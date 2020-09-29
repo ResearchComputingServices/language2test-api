@@ -1,0 +1,26 @@
+[
+    {
+        "name": "test",
+        "text": "Grants test routes access",
+        "category": "Routes"
+    },
+    {
+        "name": "read-test",
+        "text": "Grants access to read test(s)",
+        "category": "Test",
+        "dependencies": [
+            "read-student-class",
+            "read-demographic-questionnaire-field",
+            "read-vocabulary",
+            "read-reading-comprehension",
+            "read-cloze",
+            "read-writing"
+        ]
+    },
+    {
+        "name": "create-test-session",
+        "text": "Grants access to create test-session(s)",
+        "category": "Test Session",
+        "dependencies": ["read-test-session"]
+    }
+  ]

@@ -1,0 +1,1151 @@
+{
+    "vocabularyTest": {
+        "questions": [
+            {
+                "correct": 3,
+                "difficulty": "5",
+                "id": 1,
+                "options": [
+                    {
+                        "id": 1,
+                        "text": "broken",
+                        "vocabulary": 1,
+                        "vocabularyId": 1
+                    },
+                    {
+                        "id": 2,
+                        "text": "fluffy",
+                        "vocabulary": 1,
+                        "vocabularyId": 1
+                    },
+                    {
+                        "id": 3,
+                        "text": "sharp",
+                        "vocabulary": 1,
+                        "vocabularyId": 1
+                    },
+                    {
+                        "id": 4,
+                        "text": "thin",
+                        "vocabulary": 1,
+                        "vocabularyId": 1
+                    }
+                ],
+                "testCategory": {
+                    "id": 1,
+                    "name": "Default",
+                    "testType": {
+                        "id": 1,
+                        "name": "Vocabulary"
+                    },
+                    "testTypeId": 1
+                },
+                "testCategoryId": 1,
+                "timeLimit": 20,
+                "type": "synonym",
+                "word": "keen"
+            },
+            {
+                "correct": 1,
+                "difficulty": "10",
+                "id": 2,
+                "options": [
+                    {
+                        "id": 5,
+                        "text": "logic",
+                        "vocabulary": 2,
+                        "vocabularyId": 2
+                    },
+                    {
+                        "id": 6,
+                        "text": "kindness",
+                        "vocabulary": 2,
+                        "vocabularyId": 2
+                    },
+                    {
+                        "id": 7,
+                        "text": "envy",
+                        "vocabulary": 2,
+                        "vocabularyId": 2
+                    },
+                    {
+                        "id": 8,
+                        "text": "stupidity",
+                        "vocabulary": 2,
+                        "vocabularyId": 2
+                    }
+                ],
+                "testCategory": {
+                    "id": 1,
+                    "name": "Default",
+                    "testType": {
+                        "id": 1,
+                        "name": "Vocabulary"
+                    },
+                    "testTypeId": 1
+                },
+                "testCategoryId": 1,
+                "timeLimit": 20,
+                "type": "synonym",
+                "word": "ratiocination"
+            },
+            {
+                "correct": 3,
+                "difficulty": "10",
+                "id": 3,
+                "options": [
+                    {
+                        "id": 9,
+                        "text": "rumor",
+                        "vocabulary": 3,
+                        "vocabularyId": 3
+                    },
+                    {
+                        "id": 10,
+                        "text": "load",
+                        "vocabulary": 3,
+                        "vocabularyId": 3
+                    },
+                    {
+                        "id": 11,
+                        "text": "tendency",
+                        "vocabulary": 3,
+                        "vocabularyId": 3
+                    },
+                    {
+                        "id": 12,
+                        "text": "damage",
+                        "vocabulary": 3,
+                        "vocabularyId": 3
+                    }
+                ],
+                "testCategory": {
+                    "id": 1,
+                    "name": "Default",
+                    "testType": {
+                        "id": 1,
+                        "name": "Vocabulary"
+                    },
+                    "testTypeId": 1
+                },
+                "testCategoryId": 1,
+                "timeLimit": 20,
+                "type": "synonym",
+                "word": "proclivity"
+            },
+            {
+                "correct": 1,
+                "difficulty": "10",
+                "id": 4,
+                "options": [
+                    {
+                        "id": 13,
+                        "text": "mysterious",
+                        "vocabulary": 4,
+                        "vocabularyId": 4
+                    },
+                    {
+                        "id": 14,
+                        "text": "invisible",
+                        "vocabulary": 4,
+                        "vocabularyId": 4
+                    },
+                    {
+                        "id": 15,
+                        "text": "fixed",
+                        "vocabulary": 4,
+                        "vocabularyId": 4
+                    },
+                    {
+                        "id": 16,
+                        "text": "quiet",
+                        "vocabulary": 4,
+                        "vocabularyId": 4
+                    }
+                ],
+                "testCategory": {
+                    "id": 1,
+                    "name": "Default",
+                    "testType": {
+                        "id": 1,
+                        "name": "Vocabulary"
+                    },
+                    "testTypeId": 1
+                },
+                "testCategoryId": 1,
+                "timeLimit": 20,
+                "type": "synonym",
+                "word": "inscrutable"
+            },
+            {
+                "correct": 3,
+                "difficulty": "10",
+                "id": 5,
+                "options": [
+                    {
+                        "id": 17,
+                        "text": "flavour",
+                        "vocabulary": 5,
+                        "vocabularyId": 5
+                    },
+                    {
+                        "id": 18,
+                        "text": "bias",
+                        "vocabulary": 5,
+                        "vocabularyId": 5
+                    },
+                    {
+                        "id": 19,
+                        "text": "ancestor",
+                        "vocabulary": 5,
+                        "vocabularyId": 5
+                    },
+                    {
+                        "id": 20,
+                        "text": "setback",
+                        "vocabulary": 5,
+                        "vocabularyId": 5
+                    }
+                ],
+                "testCategory": {
+                    "id": 1,
+                    "name": "Default",
+                    "testType": {
+                        "id": 1,
+                        "name": "Vocabulary"
+                    },
+                    "testTypeId": 1
+                },
+                "testCategoryId": 1,
+                "timeLimit": 20,
+                "type": "synonym",
+                "word": "progenitor"
+            },
+            {
+                "correct": 4,
+                "difficulty": "10",
+                "id": 6,
+                "options": [
+                    {
+                        "id": 21,
+                        "text": "clammy",
+                        "vocabulary": 6,
+                        "vocabularyId": 6
+                    },
+                    {
+                        "id": 22,
+                        "text": "active",
+                        "vocabulary": 6,
+                        "vocabularyId": 6
+                    },
+                    {
+                        "id": 23,
+                        "text": "nauseating",
+                        "vocabulary": 6,
+                        "vocabularyId": 6
+                    },
+                    {
+                        "id": 24,
+                        "text": "scrawny",
+                        "vocabulary": 6,
+                        "vocabularyId": 6
+                    }
+                ],
+                "testCategory": {
+                    "id": 1,
+                    "name": "Default",
+                    "testType": {
+                        "id": 1,
+                        "name": "Vocabulary"
+                    },
+                    "testTypeId": 1
+                },
+                "testCategoryId": 1,
+                "timeLimit": 20,
+                "type": "synonym",
+                "word": "emaciated"
+            },
+            {
+                "correct": 2,
+                "difficulty": "10",
+                "id": 7,
+                "options": [
+                    {
+                        "id": 25,
+                        "text": "fight",
+                        "vocabulary": 7,
+                        "vocabularyId": 7
+                    },
+                    {
+                        "id": 26,
+                        "text": "tempt",
+                        "vocabulary": 7,
+                        "vocabularyId": 7
+                    },
+                    {
+                        "id": 27,
+                        "text": "slip",
+                        "vocabulary": 7,
+                        "vocabularyId": 7
+                    },
+                    {
+                        "id": 28,
+                        "text": "relax",
+                        "vocabulary": 7,
+                        "vocabularyId": 7
+                    }
+                ],
+                "testCategory": {
+                    "id": 1,
+                    "name": "Default",
+                    "testType": {
+                        "id": 1,
+                        "name": "Vocabulary"
+                    },
+                    "testTypeId": 1
+                },
+                "testCategoryId": 1,
+                "timeLimit": 20,
+                "type": "synonym",
+                "word": "entice"
+            },
+            {
+                "correct": 3,
+                "difficulty": "10",
+                "id": 8,
+                "options": [
+                    {
+                        "id": 29,
+                        "text": "obtainable",
+                        "vocabulary": 8,
+                        "vocabularyId": 8
+                    },
+                    {
+                        "id": 30,
+                        "text": "absent",
+                        "vocabulary": 8,
+                        "vocabularyId": 8
+                    },
+                    {
+                        "id": 31,
+                        "text": "admitted",
+                        "vocabulary": 8,
+                        "vocabularyId": 8
+                    },
+                    {
+                        "id": 32,
+                        "text": "original",
+                        "vocabulary": 8,
+                        "vocabularyId": 8
+                    }
+                ],
+                "testCategory": {
+                    "id": 1,
+                    "name": "Default",
+                    "testType": {
+                        "id": 1,
+                        "name": "Vocabulary"
+                    },
+                    "testTypeId": 1
+                },
+                "testCategoryId": 1,
+                "timeLimit": 20,
+                "type": "synonym",
+                "word": "privy"
+            },
+            {
+                "correct": 3,
+                "difficulty": "10",
+                "id": 9,
+                "options": [
+                    {
+                        "id": 33,
+                        "text": "lock",
+                        "vocabulary": 9,
+                        "vocabularyId": 9
+                    },
+                    {
+                        "id": 34,
+                        "text": "defeat",
+                        "vocabulary": 9,
+                        "vocabularyId": 9
+                    },
+                    {
+                        "id": 35,
+                        "text": "trick",
+                        "vocabulary": 9,
+                        "vocabularyId": 9
+                    },
+                    {
+                        "id": 36,
+                        "text": "decide",
+                        "vocabulary": 9,
+                        "vocabularyId": 9
+                    }
+                ],
+                "testCategory": {
+                    "id": 1,
+                    "name": "Default",
+                    "testType": {
+                        "id": 1,
+                        "name": "Vocabulary"
+                    },
+                    "testTypeId": 1
+                },
+                "testCategoryId": 1,
+                "timeLimit": 20,
+                "type": "synonym",
+                "word": "dupe"
+            },
+            {
+                "correct": 1,
+                "difficulty": "10",
+                "id": 10,
+                "options": [
+                    {
+                        "id": 37,
+                        "text": "harmless",
+                        "vocabulary": 10,
+                        "vocabularyId": 10
+                    },
+                    {
+                        "id": 38,
+                        "text": "unavailable",
+                        "vocabulary": 10,
+                        "vocabularyId": 10
+                    },
+                    {
+                        "id": 39,
+                        "text": "sudden",
+                        "vocabulary": 10,
+                        "vocabularyId": 10
+                    },
+                    {
+                        "id": 40,
+                        "text": "upbeat",
+                        "vocabulary": 10,
+                        "vocabularyId": 10
+                    }
+                ],
+                "testCategory": {
+                    "id": 1,
+                    "name": "Default",
+                    "testType": {
+                        "id": 1,
+                        "name": "Vocabulary"
+                    },
+                    "testTypeId": 1
+                },
+                "testCategoryId": 1,
+                "timeLimit": 20,
+                "type": "synonym",
+                "word": "innocuous"
+            }
+        ],
+        "answers": [
+            "broken",
+            "envy",
+            "tendency",
+            "mysterious",
+            "ancestor",
+            "scrawny",
+            "tempt",
+            "admitted",
+            "trick",
+            "harmless"
+        ],
+        "correctAnswers": [
+            "sharp",
+            "logic",
+            "tendency",
+            "mysterious",
+            "ancestor",
+            "scrawny",
+            "tempt",
+            "admitted",
+            "trick",
+            "harmless"
+        ],
+        "startDatetime": "2020-07-28T13:06:45.076Z",
+        "endDatetime": "2020-07-28T13:07:18.796Z",
+        "result": {
+            "score": 8,
+            "total": 10
+        }
+    },
+    "readingComprehensionTest": {
+        "questions": [
+            {
+                "filename": "",
+                "id": 1,
+                "name": "RC-1",
+                "questions": [
+                    {
+                        "correct": 1,
+                        "id": 1,
+                        "options": [
+                            {
+                                "id": 1,
+                                "rcQuestion": 1,
+                                "rcQuestionId": 1,
+                                "text": "inquisitive"
+                            },
+                            {
+                                "id": 2,
+                                "rcQuestion": 1,
+                                "rcQuestionId": 1,
+                                "text": "Has a double-meaning both as a pun on the topic of plants and a literal meaning of \"to replace\""
+                            },
+                            {
+                                "id": 3,
+                                "rcQuestion": 1,
+                                "rcQuestionId": 1,
+                                "text": "Is a synonym for \"to plant again\""
+                            },
+                            {
+                                "id": 4,
+                                "rcQuestion": 1,
+                                "rcQuestionId": 1,
+                                "text": "Has the same meaning as \"to plant,\" with extra emphasis"
+                            }
+                        ],
+                        "rc": 1,
+                        "rcId": 1,
+                        "text": "The word \"supplanted\" in paragraph 1"
+                    },
+                    {
+                        "correct": 3,
+                        "id": 2,
+                        "options": [
+                            {
+                                "id": 5,
+                                "rcQuestion": 2,
+                                "rcQuestionId": 2,
+                                "text": "That giant sequoias are more resilient than other tree species"
+                            },
+                            {
+                                "id": 6,
+                                "rcQuestion": 2,
+                                "rcQuestionId": 2,
+                                "text": "That old trees are as productive at photosynthesis as younger ones"
+                            },
+                            {
+                                "id": 7,
+                                "rcQuestion": 2,
+                                "rcQuestionId": 2,
+                                "text": "That only giant sequoias may be named after historical figures"
+                            },
+                            {
+                                "id": 8,
+                                "rcQuestion": 2,
+                                "rcQuestionId": 2,
+                                "text": "That large trees grow more slowly as they age"
+                            }
+                        ],
+                        "rc": 1,
+                        "rcId": 1,
+                        "text": "One common myth about trees that The President helps disprove is"
+                    },
+                    {
+                        "correct": 2,
+                        "id": 3,
+                        "options": [
+                            {
+                                "id": 9,
+                                "rcQuestion": 3,
+                                "rcQuestionId": 3,
+                                "text": "Their natural beauty can have health benefits for those who travel to wildlife preserves to see them"
+                            },
+                            {
+                                "id": 10,
+                                "rcQuestion": 3,
+                                "rcQuestionId": 3,
+                                "text": "They represent centuries of natural history that no other living things do"
+                            },
+                            {
+                                "id": 11,
+                                "rcQuestion": 3,
+                                "rcQuestionId": 3,
+                                "text": "Because of their size, they can process more carbon dioxide than other trees, which can have significant benefits for the atmosphere"
+                            },
+                            {
+                                "id": 12,
+                                "rcQuestion": 3,
+                                "rcQuestionId": 3,
+                                "text": "Their resilient bark may have eventual uses in human medicine."
+                            }
+                        ],
+                        "rc": 1,
+                        "rcId": 1,
+                        "text": "What is the primary benefit that Sillett and other researchers suggest that giant sequoias may have?"
+                    },
+                    {
+                        "correct": 3,
+                        "id": 4,
+                        "options": [
+                            {
+                                "id": 13,
+                                "rcQuestion": 4,
+                                "rcQuestionId": 4,
+                                "text": "Even when the sequoias fall, they do not decay and so send less carbon into the air"
+                            },
+                            {
+                                "id": 14,
+                                "rcQuestion": 4,
+                                "rcQuestionId": 4,
+                                "text": "White firs are more plentiful because they grow and decay more quickly than sequoias"
+                            },
+                            {
+                                "id": 15,
+                                "rcQuestion": 4,
+                                "rcQuestionId": 4,
+                                "text": "The giant sequoias are completely resistant to death"
+                            },
+                            {
+                                "id": 16,
+                                "rcQuestion": 4,
+                                "rcQuestionId": 4,
+                                "text": "White firs are essential because when they decompose they emit necessary nutrients"
+                            }
+                        ],
+                        "rc": 1,
+                        "rcId": 1,
+                        "text": "The giant sequoias are compared to white firs to demonstrate that?"
+                    },
+                    {
+                        "correct": 2,
+                        "id": 5,
+                        "options": [
+                            {
+                                "id": 17,
+                                "rcQuestion": 5,
+                                "rcQuestionId": 5,
+                                "text": "1850"
+                            },
+                            {
+                                "id": 18,
+                                "rcQuestion": 5,
+                                "rcQuestionId": 5,
+                                "text": "2012"
+                            },
+                            {
+                                "id": 19,
+                                "rcQuestion": 5,
+                                "rcQuestionId": 5,
+                                "text": "1580"
+                            },
+                            {
+                                "id": 20,
+                                "rcQuestion": 5,
+                                "rcQuestionId": 5,
+                                "text": "The President has grown every year of its life"
+                            }
+                        ],
+                        "rc": 1,
+                        "rcId": 1,
+                        "text": "The President has grown every year EXCEPT"
+                    },
+                    {
+                        "correct": 1,
+                        "id": 6,
+                        "options": [
+                            {
+                                "id": 21,
+                                "rcQuestion": 6,
+                                "rcQuestionId": 6,
+                                "text": "They are resistant to diseases that can affect other tree species"
+                            },
+                            {
+                                "id": 22,
+                                "rcQuestion": 6,
+                                "rcQuestionId": 6,
+                                "text": "Their size makes them less vulnerable to animal attacks"
+                            },
+                            {
+                                "id": 23,
+                                "rcQuestion": 6,
+                                "rcQuestionId": 6,
+                                "text": "They are resistant to pests that commonly inhabit trees"
+                            },
+                            {
+                                "id": 24,
+                                "rcQuestion": 6,
+                                "rcQuestionId": 6,
+                                "text": "Their thick bark protects them from wildfires."
+                            }
+                        ],
+                        "rc": 1,
+                        "rcId": 1,
+                        "text": "All of the following contribute to the lifespan of the giant sequoia EXCEPT"
+                    },
+                    {
+                        "correct": 1,
+                        "id": 7,
+                        "options": [
+                            {
+                                "id": 25,
+                                "rcQuestion": 7,
+                                "rcQuestionId": 7,
+                                "text": "The size rankings of various large sequoias is being reevaluated"
+                            },
+                            {
+                                "id": 26,
+                                "rcQuestion": 7,
+                                "rcQuestionId": 7,
+                                "text": "Human security will be employed to protect these valuable trees"
+                            },
+                            {
+                                "id": 27,
+                                "rcQuestion": 7,
+                                "rcQuestionId": 7,
+                                "text": "Wildlife parks will bring in new equipment to ensure the safety of the trees"
+                            },
+                            {
+                                "id": 28,
+                                "rcQuestion": 7,
+                                "rcQuestionId": 7,
+                                "text": "A new schedule of shifts will be made for studying the trees"
+                            }
+                        ],
+                        "rc": 1,
+                        "rcId": 1,
+                        "text": "The term \"changing of the guard\" in Paragraph 10 means"
+                    },
+                    {
+                        "correct": 1,
+                        "id": 8,
+                        "options": [
+                            {
+                                "id": 29,
+                                "rcQuestion": 8,
+                                "rcQuestionId": 8,
+                                "text": "Current sequoia reserves will be altered to grow in particular patterns"
+                            },
+                            {
+                                "id": 30,
+                                "rcQuestion": 8,
+                                "rcQuestionId": 8,
+                                "text": "That sequoias may be specially grown in the future for the sole purpose of filtering carbon from the air"
+                            },
+                            {
+                                "id": 31,
+                                "rcQuestion": 8,
+                                "rcQuestionId": 8,
+                                "text": "New forests may be grown globally to promote the beauty of the species"
+                            },
+                            {
+                                "id": 32,
+                                "rcQuestion": 8,
+                                "rcQuestionId": 8,
+                                "text": "Wildlife parks will make more of an effort in the future to direct visitors to the sequoia forests"
+                            }
+                        ],
+                        "rc": 1,
+                        "rcId": 1,
+                        "text": "What does the term \"cultivated sequoia forests\" in Paragraph 14 imply?"
+                    },
+                    {
+                        "correct": 1,
+                        "id": 9,
+                        "options": [
+                            {
+                                "id": 33,
+                                "rcQuestion": 9,
+                                "rcQuestionId": 9,
+                                "text": "New Zealand"
+                            },
+                            {
+                                "id": 34,
+                                "rcQuestion": 9,
+                                "rcQuestionId": 9,
+                                "text": "France"
+                            },
+                            {
+                                "id": 35,
+                                "rcQuestion": 9,
+                                "rcQuestionId": 9,
+                                "text": "South America"
+                            },
+                            {
+                                "id": 36,
+                                "rcQuestion": 9,
+                                "rcQuestionId": 9,
+                                "text": "Australia"
+                            }
+                        ],
+                        "rc": 1,
+                        "rcId": 1,
+                        "text": "Giant sequoias are native to California, but can also be found in"
+                    },
+                    {
+                        "correct": 3,
+                        "id": 10,
+                        "options": [
+                            {
+                                "id": 37,
+                                "rcQuestion": 10,
+                                "rcQuestionId": 10,
+                                "text": "Best of a species"
+                            },
+                            {
+                                "id": 38,
+                                "rcQuestion": 10,
+                                "rcQuestionId": 10,
+                                "text": "Most beautiful"
+                            },
+                            {
+                                "id": 39,
+                                "rcQuestion": 10,
+                                "rcQuestionId": 10,
+                                "text": "The winner of a contest"
+                            },
+                            {
+                                "id": 40,
+                                "rcQuestion": 10,
+                                "rcQuestionId": 10,
+                                "text": "Having individual, unique merit"
+                            }
+                        ],
+                        "rc": 1,
+                        "rcId": 1,
+                        "text": "In the final sentence, the word \"superlative\" is closest in meaning to"
+                    }
+                ],
+                "testCategory": {
+                    "id": 1,
+                    "name": "Default",
+                    "testType": {
+                        "id": 1,
+                        "name": "Vocabulary"
+                    },
+                    "testTypeId": 1
+                },
+                "testCategoryId": 1,
+                "text": "Deep in the Sierra Nevada, the famous General Grant giant sequoia tree is suffering its loss of stature in silence. What once was the world's No. 2 biggest tree has been supplanted thanks to the most comprehensive measurements taken of the largest living things on Earth.\n\n\nThe new No. 2 is The President, a 54,000-cubic-foot gargantuan not far from the Grant in Sequoia National Park. After 3,240 years, the giant sequoia still is growing wider at a consistent rate, which may be what most surprised the scientists examining how the sequoias and coastal redwoods will be affected by climate change and whether these trees have a role to play in combating it.\n\n\n\"I consider it to be the greatest tree in all of the mountains of the world,\" said Stephen Sillett, a redwood researcher whose team from Humboldt State University is seeking to mathematically assess the potential of California's iconic trees to absorb planet-warming carbon dioxide.\n\n\nThe researchers are a part of the 10-year Redwoods and Climate Change Initiative funded by the Save the Redwoods League in San Francisco. The measurements of The President, reported in the current National Geographic, dispelled the previous notion that the big trees grow more slowly in old age.\n\n\n\nIt means, the experts say, the amount of carbon dioxide they absorb during photosynthesis continues to increase over their lifetimes.\n\n\nIn addition to painstaking measurements of every branch and twig, the team took 15 half-centimeter-wide core samples of The President to determine its growth rate, which they learned was stunted in the abnormally cold year of 1580 when temperatures in the Sierra hovered near freezing even in the summer and the trees remained dormant.\n\n\nBut that was an anomaly, Sillett said. The President adds about one cubic meter of wood a year during its short six-month growing season, making it one of the fastest-growing trees in the world. Its 2 billion leaves are thought to be the most of any tree on the planet, which would also make it one of the most efficient at transforming carbon dioxide into nourishing sugars during photosynthesis.\n\n\n\"We're not going to save the world with any one strategy, but part of the value of these great trees is this contribution and we're trying to get a handle on the math behind that,\" Sillett said.\n\n\nAfter the equivalent of 32 working days dangling from ropes in The President, Sillett's team is closer to having a mathematical equation to determine its carbon conversion potential, as it has done with some less famous coastal redwoods. The team has analyzed a representative sample that can be used to model the capacity of the state's signature trees.\n\n\nMore immediately, however, the new measurements could lead to a changing of the guard in the land of giant sequoias. The park would have to update signs and brochures - and someone is going to have to correct the Wikipedia entry for \"List of largest giant sequoias,\" which still has The President at No. 3.\n\n\nNow at 93 feet in circumference and with 45,000 cubic feet of trunk volume and another 9,000 cubic feet in its branches, the tree named for President Warren G. Harding is about 15 percent larger than Grant, also known as America's Christmas Tree. Sliced into one-foot by one-foot cubes, The President would cover a football field.\n\n\nGiant sequoias grow so big and for so long because their wood is resistant to the pests and disease that dwarf the lifespan of other trees, and their thick bark makes them impervious to fast-moving fire.\n\n\nIt's that resiliency that makes sequoias and their taller coastal redwood cousin worthy of intensive protections and even candidates for cultivation to pull carbon from an increasingly warming atmosphere, Sillett said. Unlike white firs, which easily die and decay to send decomposing carbon back into the air, rot-resistant redwoods stay solid for hundreds of years after they fall.\n\n\nThough sequoias are native to California, early settlers traveled with seedlings back to the British Isles and New Zealand, where a 15-foot diameter sequoia that is the world's biggest planted tree took root in 1850. Part of Sillett's studies involves modeling the potential growth rate of cultivated sequoia forests to determine over time how much carbon sequestering might increase.\n\n\nAll of that led him to a spot 7,000 feet high in the Sierra and to The President, which he calls \"the ultimate example of a giant sequoia.\" Compared to the other giants whose silhouettes are bedraggled by lightning strikes, The President's crown is large with burly branches that are themselves as large as tree trunks.\n\n\nThe world's biggest tree is still the nearby General Sherman with about 2,000 cubic feet more volume than the President, but to Sillett it's not a contest.\n\n\n\"They're all superlative in their own way,\" Sillett said.\n",
+                "timeLimit": 600,
+                "type": "text"
+            }
+        ],
+        "answers": [
+            [
+                "inquisitive",
+                "That giant sequoias are more resilient than other tree species",
+                "Their natural beauty can have health benefits for those who travel to wildlife preserves to see them",
+                "The giant sequoias are completely resistant to death",
+                "1580",
+                "Their size makes them less vulnerable to animal attacks",
+                "Wildlife parks will bring in new equipment to ensure the safety of the trees",
+                "New forests may be grown globally to promote the beauty of the species",
+                "South America",
+                "Most beautiful"
+            ]
+        ],
+        "correctAnswers": [
+            [
+                "inquisitive",
+                "That only giant sequoias may be named after historical figures",
+                "They represent centuries of natural history that no other living things do",
+                "The giant sequoias are completely resistant to death",
+                "2012",
+                "They are resistant to diseases that can affect other tree species",
+                "The size rankings of various large sequoias is being reevaluated",
+                "Current sequoia reserves will be altered to grow in particular patterns",
+                "New Zealand",
+                "The winner of a contest"
+            ]
+        ],
+        "startDatetime": "2020-07-28T13:07:20.147Z",
+        "endDatetime": "2020-07-28T13:12:29.862Z",
+        "result": {
+            "score": 2,
+            "total": 10
+        }
+    },
+    "clozeTest": {
+        "questions": [
+            {
+                "filename": "",
+                "id": 1,
+                "name": "Cloze-1",
+                "questions": [
+                    {
+                        "cloze": 1,
+                        "clozeId": 1,
+                        "correct": 3,
+                        "id": 1,
+                        "options": [
+                            {
+                                "clozeQuestion": 1,
+                                "clozeQuestionId": 1,
+                                "id": 1,
+                                "text": "if"
+                            },
+                            {
+                                "clozeQuestion": 1,
+                                "clozeQuestionId": 1,
+                                "id": 2,
+                                "text": "where"
+                            },
+                            {
+                                "clozeQuestion": 1,
+                                "clozeQuestionId": 1,
+                                "id": 3,
+                                "text": "that"
+                            },
+                            {
+                                "clozeQuestion": 1,
+                                "clozeQuestionId": 1,
+                                "id": 4,
+                                "text": "whether"
+                            },
+                            {
+                                "clozeQuestion": 1,
+                                "clozeQuestionId": 1,
+                                "id": 5,
+                                "text": "when"
+                            }
+                        ],
+                        "text": "1"
+                    },
+                    {
+                        "cloze": 1,
+                        "clozeId": 1,
+                        "correct": 4,
+                        "id": 2,
+                        "options": [
+                            {
+                                "clozeQuestion": 2,
+                                "clozeQuestionId": 2,
+                                "id": 6,
+                                "text": "being disappeared"
+                            },
+                            {
+                                "clozeQuestion": 2,
+                                "clozeQuestionId": 2,
+                                "id": 7,
+                                "text": "to be disappeared"
+                            },
+                            {
+                                "clozeQuestion": 2,
+                                "clozeQuestionId": 2,
+                                "id": 8,
+                                "text": "to have disappeared"
+                            },
+                            {
+                                "clozeQuestion": 2,
+                                "clozeQuestionId": 2,
+                                "id": 9,
+                                "text": "to disappear"
+                            },
+                            {
+                                "clozeQuestion": 2,
+                                "clozeQuestionId": 2,
+                                "id": 10,
+                                "text": "having disappeared"
+                            }
+                        ],
+                        "text": "2"
+                    },
+                    {
+                        "cloze": 1,
+                        "clozeId": 1,
+                        "correct": 1,
+                        "id": 3,
+                        "options": [
+                            {
+                                "clozeQuestion": 3,
+                                "clozeQuestionId": 3,
+                                "id": 11,
+                                "text": "until"
+                            },
+                            {
+                                "clozeQuestion": 3,
+                                "clozeQuestionId": 3,
+                                "id": 12,
+                                "text": "since"
+                            },
+                            {
+                                "clozeQuestion": 3,
+                                "clozeQuestionId": 3,
+                                "id": 13,
+                                "text": "after"
+                            },
+                            {
+                                "clozeQuestion": 3,
+                                "clozeQuestionId": 3,
+                                "id": 14,
+                                "text": "by the time"
+                            },
+                            {
+                                "clozeQuestion": 3,
+                                "clozeQuestionId": 3,
+                                "id": 15,
+                                "text": "unless"
+                            }
+                        ],
+                        "text": "3"
+                    },
+                    {
+                        "cloze": 1,
+                        "clozeId": 1,
+                        "correct": 3,
+                        "id": 4,
+                        "options": [
+                            {
+                                "clozeQuestion": 4,
+                                "clozeQuestionId": 4,
+                                "id": 16,
+                                "text": "reluctantly"
+                            },
+                            {
+                                "clozeQuestion": 4,
+                                "clozeQuestionId": 4,
+                                "id": 17,
+                                "text": "accidentally"
+                            },
+                            {
+                                "clozeQuestion": 4,
+                                "clozeQuestionId": 4,
+                                "id": 18,
+                                "text": "slowly"
+                            },
+                            {
+                                "clozeQuestion": 4,
+                                "clozeQuestionId": 4,
+                                "id": 19,
+                                "text": "passionately"
+                            },
+                            {
+                                "clozeQuestion": 4,
+                                "clozeQuestionId": 4,
+                                "id": 20,
+                                "text": "carefully"
+                            }
+                        ],
+                        "text": "4"
+                    },
+                    {
+                        "cloze": 1,
+                        "clozeId": 1,
+                        "correct": 3,
+                        "id": 5,
+                        "options": [
+                            {
+                                "clozeQuestion": 5,
+                                "clozeQuestionId": 5,
+                                "id": 21,
+                                "text": "the same"
+                            },
+                            {
+                                "clozeQuestion": 5,
+                                "clozeQuestionId": 5,
+                                "id": 22,
+                                "text": "alike"
+                            },
+                            {
+                                "clozeQuestion": 5,
+                                "clozeQuestionId": 5,
+                                "id": 23,
+                                "text": "just as"
+                            },
+                            {
+                                "clozeQuestion": 5,
+                                "clozeQuestionId": 5,
+                                "id": 24,
+                                "text": "by the way"
+                            },
+                            {
+                                "clozeQuestion": 5,
+                                "clozeQuestionId": 5,
+                                "id": 25,
+                                "text": "similar to"
+                            }
+                        ],
+                        "text": "5"
+                    }
+                ],
+                "testCategory": {
+                    "id": 1,
+                    "name": "Default",
+                    "testType": {
+                        "id": 1,
+                        "name": "Vocabulary"
+                    },
+                    "testTypeId": 1
+                },
+                "testCategoryId": 1,
+                "text": "Can we see (1) ......... the earth is a globe? Yes, we can, when we watch a ship that sails out to sea. If we watch closely, we see that the ship begins (2) ........ . The bottom of the ship disappears first, and then the ship seems to sink lower and lower, (3) ......... we can only see the top of the ship, and then we see nothing at all. What is hiding the ship from us? It is the earth. Stick a pin most of the way into an orange, and (4) ......... turn the orange away from you. You will see the pin disappear, (5) ......... a ship does on the earth.\n",
+                "timeLimit": 600,
+                "type": "text"
+            }
+        ],
+        "answers": [
+            [
+                "if",
+                "being disappeared",
+                "after",
+                "carefully",
+                "just as"
+            ]
+        ],
+        "correctAnswers": [
+            [
+                "that",
+                "to disappear",
+                "until",
+                "slowly",
+                "just as"
+            ]
+        ],
+        "startDatetime": "2020-07-28T13:12:31.234Z",
+        "endDatetime": "2020-07-28T13:12:51.257Z",
+        "result": {
+            "score": 1,
+            "total": 5
+        }
+    },
+    "writingTest": {
+        "questions": [
+            {
+                "id": 1,
+                "name": "Weather",
+                "question": "Please write a short essay, about 200-300 words on the weather.",
+                "testCategory": {
+                    "id": 4,
+                    "name": "Default",
+                    "testType": {
+                        "id": 4,
+                        "name": "Writing"
+                    },
+                    "testTypeId": 4
+                },
+                "testCategoryId": 4,
+                "timeLimit": 900,
+                "wordLimit": 300
+            },
+            {
+                "id": 2,
+                "name": "Football",
+                "question": "Please write a short essay, about 400-500 words on your favourite Football team.",
+                "testCategory": {
+                    "id": 4,
+                    "name": "Default",
+                    "testType": {
+                        "id": 4,
+                        "name": "Writing"
+                    },
+                    "testTypeId": 4
+                },
+                "testCategoryId": 4,
+                "timeLimit": 900,
+                "wordLimit": 500
+            }
+        ],
+        "answers": [
+            "Weather in Ottawa is very cold during the winter.",
+            "Real Madrid is a successful soccer team."
+        ],
+        "startDatetime": "2020-07-28T13:12:52.902Z",
+        "endDatetime": "2020-07-28T13:14:21.663Z"
+    }
+}

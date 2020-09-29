@@ -1,0 +1,431 @@
+[
+    {
+        "name": "admin",
+        "text": "Grants admin routes access",
+        "category": "Routes"
+    },
+    {
+        "name": "test",
+        "text": "Grants test routes access",
+        "category": "Routes"
+    },
+    {
+        "name": "read-user",
+        "text": "Grants access to read user(s)",
+        "category": "User",
+        "dependencies": ["read-role", "read-user-field-type"]
+    },
+    {
+        "name": "export-user",
+        "text": "Grants access to export user(s)",
+        "category": "User",
+        "dependencies": ["read-user", "read-role", "read-user-field-type"]
+    },
+    {
+        "name": "read-student-class",
+        "text": "Grants access to read student class(es)",
+        "category": "Student Class",
+        "dependencies": ["read-user"]
+    },
+    {
+        "name": "export-student-class",
+        "text": "Grants access to export student class(es)",
+        "category": "Student Class",
+        "dependencies": ["read-student-class", "read-user"]
+    },
+    {
+        "name": "read-test",
+        "text": "Grants access to read test(s)",
+        "category": "Test",
+        "dependencies": [
+            "read-student-class",
+            "read-demographic-questionnaire-field",
+            "read-vocabulary",
+            "read-reading-comprehension",
+            "read-cloze",
+            "read-writing"
+        ]
+    },
+    {
+        "name": "create-test",
+        "text": "Grants access to create test(s)",
+        "category": "Test",
+        "dependencies": [
+            "read-test",
+            "read-student-class",
+            "read-demographic-questionnaire-field",
+            "read-vocabulary",
+            "read-reading-comprehension",
+            "read-cloze",
+            "read-writing"
+        ]
+    },
+    {
+        "name": "update-test",
+        "text": "Grants access to update test(s)",
+        "category": "Test",
+        "dependencies": [
+            "read-test",
+            "read-student-class",
+            "read-demographic-questionnaire-field",
+            "read-vocabulary",
+            "read-reading-comprehension",
+            "read-cloze",
+            "read-writing"
+        ]
+    },
+    {
+        "name": "delete-test",
+        "text": "Grants access to delete test(s)",
+        "category": "Test",
+        "dependencies": [
+            "read-test",
+            "read-student-class",
+            "read-demographic-questionnaire-field",
+            "read-vocabulary",
+            "read-reading-comprehension",
+            "read-cloze",
+            "read-writing"
+        ]
+    },
+    {
+        "name": "export-test",
+        "text": "Grants access to delete test(s)",
+        "category": "Test",
+        "dependencies": [
+            "read-test",
+            "read-student-class",
+            "read-demographic-questionnaire-field",
+            "read-vocabulary",
+            "read-reading-comprehension",
+            "read-cloze",
+            "read-writing"
+        ]
+    },
+    {
+        "name": "read-test-session",
+        "text": "Grants access to read test-session(s)",
+        "category": "Test Session"
+    },
+    {
+        "name": "export-test-session",
+        "text": "Grants access to export test-session(s)",
+        "category": "Test Session",
+        "dependencies": ["read-test-session"]
+    },
+    {
+        "name": "create-test-session",
+        "text": "Grants access to create test-session(s)",
+        "category": "Test Session",
+        "dependencies": ["read-test-session"]
+    },
+    {
+        "name": "delete-test-session",
+        "text": "Grants access to delete test-session(s)",
+        "category": "Test Session",
+        "dependencies": ["read-test-session"]
+    },
+    {
+        "name": "update-test-session",
+        "text": "Grants access to update test-session(s)",
+        "category": "Test Session",
+        "dependencies": ["read-test-session"]
+    },
+    {
+        "name": "read-test-type",
+        "text": "Grants access to read test-type(s)",
+        "category": "Test Type"
+    },
+    {
+        "name": "create-test-type",
+        "text": "Grants access to create test-type(s)",
+        "category": "Test Type",
+        "dependencies": ["read-test-type"]
+    },
+    {
+        "name": "delete-test-type",
+        "text": "Grants access to delete test-type(s)",
+        "category": "Test Type",
+        "dependencies": ["read-test-type"]
+    },
+    {
+        "name": "update-test-type",
+        "text": "Grants access to update test-type(s)",
+        "category": "Test Type",
+        "dependencies": ["read-test-type"]
+    },
+    {
+        "name": "read-vocabulary",
+        "text": "Grants access to read vocabulary(ies)",
+        "category": "Vocabulary",
+        "dependencies": ["read-test-category"]
+    },
+    {
+        "name": "create-vocabulary",
+        "text": "Grants access to create vocabulary(ies)",
+        "category": "Vocabulary",
+        "dependencies": ["read-vocabulary", "read-test-category"]
+    },
+    {
+        "name": "update-vocabulary",
+        "text": "Grants access to update vocabulary(ies)",
+        "category": "Vocabulary",
+        "dependencies": ["read-vocabulary", "read-test-category"]
+    },
+    {
+        "name": "delete-vocabulary",
+        "text": "Grants access to delete vocabulary(ies)",
+        "category": "Vocabulary",
+        "dependencies": ["read-vocabulary", "read-test-category"]
+    },
+    {
+        "name": "export-vocabulary",
+        "text": "Grants access to export vocabulary(ies)",
+        "category": "Vocabulary",
+        "dependencies": ["read-vocabulary", "read-test-category"]
+    },
+    {
+        "name": "import-vocabulary",
+        "text": "Grants access to import vocabulary(ies)",
+        "category": "Vocabulary",
+        "dependencies": ["read-vocabulary"]
+    },
+    {
+        "name": "read-reading-comprehension",
+        "text": "Grants access to read reading comprehension(s)",
+        "category": "Reading Comprehension",
+        "dependencies": ["read-test-category"]
+    },
+    {
+        "name": "create-reading-comprehension",
+        "text": "Grants access to create reading comprehension(s)",
+        "category": "Reading Comprehension",
+        "dependencies": ["read-reading-comprehension", "read-test-category"]
+    },
+    {
+        "name": "update-reading-comprehension",
+        "text": "Grants access to update reading comprehension(s)",
+        "category": "Reading Comprehension",
+        "dependencies": ["read-reading-comprehension", "read-test-category"]
+    },
+    {
+        "name": "delete-reading-comprehension",
+        "text": "Grants access to delete reading comprehension(s)",
+        "category": "Reading Comprehension",
+        "dependencies": ["read-reading-comprehension", "read-test-category"]
+    },
+    {
+        "name": "export-reading-comprehension",
+        "text": "Grants access to export reading comprehension(s)",
+        "category": "Reading Comprehension",
+        "dependencies": ["read-reading-comprehension", "read-test-category"]
+    },
+    {
+        "name": "import-reading-comprehension",
+        "text": "Grants access to import reading comprehension(s)",
+        "category": "Reading Comprehension",
+        "dependencies": ["read-reading-comprehension", "read-test-category"]
+    },
+    {
+        "name": "read-cloze",
+        "text": "Grants access to read cloze(s)",
+        "category": "Cloze",
+        "dependencies": ["read-test-category"]
+    },
+    {
+        "name": "create-cloze",
+        "text": "Grants access to create cloze(s)",
+        "category": "Cloze",
+        "dependencies": ["read-cloze", "read-test-category"]
+    },
+    {
+        "name": "update-cloze",
+        "text": "Grants access to update cloze(s)",
+        "category": "Cloze",
+        "dependencies": ["read-cloze", "read-test-category"]
+    },
+    {
+        "name": "delete-cloze",
+        "text": "Grants access to delete cloze(s)",
+        "category": "Cloze",
+        "dependencies": ["read-cloze", "read-test-category"]
+    },
+    {
+        "name": "export-cloze",
+        "text": "Grants access to export cloze(s)",
+        "category": "Cloze",
+        "dependencies": ["read-cloze", "read-test-category"]
+    },
+    {
+        "name": "import-cloze",
+        "text": "Grants access to export cloze(s)",
+        "category": "Cloze",
+        "dependencies": ["read-cloze"]
+    },
+    {
+        "name": "read-writing",
+        "text": "Grants access to read writing(s)",
+        "category": "Writing",
+        "dependencies": ["read-test-category"]
+    },
+    {
+        "name": "create-writing",
+        "text": "Grants access to create writing(s)",
+        "category": "Writing",
+        "dependencies": ["read-writing", "read-test-category"]
+    },
+    {
+        "name": "update-writing",
+        "text": "Grants access to update writing(s)",
+        "category": "Writing",
+        "dependencies": ["read-writing", "read-test-category"]
+    },
+    {
+        "name": "delete-writing",
+        "text": "Grants access to delete writing(s)",
+        "category": "Writing",
+        "dependencies": ["read-writing", "read-test-category"]
+    },
+    {
+        "name": "export-writing",
+        "text": "Grants access to export writing(s)",
+        "category": "Writing",
+        "dependencies": ["read-writing", "read-test-category"]
+    },
+    {
+        "name": "import-writing",
+        "text": "Grants access to import writing(s)",
+        "category": "Writing",
+        "dependencies": ["read-writing", "read-test-category"]
+    },
+    {
+        "name": "read-test-category",
+        "text": "Grants access to read test category(ies)",
+        "category": "Test Category",
+        "dependencies": ["read-test-type"]
+    },
+    {
+        "name": "create-test-category",
+        "text": "Grants access to create test category(ies)",
+        "category": "Test Category",
+        "dependencies": ["read-test-category", "read-test-type"]
+    },
+    {
+        "name": "update-test-category",
+        "text": "Grants access to update test category(ies)",
+        "category": "Test Category",
+        "dependencies": ["read-test-category", "read-test-type"]
+    },
+    {
+        "name": "delete-test-category",
+        "text": "Grants access to delete test category(ies)",
+        "category": "Test Category",
+        "dependencies": ["read-test-category", "read-test-type"]
+    },
+    {
+        "name": "export-test-category",
+        "text": "Grants access to export test category(ies)",
+        "category": "Test Category",
+        "dependencies": ["read-test-category", "read-test-type"]
+    },
+    {
+        "name": "read-demographic-questionnaire-field",
+        "text": "Grants access to read demographic questionnaire field(s)",
+        "category": "Demographic Questionnaire Field",
+        "dependencies": ["read-user-field-type"]
+    },
+    {
+        "name": "create-demographic-questionnaire-field",
+        "text": "Grants access to create demographic questionnaire field(s)",
+        "category": "Demographic Questionnaire Field",
+        "dependencies": ["read-demographic-questionnaire-field", "read-user-field-type"]
+    },
+    {
+        "name": "update-demographic-questionnaire-field",
+        "text": "Grants access to update demographic questionnaire field(s)",
+        "category": "Demographic Questionnaire Field",
+        "dependencies": ["read-demographic-questionnaire-field", "read-user-field-type"]
+    },
+    {
+        "name": "delete-demographic-questionnaire-field",
+        "text": "Grants access to delete demographic questionnaire field(s)",
+        "category": "Demographic Questionnaire Field",
+        "dependencies": ["read-demographic-questionnaire-field", "read-user-field-type"]
+    },
+    {
+        "name": "export-demographic-questionnaire-field",
+        "text": "Grants access to export demographic questionnaire field(s)",
+        "category": "Demographic Questionnaire Field",
+        "dependencies": ["read-demographic-questionnaire-field", "read-user-field-type"]
+    },
+    {
+        "name": "read-user-field-type",
+        "text": "Grants access to read user field type(s)",
+        "category": "User Field Type",
+        "dependencies": ["read-enumeration"]
+    },
+    {
+        "name": "create-user-field-type",
+        "text": "Grants access to create user field type(s)",
+        "category": "User Field Type",
+        "dependencies": ["read-user-field-type", "read-enumeration"]
+    },
+    {
+        "name": "update-user-field-type",
+        "text": "Grants access to update user field type(s)",
+        "category": "User Field Type",
+        "dependencies": ["read-user-field-type", "read-enumeration"]
+    },
+    {
+        "name": "delete-user-field-type",
+        "text": "Grants access to delete user field type(s)",
+        "category": "User Field Type",
+        "dependencies": ["read-user-field-type", "read-enumeration"]
+    },
+    {
+        "name": "read-enumeration",
+        "text": "Grants access to read user enumeration(s)",
+        "category": "Enumeration"
+    },
+    {
+        "name": "create-enumeration",
+        "text": "Grants access to create user enumeration(s)",
+        "category": "Enumeration",
+        "dependencies": ["read-enumeration"]
+    },
+    {
+        "name": "update-enumeration",
+        "text": "Grants access to update user enumeration(s)",
+        "category": "Enumeration",
+        "dependencies": ["read-enumeration"]
+    },
+    {
+        "name": "delete-enumeration",
+        "text": "Grants access to delete user enumeration(s)",
+        "category": "Enumeration",
+        "dependencies": ["read-enumeration"]
+    },
+    {
+        "name": "export-enumeration",
+        "text": "Grants access to export user enumeration(s)",
+        "category": "Enumeration",
+        "dependencies": ["read-enumeration"]
+    },
+    {
+        "name": "import-enumeration",
+        "text": "Grants access to import user enumeration(s)",
+        "category": "Enumeration",
+        "dependencies": ["read-enumeration"]
+    },
+    {
+        "name": "read-role",
+        "text": "Grants access to read role(s)",
+        "category": "Roles",
+        "dependencies": ["read-authorization"]
+    },
+    {
+        "name": "read-authorization",
+        "text": "Grants access to read authorization(s)",
+        "category": "Authorization"
+    }
+]
