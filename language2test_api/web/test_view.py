@@ -1,4 +1,5 @@
 import random
+import re
 from flask import request, send_file
 from flask import json, jsonify, Response
 from language2test_api.models.test import Test, TestSchema
@@ -32,7 +33,7 @@ def __remove_correct_and_shuffle_options(tests):
         for type in test_types:
             if type in test:
                 for test_type in test[type]:
-                    if 'questions' in test_type:
+                    if 'questions' in test_type: #Shuffle questions in each test
                         for question in test_type['questions']:
                             question['correct'] = 0
                             random.shuffle(question['options'])
@@ -40,6 +41,16 @@ def __remove_correct_and_shuffle_options(tests):
                         if 'correct' in test_type:  # Vocabulary test is one word with several options.
                             test_type['correct'] = 0
                             random.shuffle(test_type['options'])
+
+    #Remove questions-word from cloze
+    for test in tests:
+        if test['test_cloze']:
+            cloze_tests = test['test_cloze']
+            for cloze in cloze_tests:
+                pattern = re.compile(r"(\*.*?\*)")
+                cloze_text = re.sub(pattern, '**', cloze['text'])
+                cloze['text'] = cloze_text
+                print(cloze_text)
 
     return tests
 
