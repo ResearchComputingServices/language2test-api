@@ -46,7 +46,7 @@ INSERT INTO public."cloze"(name, text, type, filename, test_category_id, time_li
 VALUES ('Cloze-1', 'Can we see *that* the earth is a globe? Yes, we can, when we watch a ship that sails out to sea. If we watch closely, we see that the ship begins *to disappear* . The bottom of the ship disappears first, and then the ship seems to sink lower and lower, *until* we can only see the top of the ship, and then we see nothing at all. What is hiding the ship from us? It is the earth. Stick a pin most of the way into an orange, and *passionately* turn the orange away from you. You will see the pin disappear, *similar to* a ship does on the earth.
 ', 'text', '', 3, 600);
 
-select add_cloze_question('1',
+select add_cloze_question('that',
                        'Cloze-1',
                        'if',
                        'where',
@@ -54,7 +54,7 @@ select add_cloze_question('1',
                        'whether',
                        'when',
                        3, 1);
-select add_cloze_question('2',
+select add_cloze_question('to disappear',
                        'Cloze-1',
                        'being disappeared',
                        'to be disappeared',
@@ -63,7 +63,7 @@ select add_cloze_question('2',
                        'having disappeared',
                        4, 1);
 
-select add_cloze_question('3',
+select add_cloze_question('until',
                        'Cloze-1',
                        'until',
                        'since',
@@ -72,7 +72,7 @@ select add_cloze_question('3',
                        'unless',
                        1, 1);
 
-select add_cloze_question('4',
+select add_cloze_question('slowly',
                        'Cloze-1',
                        'reluctantly',
                        'accidentally',
@@ -81,7 +81,7 @@ select add_cloze_question('4',
                        'carefully',
                        3, 1);
 
-select add_cloze_question('5',
+select add_cloze_question('just as',
                        'Cloze-1',
                        'the same',
                        'alike',

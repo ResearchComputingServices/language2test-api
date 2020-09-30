@@ -96,11 +96,34 @@ class ClozeProvider(BaseProvider):
         db.session.commit()
         return cloze
 
+    def generate_cloze_question_options(word, previous_letter = ''):
+        options = []
+        synonyms = wordnet.synsets(word)
+        lemmas = set(chain.from_iterable([word.lemma_names() for word in synonyms]))
+        has_previous_letter = previous_letter != ' ' and previous_letter != ''
+        if word in lemmas:
+            lemmas.remove(word)
+        lemmas = list(lemmas)
+        if len(lemmas) >= 3:
+            options.extend(lemmas[:3])
+        else:
+            options.extend(lemmas)
+        if has_previous_letter:
+            def filter_options(option):
+                return option[0] == previous_letter
+            options = filter(filter_options, options)
+        mapped_options = []
+        for option in options:
+            option = ' '.join(option.split('_'))
+            mapped_options.append({ 'text': option })
+        random_correct = randint(0, len(mapped_options))
+        mapped_options.insert(random_correct, { 'text': word })
+        return mapped_options, random_correct + 1
+
     @staticmethod
     def generate_questions(text, typed = False):
         words = []
         if text:
-            start_index = 0
             segment = ''
             bracket_open = False
             for i in range(len(text)):
@@ -110,40 +133,27 @@ class ClozeProvider(BaseProvider):
                     bracket_open = True
                 elif word == '*' and bracket_open:
                     # We take into consideration about the fact that, words can be a<pple> words can be sliced up.
-                    previous_word = text[i - len(segment) - 2]
-                    options = []
-                    if previous_word != ' ' and previous_word != '':
-                        segment = previous_word + segment
-                        synonyms = wordnet.synsets(segment)
-                        lemmas = set(chain.from_iterable([segment.lemma_names() for segment in synonyms]))
-                        if segment in lemmas:
-                            lemmas.remove(segment)
-                        lemmas = list(lemmas)
-                        if len(lemmas) >= 3:
-                            options.extend(lemmas[:3])
-                        else:
-                            options.extend(lemmas)
-                        def filter_options(option):
-                            return option[0] == previous_word
-                        options = filter(filter_options, options)
-                    mapped_options = []
-                    for option in options:
-                        option = ' '.join(option.split('_'))
-                        mapped_options.append({ 'text': option })
-                    random_correct = randint(0, len(mapped_options))
-                    mapped_options.insert(random_correct, { 'text': segment })
-                    words.append({
-                        'word': segment,
-                        'options': mapped_options,
-                        'correct': random_correct + 1,
-                        'start_index': start_index,
-                        'end_index': i,
-                        'typed': typed
-                    })
+                    previous_letter = text[i - len(segment) - 2]
+                    has_previous_letter = previous_letter != ' ' and previous_letter != ''
+                    if has_previous_letter:
+                        segment = previous_letter + segment
+                    if not typed:
+                        options, random_correct = ClozeProvider.generate_cloze_question_options(segment, previous_letter)
+                        words.append({
+                            'text': segment,
+                            'options': options,
+                            'correct': random_correct,
+                            'typed': typed
+                        })
+                    else:
+                        words.append({
+                            'text': segment,
+                            'accepted_answers': [{ 'text': segment }],
+                            'typed': typed
+                        })
                     segment = ''
                     bracket_open = False
                 else:
-                    if segment == '': start_index = i
                     segment += word
         return words
 
