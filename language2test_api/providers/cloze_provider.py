@@ -96,6 +96,7 @@ class ClozeProvider(BaseProvider):
         db.session.commit()
         return cloze
 
+    @staticmethod
     def generate_cloze_question_options(word, previous_letter = ''):
         options = []
         synonyms = wordnet.synsets(word)
