@@ -76,7 +76,7 @@ def update_rc():
         rc = RC.query.filter_by(id=data.get('id')).first()
         if not rc:
             rc = RC.query.filter_by(name=data.get('name')).first()
-        if rc:
+        if rc and not rc.immutable:
             if data.get('id') is None:
                 data['id'] = rc.id
             provider.update(data, rc)
@@ -100,7 +100,7 @@ def delete_rc():
         rc = RC.query.filter_by(id=data.get('id')).first()
         if not rc:
             rc = RC.query.filter_by(name=data.get('name')).first()
-        if rc:
+        if rc and not rc.unremovable:
             provider.delete(data, rc)
             db.session.commit()
             response = Response(json.dumps(data), 200, mimetype="application/json")

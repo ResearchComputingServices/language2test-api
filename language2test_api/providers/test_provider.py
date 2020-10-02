@@ -32,21 +32,25 @@ class TestProvider(BaseProvider):
         for test_rc in data.get('test_rc'):
             rc = RC.query.filter_by(name=test_rc.get('name')).first()
             if rc:
+                rc.unremovable = True  #An RC is added to a test (it cannot be deleted)
                 test.test_rc.append(rc)
 
         for test_cloze in data.get('test_cloze'):
             cloze = Cloze.query.filter_by(name=test_cloze.get('name')).first()
             if cloze:
+                cloze.unremovable = True
                 test.test_cloze.append(cloze)
 
         for test_writing in data.get('test_writing'):
             writing = Writing.query.filter_by(name=test_writing.get('name')).first()
             if writing:
+                writing.unremovable = True
                 test.test_writing.append(writing)
 
         for test_vocabulary in data.get('test_vocabulary'):
             vocabulary = Vocabulary.query.filter_by(word=test_vocabulary.get('word')).first()
             if vocabulary:
+                vocabulary.unremovable = True
                 test.test_vocabulary.append(vocabulary)
 
         for test_user_field_category in data.get('test_user_field_category'):
@@ -73,6 +77,10 @@ class TestProvider(BaseProvider):
         return test
 
     def update(self, data, test):
+
+        #Unremovable flags are set to false
+        self.update_unremovable_flag(test, False)
+
         test.test_rc = []
         test.test_cloze = []
         test.test_writing = []
@@ -84,21 +92,25 @@ class TestProvider(BaseProvider):
         for test_rc in data.get('test_rc'):
             rc = RC.query.filter_by(name=test_rc.get('name')).first()
             if rc:
+                rc.unremovable = True
                 test.test_rc.append(rc)
 
         for test_cloze in data.get('test_cloze'):
             cloze = Cloze.query.filter_by(name=test_cloze.get('name')).first()
             if cloze:
+                cloze.unremovable = True
                 test.test_cloze.append(cloze)
 
         for test_writing in data.get('test_writing'):
             writing = Writing.query.filter_by(name=test_writing.get('name')).first()
             if writing:
+                writing.unremovable = True
                 test.test_writing.append(writing)
 
         for test_vocabulary in data.get('test_vocabulary'):
             vocabulary = Vocabulary.query.filter_by(word=test_vocabulary.get('word')).first()
             if vocabulary:
+                vocabulary.unremovable = True
                 test.test_vocabulary.append(vocabulary)
 
         for test_user_field_category in data.get('test_user_field_category'):
@@ -121,5 +133,29 @@ class TestProvider(BaseProvider):
             test.order.append(order)
 
         db.session.add(test)
+
+
+    #Updates unremovable flag
+    #in test_rc, test_cloze, test_vocabulary
+    def update_unremovable_flag(self, test, value):
+        test_rc = test.test_rc
+        for rc in test_rc:
+            rc.unremovable = value
+
+        test_cloze = test.test_cloze
+        for cloze in test_cloze:
+            cloze.unremovable =value
+
+        test_vocabulary = test.test_vocabulary
+        for vocabulary in test_vocabulary:
+            vocabulary.unremovable = value
+
+        test_writing = test.test_writing
+        for writing in test_writing:
+            writing.unremovable = value
+
+
+
+
 
 

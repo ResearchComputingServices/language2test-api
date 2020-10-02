@@ -80,7 +80,7 @@ def update_cloze():
         cloze = Cloze.query.filter_by(id=data.get('id')).first()
         if not cloze:
             cloze = Cloze.query.filter_by(name=data.get('name')).first()
-        if cloze:
+        if cloze and not cloze.immutable:
             if data.get('id') is None:
                 data['id'] = cloze.id
             provider.update(data, cloze)
@@ -104,7 +104,7 @@ def delete_cloze():
         cloze = Cloze.query.filter_by(id=data.get('id')).first()
         if not cloze:
             cloze = Cloze.query.filter_by(name=data.get('name')).first()
-        if cloze:
+        if cloze and not cloze.unremovable:
             provider.delete(data, cloze)
             db.session.commit()
             response = Response(json.dumps(data), 200, mimetype="application/json")

@@ -3,6 +3,7 @@ from language2test_api.providers.base_provider import BaseProvider
 from language2test_api.models.test_session_results_rc import TestSessionResultsRC, TestSessionResultsRCSchema
 from language2test_api.models.test_session_results_rc_answers import TestSessionResultsRCAnswers, TestSessionResultsRCAnswersSchema
 from language2test_api.models.rc import RCQuestion
+from language2test_api.models.rc import RC, RCSchema
 
 class TestSessionResultsRCProvider(BaseProvider):
     def add_results_rc(self, data, test_session):
@@ -16,6 +17,10 @@ class TestSessionResultsRCProvider(BaseProvider):
                     results_rc.answers.append(answer)
                     #self.update_rc_answered_correctly(answer.text, test_session.test_id, results_rc.rc_id, answer.rc_question_id)
                     self.update_rc_answered_correctly(answer)
+                rc = RC.query.filter_by(id=results_rc.rc_id).first()
+                if rc:
+                    rc.unremovable = True  # Update flags: unremovable and immutable from the RC
+                    rc.immutable = True
                 test_session.results_rc.append(results_rc)
         return test_session
 
@@ -42,7 +47,20 @@ class TestSessionResultsRCProvider(BaseProvider):
 
 
     def update_results_rc(self, data, test_session):
-        test_session.results_rc = []
+
+
+
+        #Set immutable to false from previous RC
+        #for test_rc in test_session.results_rc:
+        #    rc = RC.query.filter_by(id=test_rc.rc_id).first()
+        #    if rc:
+        #        rc.immutable = False
+
+        #This update needs fixing.
+        #Fields 'results_rc' doesn't exist.
+        #Generate id needs fixing.
+
+        #test_session.results_rc = []
         if data.get('results_rc') is not None:
             for index, data_results_rc in enumerate(data.get('results_rc')):
                 data_results_rc['id'] = self.generate_id(index, TestSessionResultsRC.id)
@@ -51,11 +69,20 @@ class TestSessionResultsRCProvider(BaseProvider):
                     data_answers['id'] = self.generate_id(index_data_answers, TestSessionResultsRCAnswers.id)
                     answers = TestSessionResultsRCAnswers(data_answers)
                     results_rc.answers.append(answers)
+                rc = RC.query.filter_by(id=results_rc.rc_id).first()
+                if rc:
+                    rc.unremovable = True  # Update flags: unremovable and immutable from the RC
+                    rc.immutable = True
                 test_session.results_rc.append(results_rc)
         return test_session
 
     def delete_results_rc(self, data, test_session):
+
         for results_rc in test_session.results_rc:
+            rc = RC.query.filter_by(id=results_rc.rc_id).first()
+            if rc:  # Update immutable
+                rc.immutable = False
+
             for answer in results_rc.answers:
                 db.session.query(TestSessionResultsRCAnswers).filter(
                     TestSessionResultsRCAnswers.id == answer.id).delete()

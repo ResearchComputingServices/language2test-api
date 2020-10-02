@@ -139,7 +139,7 @@ def update_test():
         test = Test.query.filter_by(id=data.get('id')).first()
         if not test:
             test = Test.query.filter_by(name=data.get('name')).first()
-        if test:
+        if test and not test.immutable:
             if data.get('id') is None:
                 data['id'] = test.id
             provider.update(data, test)
@@ -164,7 +164,8 @@ def delete_test():
         test = Test.query.filter_by(id=data.get('id')).first()
         if not test:
             test = Test.query.filter_by(name=data.get('name')).first()
-        if test:
+        if test and not test.immutable:
+            provider.update_unremovable_flag(test, False)
             db.session.delete(test)
             db.session.commit()
             response = Response(json.dumps(data), 200, mimetype="application/json")

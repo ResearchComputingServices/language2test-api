@@ -69,7 +69,7 @@ def update_writing():
         writing = Writing.query.filter_by(id=data.get('id')).first()
         if not writing:
             writing = Writing.query.filter_by(name=data.get('name')).first()
-        if writing:
+        if writing and not writing.immutable:
             if data.get('id') is None:
                 data['id'] = writing.id
             provider.update(data, writing)
@@ -93,7 +93,7 @@ def delete_writing():
         writing = Writing.query.filter_by(id=data.get('id')).first()
         if not writing:
             writing = Writing.query.filter_by(name=data.get('name')).first()
-        if writing:
+        if writing and not writing.unremovable:
             provider.delete(data, writing)
             db.session.commit()
             response = Response(json.dumps(data), 200, mimetype="application/json")

@@ -7,6 +7,7 @@ from language2test_api.models.cloze_question import ClozeQuestion
 from language2test_api.providers.cloze_question_correctly_typed_provider import ClozeQuestionCorrectlyTypedProvider
 from language2test_api.providers.cloze_question_incorrectly_typed_provider import ClozeQuestionIncorrectlyTypedProvider
 from language2test_api.providers.cloze_question_pending_typed_provider import ClozeQuestionPendingTypedProvider
+from language2test_api.models.cloze import Cloze
 
 test_provider = TestProvider()
 correctly_typed_provider = ClozeQuestionCorrectlyTypedProvider()
@@ -26,6 +27,10 @@ class TestSessionResultsClozeProvider(BaseProvider):
                     self.add_typed_text_to_pending_list(answer.text, test_session.test_id,
                                                         results_cloze.cloze_id, answer.cloze_question_id)
                     self.update_cloze_answered_correctly(answer, test_session.test_id, results_cloze.cloze_id)
+                cloze = Cloze.query.filter_by(id=results_cloze.cloze_id).first()
+                if cloze:
+                    cloze.unremovable = True  # Update flags: unremovable and immutable from the RC
+                    cloze.immutable = True
                 test_session.results_cloze.append(results_cloze)
         return test_session
 
@@ -82,7 +87,9 @@ class TestSessionResultsClozeProvider(BaseProvider):
 
 
     def update_results_cloze(self, data, test_session):
-        test_session.results_cloze = []
+        # Need to check if generate id is correctly working
+        # Uncomment the following line once the id are properly generated.
+        #test_session.results_cloze = []
         if data.get('results_cloze') is not None:
             for index, data_results_cloze in enumerate(data.get('results_cloze')):
                 data_results_cloze['id'] = self.generate_id(index, TestSessionResultsCloze.id)
@@ -96,6 +103,10 @@ class TestSessionResultsClozeProvider(BaseProvider):
 
     def delete_results_cloze(self, data, test_session):
         for results_cloze in test_session.results_cloze:
+            cloze = Cloze.query.filter_by(id=results_cloze.cloze_id).first()
+            if cloze:
+                cloze.immutable = False
+
             for answer in results_cloze.answers:
                 db.session.query(TestSessionResultsClozeAnswers).filter(
                     TestSessionResultsClozeAnswers.id == answer.id).delete()

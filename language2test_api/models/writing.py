@@ -15,6 +15,9 @@ class Writing(BaseModel):
     time_limit = db.Column(db.Integer())
     test_category_id = db.Column(db.Integer(), ForeignKey('test_category.id'))
     test_category = relationship("TestCategory")
+    immutable = db.Column(db.Boolean, default=False)
+    unremovable = db.Column(db.Boolean, default=False)
+
 
     def __init__(self, item):
         BaseModel.__init__(self, item)
@@ -24,6 +27,9 @@ class Writing(BaseModel):
         self.word_limit = item.get('word_limit')
         self.time_limit = item.get('time_limit')
         self.test_category_id = item.get('test_category_id')
+        self.immutable = item.get('immutable')
+        self.unremovable = item.get('unremovable')
+
 
     def __repr__(self):
         return '<writing %r>' % self.name
@@ -39,3 +45,5 @@ class WritingSchema(BaseModelSchema):
     time_limit = fields.Integer()
     test_category = fields.Nested(TestCategorySchema)
     test_category_id = fields.Integer()
+    immutable = fields.Boolean()
+    unremovable = fields.Boolean()

@@ -3,7 +3,9 @@ from language2test_api.providers.base_provider import BaseProvider
 from language2test_api.models.rc import RC, RCSchema
 from language2test_api.models.rc_question import RCQuestion, RCQuestionSchema
 from language2test_api.models.rc_question_option import RCQuestionOption, RCQuestionOptionSchema
+from language2test_api.providers.test_provider import TestProvider
 import re
+
 
 class RCProvider(BaseProvider):
     def add(self, data):
@@ -11,10 +13,10 @@ class RCProvider(BaseProvider):
         data = self.add_category_to_data(data)
         rc = RC(data)
         offset = 0
+
         for index, question in enumerate(data.get('questions')):
             question['id'] = self.generate_id(index, RCQuestion.id)
             rc_question = RCQuestion(question)
-
 
             for index_option, option in enumerate(question.get('options')):
                 rc_question_option = RCQuestionOption(option)
@@ -43,11 +45,14 @@ class RCProvider(BaseProvider):
         rc.filename = data.get("filename")
         rc.time_limit = data.get("time_limit")
 
-        for question in rc.questions:
-            for option in question.options:
-                db.session.query(RCQuestionOption).filter(RCQuestionOption.id == option.id).delete()
-            db.session.query(RCQuestion).filter(RCQuestion.id == question.id).delete()
+        #Deleting the questions causes exception when there are links to other tables
+        #for question in rc.questions:
+        #    for option in question.options:
+        #        db.session.query(RCQuestionOption).filter(RCQuestionOption.id == option.id).delete()
+        #    db.session.query(RCQuestion).filter(RCQuestion.id == question.id).delete()
 
+        #Putting questions to null causes ghosts rows in linked tables (i.e. test sessions)
+        rc.questions = []
         for index, question in enumerate(data.get('questions')):
             question['id'] = self.generate_id(field=RCQuestion.id)
 
