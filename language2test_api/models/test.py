@@ -61,6 +61,7 @@ class Test(BaseModel):
     test_user_field_category = relationship("UserFieldCategory", secondary=test_user_field_category)
     mandatory_test_user_field_category = relationship("UserFieldCategory", secondary=mandatory_test_user_field_category)
     test_student_class = relationship("StudentClass", secondary=test_student_class)
+    immutable = db.Column(db.Boolean, default=False)
 
     def __init__(self, item):
         BaseModel.__init__(self, item)
@@ -80,7 +81,7 @@ class TestSchema(BaseModelSchema):
     test_user_field_category = fields.Nested(UserFieldCategorySchema, many=True)
     mandatory_test_user_field_category = fields.Nested(UserFieldCategorySchema, many=True)
     test_student_class = fields.Nested(StudentClassSchema, many=True)
-
+    immutable = fields.Boolean()
 
 
 

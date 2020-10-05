@@ -29,6 +29,7 @@ class TestSession(BaseModel):
     results_cloze = relationship("TestSessionResultsCloze", backref="test_session")
     results_writing = relationship("TestSessionResultsWriting", backref="test_session")
 
+
     def __init__(self, item):
         BaseModel.__init__(self, item)
         self.user_id = item.get('user_id')

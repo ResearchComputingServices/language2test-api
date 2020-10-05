@@ -16,6 +16,8 @@ class Cloze(BaseModel):
     questions = relationship("ClozeQuestion", backref="cloze")
     test_category_id = db.Column(db.Integer(), ForeignKey('test_category.id'))
     test_category = relationship("TestCategory")
+    immutable = db.Column(db.Boolean, default=False)
+    unremovable = db.Column(db.Boolean, default=False)
 
     def __init__(self, item):
         BaseModel.__init__(self, item)
@@ -24,6 +26,8 @@ class Cloze(BaseModel):
         self.time_limit = item.get('time_limit')
         self.filename = item.get('filename') if item.get('filename') else ''
         self.test_category_id = item.get('test_category_id')
+        self.immutable = item.get('immutable')
+        self.unremovable = item.get('unremovable')
 
     def __repr__(self):
         return '<cloze %r>' % self.id
@@ -39,4 +43,6 @@ class ClozeSchema(BaseModelSchema):
     questions = fields.Nested(ClozeQuestionSchema, many=True)
     test_category = fields.Nested(TestCategorySchema)
     test_category_id = fields.Integer()
+    immutable = fields.Boolean()
+    unremovable = fields.Boolean()
 

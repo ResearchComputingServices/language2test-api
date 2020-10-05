@@ -76,11 +76,12 @@ class ClozeProvider(BaseProvider):
         cloze.time_limit = data.get("time_limit")
 
 
-        for question in cloze.questions:
-            for option in question.options:
-                db.session.query(ClozeQuestionOption).filter(ClozeQuestionOption.id == option.id).delete()
-            db.session.query(ClozeQuestion).filter(ClozeQuestion.id == question.id).delete()
+        #for question in cloze.questions:
+        #    for option in question.options:
+        #        db.session.query(ClozeQuestionOption).filter(ClozeQuestionOption.id == option.id).delete()
+        #    db.session.query(ClozeQuestion).filter(ClozeQuestion.id == question.id).delete()
 
+        cloze.questions = []
 
         for index, question in enumerate(data.get('questions')):
             question['id'] = self.generate_id(field=ClozeQuestion.id)

@@ -79,7 +79,7 @@ def update_vocabulary():
         vocabulary = Vocabulary.query.filter_by(id=data.get('id')).first()
         if not vocabulary:
             vocabulary = Vocabulary.query.filter_by(word=data.get('word')).first()
-        if vocabulary:
+        if vocabulary and not vocabulary.immutable:
             if data.get('id') is None:
                 data['id'] = vocabulary.id
             provider.update(data, vocabulary)
@@ -103,7 +103,7 @@ def delete_vocabulary():
         vocabulary = Vocabulary.query.filter_by(id=data.get('id')).first()
         if not vocabulary:
             vocabulary = Vocabulary.query.filter_by(word=data.get('word')).first()
-        if vocabulary:
+        if vocabulary and not vocabulary.unremovable:
             provider.delete(data, vocabulary)
             db.session.commit()
             response = Response(json.dumps(data), 200, mimetype="application/json")

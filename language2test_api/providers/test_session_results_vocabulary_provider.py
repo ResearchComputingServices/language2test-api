@@ -18,6 +18,10 @@ class TestSessionResultsVocabularyProvider(BaseProvider):
                     results_vocabulary.answers.append(answer)
                     #self.update_vocabulary_answered_correctly(answer.text, test_session.test_id, answer.vocabulary_id)
                     self.update_vocabulary_answered_correctly(answer)
+                    vocabulary = Vocabulary.query.filter_by(id=answer.vocabulary_id).first()
+                    if vocabulary:
+                        vocabulary.unremovable = True  # Update flags: unremovable and immutable from the RC
+                        vocabulary.immutable = True
                 test_session.results_vocabulary.append(results_vocabulary)
         return test_session
 
@@ -44,7 +48,9 @@ class TestSessionResultsVocabularyProvider(BaseProvider):
         return
 
     def update_results_vocabulary(self, data, test_session):
-        test_session.results_vocabulary = []
+        #Need to check if generate id is correctly working
+        #Uncomment the following line once the id are properly generated.
+        #test_session.results_vocabulary = []
         if data.get('results_vocabulary') is not None:
             for index, data_results_vocabulary in enumerate(data.get('results_vocabulary')):
                 data_results_vocabulary['id'] = self.generate_id(index, TestSessionResultsVocabulary.id)
@@ -57,6 +63,14 @@ class TestSessionResultsVocabularyProvider(BaseProvider):
         return test_session
 
     def delete_results_vocabulary(self, data, test_session):
+
+        results_vocabulary = test_session.results_vocabulary
+        for result in results_vocabulary:
+            for answers in result.answers:
+                vocabulary = Vocabulary.query.filter_by(id=answers.vocabulary_id).first()
+                if vocabulary:  # Update immutable
+                    vocabulary.immutable = False
+
         for results_vocabulary in test_session.results_vocabulary:
             for answer in results_vocabulary.answers:
                 db.session.query(TestSessionResultsVocabularyAnswers).filter(

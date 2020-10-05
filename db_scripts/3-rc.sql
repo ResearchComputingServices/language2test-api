@@ -39,7 +39,7 @@ BEGIN
 END;
 ' LANGUAGE 'plpgsql';
 
-INSERT INTO public."rc"(name, text, type, filename, test_category_id, time_limit)
+INSERT INTO public."rc"(name, text, type, filename, test_category_id, time_limit, immutable, unremovable)
 VALUES ('RC-1', 'Deep in the Sierra Nevada, the famous General Grant giant sequoia tree is suffering its loss of stature in silence. What once was the world''s No. 2 biggest tree has been supplanted thanks to the most comprehensive measurements taken of the largest living things on Earth.
 
 
@@ -90,7 +90,7 @@ The world''s biggest tree is still the nearby General Sherman with about 2,000 c
 
 
 "They''re all superlative in their own way," Sillett said.
-', 'text', '', 2, 600);
+', 'text', '', 2, 600, False, True);
 
 select add_rc_question('The word "supplanted" in paragraph 1',
                        'RC-1',

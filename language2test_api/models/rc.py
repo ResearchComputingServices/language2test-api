@@ -7,6 +7,7 @@ from language2test_api.extensions import db, ma
 from language2test_api.models.base_model import BaseModel, BaseModelSchema
 from language2test_api.models.test_category import TestCategory, TestCategorySchema
 
+
 class RC(BaseModel):
     __tablename__ = 'rc'
 
@@ -17,6 +18,8 @@ class RC(BaseModel):
     questions = relationship("RCQuestion", back_populates="rc")
     test_category_id = db.Column(db.Integer(), ForeignKey('test_category.id'))
     test_category = relationship("TestCategory")
+    immutable = db.Column(db.Boolean, default=False)
+    unremovable = db.Column(db.Boolean, default=False)
 
     def __init__(self, item):
         BaseModel.__init__(self, item)
@@ -25,6 +28,8 @@ class RC(BaseModel):
         self.time_limit = item.get('time_limit')
         self.filename = item.get('filename') if item.get('filename') else ''
         self.test_category_id = item.get('test_category_id')
+        self.immutable = item.get('immutable')
+        self.unremovable = item.get('unremovable')
 
     def __repr__(self):
         return '<rc %r>' % self.id
@@ -42,4 +47,6 @@ class RCSchema(BaseModelSchema):
     questions = fields.Nested(RCQuestionSchema, many=True)
     test_category = fields.Nested(TestCategorySchema)
     test_category_id = fields.Integer()
+    immutable = fields.Boolean()
+    unremovable = fields.Boolean()
 
