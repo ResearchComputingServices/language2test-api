@@ -79,12 +79,15 @@ def update_vocabulary():
         vocabulary = Vocabulary.query.filter_by(id=data.get('id')).first()
         if not vocabulary:
             vocabulary = Vocabulary.query.filter_by(word=data.get('word')).first()
-        if vocabulary and not vocabulary.immutable:
-            if data.get('id') is None:
-                data['id'] = vocabulary.id
-            provider.update(data, vocabulary)
-            result = vocabulary_schema.dump(vocabulary)
-            response = jsonify(result)
+        if vocabulary:
+            if not vocabulary.immutable:
+                if data.get('id') is None:
+                    data['id'] = vocabulary.id
+                provider.update(data, vocabulary)
+                result = vocabulary_schema.dump(vocabulary)
+                response = jsonify(result)
+            else:
+                response = Response(json.dumps(data), 403, mimetype="application/json")
         else:
             response = Response(json.dumps(data), 404, mimetype="application/json")
     except Exception as e:
