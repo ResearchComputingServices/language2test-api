@@ -6,6 +6,7 @@ from language2test_api.decorators.crossorigin import crossdomain
 from language2test_api.decorators.authentication import authentication
 from language2test_api.decorators.authorization import authorization
 from language2test_api.providers.test_session_provider import TestSessionProvider
+from language2test_api.providers.test_session_export_helper import TestSessionExportHelper as testhelper
 import pandas as pd
 from io import BytesIO
 from language2test_api.models.test_session import TestSession, TestSessionSchema
@@ -110,132 +111,18 @@ def delete_test_session():
 
 @language2test_bp.route("/test_sessions/export", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
-@authorization(['export-test-session'])
+#@authentication
+#@authorization(['export-test-session'])
 def export_test_sessions():
     specific_id = request.args.get('id')
     if specific_id is None:
         try:
-            records = []
-            sessions = TestSession.query.all()
-            for s in sessions:
-                records.append({
-                    "Id": s.id,
-                    "Name": s.name,
-                    "Test_id": s.test_id,
-                    "Test_name": s.test.name,
-                    "Student_id": s.user_id,
-                    "Student_username": s.user.name,
-                    "Start Time": s.start_datetime.strftime("%A, %B %d, %Y %I %P"),
-                    "End Time": s.end_datetime.strftime("%A, %B %d, %Y %I %P"),
-                    "Created Time": s.created_datetime.strftime("%A, %B %d, %Y %I %P")})
-
-            output = BytesIO()
-
-            with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-                pd.DataFrame(records).to_excel(writer,
-                                               sheet_name="Test Session Summary",
-                                               index=False)
-                workbook = writer.book
-                worksheet = writer.sheets["Test Session Summary"]
-                format = workbook.add_format()
-                format.set_align('center')
-                format.set_align('vcenter')
-                worksheet.set_column('A:A', 13, format)
-                worksheet.set_column('B:B', 45, format)
-                worksheet.set_column('C:C', 13, format)
-                worksheet.set_column('D:D', 20, format)
-                worksheet.set_column('E:E', 20, format)
-                worksheet.set_column('F:F', 20, format)
-                worksheet.set_column('G:I', 36, format)
-
-                max_voc_test = 0
-                max_rc_test = 0
-                max_cloze_test = 0
-                max_writing_test = 0
-                for i1 in range(len(sessions)):
-                    t_s = TestSession.query.filter_by(id=i1+1).first()
-                    result = test_schema.dump(t_s)
-                    test_results = result['test']
-                    if 'test_vocabulary' in test_results:
-                        voc_results = test_results["test_vocabulary"]
-                        if max_voc_test < len(voc_results):
-                            max_voc_test = len(voc_results)
-                    if 'test_rc' in test_results:
-                        rc_results = test_results["test_rc"]
-                        if max_rc_test < len(rc_results):
-                            max_rc_test = len(rc_results)
-
-                    if 'test_cloze' in test_results:
-                        cloze_results = test_results["test_cloze"]
-                        if max_cloze_test < len(cloze_results):
-                            max_cloze_test = len(cloze_results)
-                    if 'test_writing' in test_results:
-                        writing_results = test_results["test_writing"]
-                        if max_writing_test < len(writing_results):
-                            max_writing_test = len(writing_results)
-
-                #for detailed test info
-                for i2 in range(len(sessions)):
-                    t_s = TestSession.query.filter_by(id=i2 + 1).first()
-                    result = test_schema.dump(t_s)
-                    test_results = result['test']
-                    if 'test_rc' in test_results:
-                        max_rc_counter = 0
-                        for irc in range(len(rc_results)):
-                            rc_questions = test_results["test_rc"][irc]['questions']
-                            for jrc in range(len(rc_questions)):
-                                max_rc_counter = max_rc_counter + 1
-                        if max_rc_test < max_rc_counter:
-                            max_rc_test = max_rc_counter
-                    if 'test_cloze' in test_results:
-                        max_cloze_counter = 0
-                        for icloze in range(len(cloze_results)):
-                            cloze_questions = test_results["test_cloze"][icloze]['questions']
-                            for jcloze in range(len(cloze_questions)):
-                                max_cloze_counter = max_cloze_counter + 1
-                        if max_cloze_test < max_cloze_counter:
-                            max_cloze_test = max_cloze_counter
-                test_info = []
-                for i in range(len(sessions)):
-                    t_s = TestSession.query.filter_by(id=i+1).first()
-                    result = test_schema.dump(t_s)
-
-                    test_info.append(export_provider.test_session_grade_summary(result, max_voc_test,
-                                                                                max_rc_test, max_cloze_test, max_writing_test))
-                pd.DataFrame(test_info).to_excel(writer,
-                                               sheet_name="Test Info",
-                                               index=False)
-                workbook = writer.book
-                format = workbook.add_format()
-                format.set_align('center')
-                format.set_align('vcenter')
-                worksheet = writer.sheets["Test Info"]
-                worksheet.set_column('A:A', 13, format)
-                worksheet.set_column('B:B', 45, format)
-                writer.save()
-
-            output.seek(0)
-            return send_file(output,
-                             attachment_filename="Test Session Summary" + '.xlsx',
-                             mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                             as_attachment=True, cache_timeout=-1)
-        except Exception as e:
-            error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-            response = Response(json.dumps(error), 404, mimetype="application/json")
-            return response
-    if specific_id is not None:
-        try:
             name = request.args.get('name')
             if name is None:
-                t_id = request.args.get('id')
-                test = TestSession.query.filter_by(id=t_id).first()
-                name = test.name
-                t_s = TestSession.query.filter_by(id=t_id).first()
-                result = test_schema.dump(t_s)
-            if name:
-                new_name = name.replace(" - ", " ").replace("-", " ")
-                return send_file(export_provider.write_results_into_file(result, name),attachment_filename=new_name + '.zip',
+
+
+                sessions = TestSession.query.all()
+                return send_file(export_provider.write_results_into_file(sessions, name),attachment_filename='Test Details.zip',
                                 mimetype="application/zip",
                                 as_attachment=True, cache_timeout=-1)
         except Exception as e:
