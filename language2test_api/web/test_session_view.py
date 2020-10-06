@@ -111,16 +111,14 @@ def delete_test_session():
 
 @language2test_bp.route("/test_sessions/export", methods=['GET'])
 @crossdomain(origin='*')
-#@authentication
-#@authorization(['export-test-session'])
+@authentication
+@authorization(['export-test-session'])
 def export_test_sessions():
     specific_id = request.args.get('id')
     if specific_id is None:
         try:
             name = request.args.get('name')
             if name is None:
-
-
                 sessions = TestSession.query.all()
                 return send_file(export_provider.write_results_into_file(sessions, name),attachment_filename='Test Details.zip',
                                 mimetype="application/zip",
