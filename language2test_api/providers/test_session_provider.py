@@ -23,6 +23,7 @@ class TestSessionProvider(TestSessionResultsVocabularyProvider,
             test = Test.query.filter_by(id=test_session.test_id).first()
             if test:
                 test.immutable = True
+                test.unremovable = True
         db.session.add(test_session)
         return test_session
 
@@ -51,4 +52,5 @@ class TestSessionProvider(TestSessionResultsVocabularyProvider,
             test = Test.query.filter_by(id=test_session.test_id).first()
             if test:
                 test.immutable = False
+                test.unremovable = False
         db.session.query(TestSession).filter(TestSession.id == data.get('id')).delete()

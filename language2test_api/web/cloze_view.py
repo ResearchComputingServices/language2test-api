@@ -80,12 +80,15 @@ def update_cloze():
         cloze = Cloze.query.filter_by(id=data.get('id')).first()
         if not cloze:
             cloze = Cloze.query.filter_by(name=data.get('name')).first()
-        if cloze and not cloze.immutable:
-            if data.get('id') is None:
-                data['id'] = cloze.id
-            provider.update(data, cloze)
-            result = cloze_schema.dump(cloze)
-            response = jsonify(result)
+        if cloze:
+            if not cloze.immutable:
+                if data.get('id') is None:
+                    data['id'] = cloze.id
+                provider.update(data, cloze)
+                result = cloze_schema.dump(cloze)
+                response = jsonify(result)
+            else:
+                response = Response(json.dumps(data), 403, mimetype="application/json")
         else:
             response = Response(json.dumps(data), 404, mimetype="application/json")
     except Exception as e:
@@ -104,10 +107,13 @@ def delete_cloze():
         cloze = Cloze.query.filter_by(id=data.get('id')).first()
         if not cloze:
             cloze = Cloze.query.filter_by(name=data.get('name')).first()
-        if cloze and not cloze.unremovable:
-            provider.delete(data, cloze)
-            db.session.commit()
-            response = Response(json.dumps(data), 200, mimetype="application/json")
+        if cloze:
+            if not cloze.unremovable:
+                provider.delete(data, cloze)
+                db.session.commit()
+                response = Response(json.dumps(data), 200, mimetype="application/json")
+            else:
+                response = Response(json.dumps(data), 403, mimetype="application/json")
         else:
             response = Response(json.dumps(data), 404, mimetype="application/json")
     except Exception as e:
