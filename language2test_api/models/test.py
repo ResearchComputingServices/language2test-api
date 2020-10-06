@@ -62,6 +62,7 @@ class Test(BaseModel):
     mandatory_test_user_field_category = relationship("UserFieldCategory", secondary=mandatory_test_user_field_category)
     test_student_class = relationship("StudentClass", secondary=test_student_class)
     immutable = db.Column(db.Boolean, default=False)
+    unremovable = db.Column(db.Boolean, default=False)
 
     def __init__(self, item):
         BaseModel.__init__(self, item)
@@ -82,6 +83,7 @@ class TestSchema(BaseModelSchema):
     mandatory_test_user_field_category = fields.Nested(UserFieldCategorySchema, many=True)
     test_student_class = fields.Nested(StudentClassSchema, many=True)
     immutable = fields.Boolean()
+    unremovable = fields.Boolean()
 
 
 

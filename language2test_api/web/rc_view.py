@@ -76,12 +76,15 @@ def update_rc():
         rc = RC.query.filter_by(id=data.get('id')).first()
         if not rc:
             rc = RC.query.filter_by(name=data.get('name')).first()
-        if rc and not rc.immutable:
-            if data.get('id') is None:
-                data['id'] = rc.id
-            provider.update(data, rc)
-            result = rc_schema.dump(rc)
-            response = jsonify(result)
+        if rc:
+            if not rc.immutable:
+                if data.get('id') is None:
+                    data['id'] = rc.id
+                provider.update(data, rc)
+                result = rc_schema.dump(rc)
+                response = jsonify(result)
+            else:
+                response = Response(json.dumps(data), 403, mimetype="application/json")
         else:
             response = Response(json.dumps(data), 404, mimetype="application/json")
     except Exception as e:
@@ -100,10 +103,13 @@ def delete_rc():
         rc = RC.query.filter_by(id=data.get('id')).first()
         if not rc:
             rc = RC.query.filter_by(name=data.get('name')).first()
-        if rc and not rc.unremovable:
-            provider.delete(data, rc)
-            db.session.commit()
-            response = Response(json.dumps(data), 200, mimetype="application/json")
+        if rc:
+            if not rc.unremovable:
+                provider.delete(data, rc)
+                db.session.commit()
+                response = Response(json.dumps(data), 200, mimetype="application/json")
+            else:
+                response = Response(json.dumps(data), 403, mimetype="application/json")
         else:
             response = Response(json.dumps(data), 404, mimetype="application/json")
     except Exception as e:

@@ -139,13 +139,16 @@ def update_test():
         test = Test.query.filter_by(id=data.get('id')).first()
         if not test:
             test = Test.query.filter_by(name=data.get('name')).first()
-        if test and not test.immutable:
-            if data.get('id') is None:
-                data['id'] = test.id
-            provider.update(data, test)
-            db.session.commit()
-            result = test_schema.dump(test)
-            response = jsonify(result)
+        if test:
+            if not test.immutable:
+                if data.get('id') is None:
+                    data['id'] = test.id
+                provider.update(data, test)
+                db.session.commit()
+                result = test_schema.dump(test)
+                response = jsonify(result)
+            else:
+                response = Response(json.dumps(data), 403, mimetype="application/json")
         else:
             response = Response(json.dumps(data), 404, mimetype="application/json")
     except Exception as e:
@@ -164,11 +167,14 @@ def delete_test():
         test = Test.query.filter_by(id=data.get('id')).first()
         if not test:
             test = Test.query.filter_by(name=data.get('name')).first()
-        if test and not test.immutable:
-            provider.update_unremovable_flag(test, False)
-            db.session.delete(test)
-            db.session.commit()
-            response = Response(json.dumps(data), 200, mimetype="application/json")
+        if test:
+            if not test.immutable:
+                provider.update_unremovable_flag(test, False)
+                db.session.delete(test)
+                db.session.commit()
+                response = Response(json.dumps(data), 200, mimetype="application/json")
+            else:
+                response = Response(json.dumps(data), 403, mimetype="application/json")
         else:
             response = Response(json.dumps(data), 404, mimetype="application/json")
     except Exception as e:
