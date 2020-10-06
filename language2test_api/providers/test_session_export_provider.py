@@ -170,22 +170,6 @@ class TestSessionExportProvider(RawSqlProvider):
                             "Time Consumption": test_writing_time
                         })
 
-                """
-                pd.DataFrame([basic_info]).to_excel(writer, sheet_name="Basic info", index=False)
-                workbook = writer.book
-                worksheet = writer.sheets["Basic info"]
-                format = workbook.add_format()
-                format.set_align('center')
-                format.set_align('vcenter')
-
-                worksheet.set_column('A:C', 15, format)
-                worksheet.set_column('B:B', 45, format)
-                worksheet.set_column('D:D', 30, format)
-                worksheet.set_column('E:E', 15, format)
-                worksheet.set_column('F:G', 25, format)
-                worksheet.set_column('H:H', 40, format)
-                worksheet.set_column('I:L', 25, format)
-                """
 
                 if ('results_vocabulary' in results) and ((len(results['results_vocabulary'])) > 0):
                     if voc_total > 0:
