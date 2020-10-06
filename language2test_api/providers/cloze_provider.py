@@ -99,9 +99,11 @@ class ClozeProvider(BaseProvider):
 
     @staticmethod
     def generate_cloze_question_options(word, previous_letter = ''):
+        word = word.strip(',.-\n')
         options = []
         synonyms = wordnet.synsets(word)
         lemmas = set(chain.from_iterable([word.lemma_names() for word in synonyms]))
+        previous_letter = previous_letter.strip(',.-\n')
         has_previous_letter = previous_letter != ' ' and previous_letter != ''
         if word in lemmas:
             lemmas.remove(word)

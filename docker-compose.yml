@@ -1,53 +1,42 @@
-version: "3.2"
-
-volumes:
-  pgdata:
-    driver: local
-  pgconf:
-    driver: local
-  pglog:
-    driver: local
+version: '3'
 
 services:
-    db:
+  db:
+    image: postgres
+    environment:
+      POSTGRES_DB: language2test
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+    ports:
+      - 5432:5432
+  postgres:
       image: postgres
-      restart: unless-stopped
-      container_name: postgres
       volumes:
-        - pgdata:/var/lib/postgresql/data
-        - pgconf:/etc/postgresql
-        - pglog:/var/log/postgresql
-      ports:
-        - "5432:5432"
+        - postgres_data:/var/lib/postgresql/data
       environment:
-        POSTGRES_DB: language2test
-        POSTGRES_USER: postgres
-        POSTGRES_PASSWORD: admin
-    mssql:
-        image: mcr.microsoft.com/mssql/server
-        ports:
-            - "1433:1433"
-        environment:
-            - ACCEPT_EULA=Y
-            - SA_PASSWORD=Password!23
-            - MSSQL_PID=Developer
-    mssqlscripts:
-        image: mcr.microsoft.com/mssql-tools
-        depends_on:
-            - mssql
-        command: /bin/bash -c 'until /opt/mssql-tools/bin/sqlcmd -S mssql -U sa -P "Password!23" -Q "create database Keycloak"; do sleep 5; done'
-    keycloak:
-        image: quay.io/keycloak/keycloak:latest
-        depends_on:
-            - mssql
-            - mssqlscripts
-        ports:
-            - "8080:8080"
-        environment:
-            - KEYCLOAK_USER=admin
-            - KEYCLOAK_PASSWORD=admin
-            - DB_VENDOR=mssql
-            - DB_USER=sa
-            - DB_PASSWORD=Password!23
-            - DB_ADDR=mssql
-            - DB_DATABASE=Keycloak
+        POSTGRES_DB: keycloak
+        POSTGRES_USER: keycloak
+        POSTGRES_PASSWORD: password
+  keycloak:
+      image: quay.io/keycloak/keycloak:latest
+      volumes:
+        - keycloak-data-volume:/var/lib/keycloak/data
+      environment:
+        DB_VENDOR: POSTGRES
+        DB_ADDR: postgres
+        DB_DATABASE: keycloak
+        DB_USER: keycloak
+        DB_SCHEMA: public
+        DB_PASSWORD: password
+        KEYCLOAK_USER: admin
+        KEYCLOAK_PASSWORD: admin
+      ports:
+        - 8080:8080
+      depends_on:
+        - postgres
+
+volumes:
+  keycloak-data-volume:
+    driver: local
+  postgres_data:
+    driver: local
