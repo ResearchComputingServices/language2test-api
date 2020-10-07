@@ -4,271 +4,268 @@ from language2test_api.extensions import db, ma
 from collections import namedtuple
 from language2test_api.providers.raw_sql_provider import RawSqlProvider
 from language2test_api.providers.test_session_export_helper import TestSessionExportHelper as testhelper
+from language2test_api.models.test_session import TestSession, TestSessionSchema
 from typing import List
 import pandas as pd
 from io import BytesIO
 from docx import Document
 import zipfile
-
+test_schema = TestSessionSchema(many=False)
 class TestSessionExportProvider(RawSqlProvider):
-    def write_results_into_file(self, results, name):
-        
-        test_time = testhelper.calculate_time_consumption(results['end_datetime'], results['start_datetime'])
-
-        basic_info= {
-            "User ID": results['user_id'],
-            "Test Info": results['name'],
-            "User Name": results['user']['name'],
-            "First Name": results['user']['first_name'],
-            "Last Name": results['user']['last_name'],
-            "Start Time": results['start_datetime'],
-            "End Time": results['end_datetime'],
-            "Time Consumption": test_time
-        }
-
-
-        if ('results_vocabulary' in results) and ((len(results['results_vocabulary'])) > 0):
-            voc_score = testhelper.calculate_correctly_answered_questions(results['results_vocabulary'][0]['answers'])
-            voc_total = len(results['results_vocabulary'][0]['answers'])
-            voc_grade = testhelper.grade_calculator(voc_score, voc_total)
-            if voc_total > 0:
-                basic_info["Vocabulary Grade"]= voc_grade
-
-
-        if 'results_rc' in results and ((len(results['results_rc'])) > 0):
-            rc_score = testhelper.calculate_correctly_answered_questions(results['results_rc'][0]['answers'])
-            rc_total = len(results['results_rc'][0]['answers'])
-            rc_grade = testhelper.grade_calculator(rc_score, rc_total)
-            if rc_total > 0:
-                basic_info["Reading Comprehension Grade"]= rc_grade
-
-        if 'results_cloze' in results and ((len(results['results_cloze'])) > 0):
-            cloze_score = testhelper.calculate_correctly_answered_questions(results['results_cloze'][0]['answers'])
-            cloze_total = len(results['results_cloze'][0]['answers'])
-            cloze_grade = testhelper.grade_calculator(cloze_score, cloze_total)
-            if cloze_total > 0:
-                basic_info["Cloze Grade"] = cloze_grade
-
-        if 'results_writing' in results and ((len(results['results_writing'])) > 0):
-            writing_score = testhelper.calculate_correctly_answered_questions_writings(results['results_writing'])
-            writing_total = len(results['results_writing'])
-            writing_grade = testhelper.grade_calculator(writing_score, writing_total)
-            if writing_total > 0:
-                basic_info["Writing Grade"] = writing_grade
-
-        test_results = results['test']
-
-        if ('test_vocabulary' in test_results) and (len(test_results['test_vocabulary']) > 0):
-            voc_results = test_results["test_vocabulary"]
-            voc_infos = []
-            for i in range(len(results['results_vocabulary'][0]['answers'])):
-                answer = results['results_vocabulary'][0]['answers'][i]['text']
-                if answer is None:
-                    test_result = "Empty Answer"
-                elif answer == voc_results[i]['options'][int(voc_results[i]['correct'])-1]['text']:
-                    test_result = "Correct"
-                else:
-                    test_result = "Incorrect"
-                test_voc_time = testhelper.calculate_time_consumption(results['results_vocabulary'][0]['answers'][i]['end_time'],
-                                                                      results['results_vocabulary'][0]['answers'][i]['start_time'])
-                voc_infos.append({
-                    "Vocabulary": str(i+1),
-                    "Test Type": voc_results[i]['type'],
-                    "Word": voc_results[i]['word'],
-                    "Option 1": voc_results[i]['options'][0]['text'],
-                    "Option 2": voc_results[i]['options'][1]['text'],
-                    "Option 3": voc_results[i]['options'][2]['text'],
-                    "Option 4": voc_results[i]['options'][3]['text'],
-                    "Student Answer": answer,
-                    "Correct Answer": voc_results[i]['options'][int(voc_results[i]['correct'])-1]['text'],
-                    "Difficulty": voc_results[i]['difficulty'],
-                    "Test Result": test_result,
-                    "Time Consumption": test_voc_time
-                })
-
-        if 'test_rc' in test_results and (len(test_results['test_rc']) > 0):
-            rc_results = test_results["test_rc"]
-            rc_infos = []
-            for i in range(len(rc_results)):
-                rc_questions = test_results["test_rc"][i]['questions']
-                for j in range(len(rc_questions)):
-                    answer = results['results_rc'][i]['answers'][j]['text']
-                    if answer is None:
-                        test_result = "Empty Answer"
-                    elif answer == rc_questions[j]['options'][int(rc_questions[j]['correct'])-1]['text']:
-                        test_result = "Correct"
-                    else:
-                        test_result = "Incorrect"
-                    test_rc_time = testhelper.calculate_time_consumption(
-                        results['results_rc'][i]['answers'][j]['end_time'],
-                        results['results_rc'][i]['answers'][j]['start_time'])
-                    rc_infos.append({
-                        "RC": str(j+1),
-                        "Question": rc_questions[j]['text'],
-                        "Option 1": rc_questions[j]['options'][0]['text'],
-                        "Option 2": rc_questions[j]['options'][1]['text'],
-                        "Option 3": rc_questions[j]['options'][2]['text'],
-                        "Option 4": rc_questions[j]['options'][3]['text'],
-                        "User Answer": results['results_rc'][i]['answers'][j]['text'],
-                        "Correct Answer": rc_questions[j]['options'][int(rc_questions[j]['correct'])-1]['text'],
-                        "Test Result": test_result,
-                        "Time Consumption":test_rc_time
-                    })
-
-
-        if 'test_cloze' in test_results  and (len(test_results['test_cloze']) > 0):
-            cloze_results = test_results["test_cloze"]
-            print(cloze_results)
-            cloze_infos =[]
-            for i in range(len(cloze_results)):
-                cloze_questions = test_results["test_cloze"][i]['questions']
-                for j in range(len(cloze_questions)):
-                    answer = results['results_cloze'][i]['answers'][j]['text']
-                    if answer is None:
-                        test_result = "Empty Answer"
-                    elif answer == cloze_questions[j]['options'][int(cloze_questions[j]['correct'])-1]['text']:
-                        test_result = "Correct"
-                    else:
-                        test_result = "Incorrect"
-                    test_cloze_time = testhelper.calculate_time_consumption(
-                        results['results_cloze'][i]['answers'][j]['end_time'],
-                        results['results_cloze'][i]['answers'][j]['start_time'])
-                    cloze_infos.append({
-                        "Question": cloze_questions[j]['text'],
-                        "Option 1": cloze_questions[j]['options'][0]['text'],
-                        "Option 2": cloze_questions[j]['options'][1]['text'],
-                        "Option 3": cloze_questions[j]['options'][2]['text'],
-                        "Option 4": cloze_questions[j]['options'][3]['text'],
-                        "User Answer": results['results_cloze'][i]['answers'][j]['text'],
-                        "Correct Answer": cloze_questions[j]['options'][int(cloze_questions[j]['correct'])-1]['text'],
-                        "Test Result": test_result,
-                        "Time Consumption": test_cloze_time
-                    })
-
-        if 'test_writing' in test_results and (len(test_results['test_writing']) > 0):
-            writing_results = test_results["test_writing"]
-            writing_infos =[]
-            for i in range(len(writing_results)):
-                test_writing_time = testhelper.calculate_time_consumption(
-                    results['results_writing'][i]['answer']['end_time'],
-                    results['results_writing'][i]['answer']['start_time'])
-                writing_infos.append({
-                    "Writing": str(i+1),
-                    "Test name": writing_results[i]['name'],
-                    "Question": writing_results[i]['question'],
-                    "Word Limit": writing_results[i]['word_limit'],
-                    "Time Limit": writing_results[i]['time_limit'],
-                    "Essay": results['results_writing'][i]['answer']['text'],
-                    "Time Consumption": test_writing_time
-                })
-
+    def write_results_into_file(self, sessions, name):
         xlsx = BytesIO()
         with pd.ExcelWriter(xlsx, engine='xlsxwriter') as writer:
-            pd.DataFrame([basic_info]).to_excel(writer, sheet_name="Basic info", index=False)
-            workbook = writer.book
-            worksheet = writer.sheets["Basic info"]
-            format = workbook.add_format()
-            format.set_align('center')
-            format.set_align('vcenter')
+            for session_id in [session.id for session in sessions]:
+                t_s = TestSession.query.filter_by(id=session_id).first()
+                results = test_schema.dump(t_s)
+                test_time = testhelper.calculate_time_consumption(results['end_datetime'], results['start_datetime'])
 
-            worksheet.set_column('A:C', 15, format)
-            worksheet.set_column('B:B', 45, format)
-            worksheet.set_column('D:D', 30, format)
-            worksheet.set_column('E:E', 15, format)
-            worksheet.set_column('F:G', 25, format)
-            worksheet.set_column('H:H', 40, format)
-            worksheet.set_column('I:L', 25, format)
+                basic_info = {
+                    "User ID": results['user_id'],
+                    "Test Info": results['name'],
+                    "User Name": results['user']['name'],
+                    "First Name": results['user']['first_name'],
+                    "Last Name": results['user']['last_name'],
+                    "Start Time": results['start_datetime'],
+                    "End Time": results['end_datetime'],
+                    "Time Consumption": test_time
+                }
 
-            if ('results_vocabulary' in results) and ((len(results['results_vocabulary'])) > 0):
-                if voc_total > 0:
-                    pd.DataFrame(voc_infos).to_excel(writer, sheet_name="Vocabulary Test Info", index=False)
-                    pd.DataFrame([voc_grade], index=["Grade"]).to_excel(writer, startrow=1 + len(voc_infos),
-                                                                        sheet_name="Vocabulary Test Info",
-                                                                        header=False)
-                    workbook = writer.book
-                    format = workbook.add_format()
-                    format.set_align('center')
-                    format.set_align('vcenter')
-                    worksheet = writer.sheets["Vocabulary Test Info"]
-                    worksheet.set_column('A:A', 13, format)
-                    worksheet.set_column('B:B', 16, format)
-                    worksheet.set_column('C:C', 18, format)
-                    worksheet.set_column('D:D', 16, format)
-                    worksheet.set_column('E:E', 16, format)
-                    worksheet.set_column('F:I', 16, format)
-                    worksheet.set_column('J:K', 20, format)
-                    worksheet.set_column('L:L', 28, format)
 
-            if ("results_rc" in results) and ((len(results['results_rc'])) > 0):
-                if rc_total > 0:
-                    pd.DataFrame(rc_infos).to_excel(writer, sheet_name="Reading Comprehension Test Info", index=False)
-                    pd.DataFrame([rc_grade], index=["Grade"]).to_excel(writer, startrow=1 + len(rc_infos),
-                                                                       sheet_name="Reading Comprehension Test Info",
-                                                                       header=False)
-                    workbook = writer.book
-                    format = workbook.add_format()
-                    format.set_align('center')
-                    format.set_align('vcenter')
-                    worksheet = writer.sheets["Reading Comprehension Test Info"]
-                    worksheet.set_column('A:A', 15, format)
-                    worksheet.set_column('B:H', 60, format)
-                    worksheet.set_column('I:I', 25, format)
-                    worksheet.set_column('J:J', 28, format)
+                if ('results_vocabulary' in results) and ((len(results['results_vocabulary'])) > 0):
+                    voc_score = testhelper.calculate_correctly_answered_questions(results['results_vocabulary'][0]['answers'])
+                    voc_total = len(results['results_vocabulary'][0]['answers'])
+                    voc_grade = testhelper.grade_calculator(voc_score, voc_total)
+                    if voc_total > 0:
+                        basic_info["Vocabulary Grade"]= voc_grade
 
-            if ("results_cloze" in results) and ((len(results['results_cloze'])) > 0):
-                if cloze_total > 0:
-                    pd.DataFrame(cloze_infos).to_excel(writer, sheet_name="Cloze Test Info", index=False)
-                    pd.DataFrame([cloze_grade], index=["Grade"]).to_excel(writer, startrow=1 + len(cloze_infos),
-                                                                          sheet_name="Cloze Test Info",
-                                                                          header=False)
-                    workbook = writer.book
-                    worksheet = writer.sheets["Cloze Test Info"]
-                    format = workbook.add_format()
-                    format.set_align('center')
-                    format.set_align('vcenter')
-                    worksheet.set_column('A:A', 13, format)
-                    worksheet.set_column('B:B', 16, format)
-                    worksheet.set_column('C:I', 28, format)
 
-            if ('results_writing' in results) and ((len(results['results_writing'])) > 0):
-                if writing_total >0:
-                    pd.DataFrame(writing_infos).to_excel(writer, sheet_name="Writing Test Info", index=False)
-                    pd.DataFrame([writing_grade], index=["Grade"]).to_excel(writer, startrow=1 + len(writing_infos),
-                                                                            sheet_name="Writing Test Info",
+                if 'results_rc' in results and ((len(results['results_rc'])) > 0):
+                    rc_score = testhelper.calculate_correctly_answered_questions(results['results_rc'][0]['answers'])
+                    rc_total = len(results['results_rc'][0]['answers'])
+                    rc_grade = testhelper.grade_calculator(rc_score, rc_total)
+                    if rc_total > 0:
+                        basic_info["Reading Comprehension Grade"]= rc_grade
+
+                if 'results_cloze' in results and ((len(results['results_cloze'])) > 0):
+                    cloze_score = testhelper.calculate_correctly_answered_questions(results['results_cloze'][0]['answers'])
+                    cloze_total = len(results['results_cloze'][0]['answers'])
+                    cloze_grade = testhelper.grade_calculator(cloze_score, cloze_total)
+                    if cloze_total > 0:
+                        basic_info["Cloze Grade"] = cloze_grade
+
+                if 'results_writing' in results and ((len(results['results_writing'])) > 0):
+                    writing_score = testhelper.calculate_correctly_answered_questions_writings(results['results_writing'])
+                    writing_total = len(results['results_writing'])
+                    writing_grade = testhelper.grade_calculator(writing_score, writing_total)
+                    if writing_total > 0:
+                        basic_info["Writing Grade"] = writing_grade
+                else:
+                    basic_info["Writing Grade"] = None
+
+                test_results = results['test']
+
+                if ('test_vocabulary' in test_results) and (len(test_results['test_vocabulary']) > 0):
+                    voc_results = test_results["test_vocabulary"]
+                    voc_infos = []
+                    for i in range(len(results['results_vocabulary'][0]['answers'])):
+                        answer = results['results_vocabulary'][0]['answers'][i]['text']
+                        if answer is None:
+                            test_result = "Empty Answer"
+                        elif answer == voc_results[i]['options'][int(voc_results[i]['correct'])-1]['text']:
+                            test_result = "Correct"
+                        else:
+                            test_result = "Incorrect"
+                        test_voc_time = testhelper.calculate_time_consumption(results['results_vocabulary'][0]['answers'][i]['end_time'],
+                                                                              results['results_vocabulary'][0]['answers'][i]['start_time'])
+                        voc_infos.append({
+                            "Vocabulary": str(i+1),
+                            "Test Type": voc_results[i]['type'],
+                            "Word": voc_results[i]['word'],
+                            "Option 1": voc_results[i]['options'][0]['text'],
+                            "Option 2": voc_results[i]['options'][1]['text'],
+                            "Option 3": voc_results[i]['options'][2]['text'],
+                            "Option 4": voc_results[i]['options'][3]['text'],
+                            "Student Answer": answer,
+                            "Correct Answer": voc_results[i]['options'][int(voc_results[i]['correct'])-1]['text'],
+                            "Difficulty": voc_results[i]['difficulty'],
+                            "Test Result": test_result,
+                            "Time Consumption": test_voc_time
+                        })
+
+                if 'test_rc' in test_results and (len(test_results['test_rc']) > 0):
+                    rc_results = test_results["test_rc"]
+                    rc_infos = []
+                    for i in range(len(rc_results)):
+                        rc_questions = test_results["test_rc"][i]['questions']
+                        for j in range(len(rc_questions)):
+                            answer = results['results_rc'][i]['answers'][j]['text']
+                            if answer is None:
+                                test_result = "Empty Answer"
+                            elif answer == rc_questions[j]['options'][int(rc_questions[j]['correct'])-1]['text']:
+                                test_result = "Correct"
+                            else:
+                                test_result = "Incorrect"
+                            test_rc_time = testhelper.calculate_time_consumption(
+                                results['results_rc'][i]['answers'][j]['end_time'],
+                                results['results_rc'][i]['answers'][j]['start_time'])
+                            rc_infos.append({
+                                "RC": str(j+1),
+                                "Question": rc_questions[j]['text'],
+                                "Option 1": rc_questions[j]['options'][0]['text'],
+                                "Option 2": rc_questions[j]['options'][1]['text'],
+                                "Option 3": rc_questions[j]['options'][2]['text'],
+                                "Option 4": rc_questions[j]['options'][3]['text'],
+                                "User Answer": results['results_rc'][i]['answers'][j]['text'],
+                                "Correct Answer": rc_questions[j]['options'][int(rc_questions[j]['correct'])-1]['text'],
+                                "Test Result": test_result,
+                                "Time Consumption":test_rc_time
+                            })
+
+
+                if 'test_cloze' in test_results  and (len(test_results['test_cloze']) > 0):
+                    cloze_results = test_results["test_cloze"]
+
+                    cloze_infos =[]
+                    for i in range(len(cloze_results)):
+                        cloze_questions = test_results["test_cloze"][i]['questions']
+                        for j in range(len(cloze_questions)):
+                            answer = results['results_cloze'][i]['answers'][j]['text']
+                            if answer is None:
+                                test_result = "Empty Answer"
+                            elif answer == cloze_questions[j]['options'][int(cloze_questions[j]['correct'])-1]['text']:
+                                test_result = "Correct"
+                            else:
+                                test_result = "Incorrect"
+                            test_cloze_time = testhelper.calculate_time_consumption(
+                                results['results_cloze'][i]['answers'][j]['end_time'],
+                                results['results_cloze'][i]['answers'][j]['start_time'])
+                            cloze_infos.append({
+                                "Cloze": str(j+1),
+                                "Question": cloze_questions[j]['text'],
+                                "Option 1": cloze_questions[j]['options'][0]['text'],
+                                "Option 2": cloze_questions[j]['options'][1]['text'],
+                                "Option 3": cloze_questions[j]['options'][2]['text'],
+                                "Option 4": cloze_questions[j]['options'][3]['text'],
+                                "User Answer": results['results_cloze'][i]['answers'][j]['text'],
+                                "Correct Answer": cloze_questions[j]['options'][int(cloze_questions[j]['correct'])-1]['text'],
+                                "Test Result": test_result,
+                                "Time Consumption": test_cloze_time
+                            })
+
+                if 'test_writing' in test_results and (len(test_results['test_writing']) > 0):
+                    writing_results = test_results["test_writing"]
+                    writing_infos =[]
+                    for i in range(len(writing_results)):
+                        test_writing_time = testhelper.calculate_time_consumption(
+                            results['results_writing'][i]['answer']['end_time'],
+                            results['results_writing'][i]['answer']['start_time'])
+                        writing_infos.append({
+                            "Writing": str(i+1),
+                            "Test name": writing_results[i]['name'],
+                            "Question": writing_results[i]['question'],
+                            "Word Limit": writing_results[i]['word_limit'],
+                            "Time Limit": writing_results[i]['time_limit'],
+                            "Essay": results['results_writing'][i]['answer']['text'],
+                            "Time Consumption": test_writing_time
+                        })
+
+
+                if ('results_vocabulary' in results) and ((len(results['results_vocabulary'])) > 0):
+                    if voc_total > 0:
+                        pd.DataFrame(voc_infos).to_excel(writer, sheet_name="Vocabulary Test Info #" + str(session_id), index=False)
+                        pd.DataFrame([voc_grade], index=["Grade"]).to_excel(writer, startrow=1 + len(voc_infos),
+                                                                            sheet_name="Vocabulary Test Info #" + str(session_id),
                                                                             header=False)
-                    workbook = writer.book
-                    worksheet = writer.sheets['Writing Test Info']
-                    format = workbook.add_format()
-                    format.set_align('center')
-                    format.set_align('vcenter')
-                    worksheet.set_column('A:A', 13, format)
-                    worksheet.set_column('B:B', 13, format)
-                    worksheet.set_column('C:C', 60, format)
-                    worksheet.set_column('D:D', 18, format)
-                    worksheet.set_column('E:E', 22, format)
-                    worksheet.set_column('F:F', 22, format)
-                    worksheet.set_column('G:G', 35, format)
-                    writer.save()
+                        workbook = writer.book
+                        format = workbook.add_format()
+                        format.set_align('center')
+                        format.set_align('vcenter')
+                        worksheet = writer.sheets["Vocabulary Test Info #" + str(session_id)]
+                        worksheet.set_column('A:A', 13, format)
+                        worksheet.set_column('B:B', 16, format)
+                        worksheet.set_column('C:C', 18, format)
+                        worksheet.set_column('D:D', 16, format)
+                        worksheet.set_column('E:E', 16, format)
+                        worksheet.set_column('F:I', 16, format)
+                        worksheet.set_column('J:K', 20, format)
+                        worksheet.set_column('L:L', 28, format)
+
+                if ("results_rc" in results) and ((len(results['results_rc'])) > 0):
+                    if rc_total > 0:
+                        pd.DataFrame(rc_infos).to_excel(writer, sheet_name="RC Test Info # "+str(session_id), index=False)
+                        pd.DataFrame([rc_grade], index=["Grade"]).to_excel(writer, startrow=1 + len(rc_infos),
+                                                                           sheet_name="RC Test Info # "+str(session_id),
+                                                                           header=False)
+                        workbook = writer.book
+                        format = workbook.add_format()
+                        format.set_align('center')
+                        format.set_align('vcenter')
+                        worksheet = writer.sheets["RC Test Info # "+str(session_id)]
+                        worksheet.set_column('A:A', 15, format)
+                        worksheet.set_column('B:H', 60, format)
+                        worksheet.set_column('I:I', 25, format)
+                        worksheet.set_column('J:J', 28, format)
+
+                if ("results_cloze" in results) and ((len(results['results_cloze'])) > 0):
+                    if cloze_total > 0:
+                        pd.DataFrame(cloze_infos).to_excel(writer, sheet_name="Cloze Test Info # "+str(session_id), index=False)
+                        pd.DataFrame([cloze_grade], index=["Grade"]).to_excel(writer, startrow=1 + len(cloze_infos),
+                                                                              sheet_name="Cloze Test Info # "+str(session_id),
+                                                                              header=False)
+                        workbook = writer.book
+                        worksheet = writer.sheets["Cloze Test Info # "+str(session_id)]
+                        format = workbook.add_format()
+                        format.set_align('center')
+                        format.set_align('vcenter')
+                        worksheet.set_column('A:A', 13, format)
+                        worksheet.set_column('B:B', 16, format)
+                        worksheet.set_column('C:I', 28, format)
+
+                if ('results_writing' in results) and ((len(results['results_writing'])) > 0):
+                    if writing_total >0:
+                        pd.DataFrame(writing_infos).to_excel(writer, sheet_name="Writing Test Info #" + str(session_id), index=False)
+                        pd.DataFrame([writing_grade], index=["Grade"]).to_excel(writer, startrow=1 + len(writing_infos),
+                                                                                sheet_name="Writing Test Info #" + str(session_id),
+                                                                                header=False)
+                        workbook = writer.book
+                        worksheet = writer.sheets["Writing Test Info #" + str(session_id)]
+                        format = workbook.add_format()
+                        format.set_align('center')
+                        format.set_align('vcenter')
+                        worksheet.set_column('A:A', 13, format)
+                        worksheet.set_column('B:B', 13, format)
+                        worksheet.set_column('C:C', 60, format)
+                        worksheet.set_column('D:D', 18, format)
+                        worksheet.set_column('E:E', 22, format)
+                        worksheet.set_column('F:F', 22, format)
+                        worksheet.set_column('G:G', 35, format)
+                        #writer.save()
 
         output = BytesIO()
-        new_name = name.replace(" - ", " ").replace("-", " ")
+
         with zipfile.ZipFile(output, "a", zipfile.ZIP_DEFLATED, False) as zip_file:
-            if ('results_writing' in results) and ((len(results['results_writing'])) > 0):
-                for i in range(len(writing_results)):
-                    txt = BytesIO()
-                    docx = BytesIO()
-                    if results['results_writing'][i]['answer']['text'] is None:
-                        results['results_writing'][i]['answer']['text'] = " "
-                    txt.write((results['results_writing'][i]['answer']['text']).encode("utf8"))
-                    document = Document()
-                    document.add_paragraph(results['results_writing'][i]['answer']['text'])
-                    document.save(docx)
-                    file_name = writing_results[i]['name']
-                    zip_file.writestr(file_name + ".txt", txt.getvalue())
-                    zip_file.writestr(file_name + ".docx", docx.getvalue())
-                zip_file.writestr(new_name + ".xlsx", xlsx.getvalue())
+            for session_id in [session.id for session in sessions]:
+                t_s = TestSession.query.filter_by(id=session_id).first()
+                results = test_schema.dump(t_s)
+                if ('results_writing' in results) and ((len(results['results_writing'])) > 0):
+                    for i in range(len(writing_results)):
+                        txt = BytesIO()
+                        docx = BytesIO()
+                        if results['results_writing'][i]['answer']['text'] is None:
+                            results['results_writing'][i]['answer']['text'] = " "
+                        txt.write((results['results_writing'][i]['answer']['text']).encode("utf8"))
+                        document = Document()
+                        document.add_paragraph(results['results_writing'][i]['answer']['text'])
+                        document.save(docx)
+                        file_name = "Test #"+str(session_id)+writing_results[i]['name']
+                        zip_file.writestr(file_name + ".txt", txt.getvalue())
+                        zip_file.writestr(file_name + ".docx", docx.getvalue())
+                zip_file.writestr("Test Details.xlsx", xlsx.getvalue())
             else:
-                zip_file.writestr(new_name + ".xlsx", xlsx.getvalue())
+                zip_file.writestr("Test Details.xlsx", xlsx.getvalue())
+            xlsx = BytesIO
+            zip_file.writestr("Test Summary.xlsx", xlsx.getvalue(TestSessionExportProvider().test_session_summary()))
 
         output.seek(0)
         return output
@@ -340,7 +337,7 @@ class TestSessionExportProvider(RawSqlProvider):
         if max_cloze_test > 0:
             if 'test_cloze' in test_results and (len(test_results['test_cloze']) > 0):
                 cloze_results = test_results["test_cloze"]
-                print(cloze_results)
+
                 for i in range(len(cloze_results)):
                     cloze_questions = test_results["test_cloze"][i]['questions']
                     for j in range(len(cloze_questions)):
@@ -376,3 +373,158 @@ class TestSessionExportProvider(RawSqlProvider):
                     test_infos["writing # " + str(h + 1)] = " "
 
         return test_infos
+
+    def vocabulary_test_grade(self, results):
+        if ('results_vocabulary' in results) and ((len(results['results_vocabulary'])) > 0):
+            voc_score = testhelper.calculate_correctly_answered_questions(results['results_vocabulary'][0]['answers'])
+            voc_total = len(results['results_vocabulary'][0]['answers'])
+            voc_grade = testhelper.grade_calculator(voc_score, voc_total)
+            if voc_total > 0:
+                return voc_grade
+        else:
+            return None
+
+    def rc_test_grade(self, results):
+        if 'results_rc' in results and ((len(results['results_rc'])) > 0):
+            rc_score = testhelper.calculate_correctly_answered_questions(results['results_rc'][0]['answers'])
+            rc_total = len(results['results_rc'][0]['answers'])
+            rc_grade = testhelper.grade_calculator(rc_score, rc_total)
+            if rc_total > 0:
+                return rc_grade
+        else:
+            return None
+
+    def cloze_test_grade(self, results):
+        if 'results_cloze' in results and ((len(results['results_cloze'])) > 0):
+            cloze_score = testhelper.calculate_correctly_answered_questions(results['results_cloze'][0]['answers'])
+            cloze_total = len(results['results_cloze'][0]['answers'])
+            cloze_grade = testhelper.grade_calculator(cloze_score, cloze_total)
+            if cloze_total > 0:
+                return cloze_grade
+        else:
+            return None
+    def writing_test_grade(self, results):
+        if 'results_writing' in results and ((len(results['results_writing'])) > 0):
+            writing_score = testhelper.calculate_correctly_answered_questions_writings(results['results_writing'])
+            writing_total = len(results['results_writing'])
+            writing_grade = testhelper.grade_calculator(writing_score, writing_total)
+            if writing_total > 0:
+                return writing_grade
+        else:
+            return None
+
+    def test_session_summary(self):
+        sessions = TestSession.query.all()
+        records_list = []
+        for s in sessions:
+            records = {
+                "Id": s.id,
+                "Name": s.name,
+                "Test Id": s.test_id,
+                "Test Name": s.test.name,
+                "Student Id": s.user_id,
+                "Username": s.user.name,
+                "First Name": s.user.first_name,
+                "Last Name": s.user.last_name,
+                "Start Time": s.start_datetime.strftime("%A, %B %d, %Y %I %P"),
+                "End Time": s.end_datetime.strftime("%A, %B %d, %Y %I %P"),
+                "Created Time": s.created_datetime.strftime("%A, %B %d, %Y %I %P")}
+            t_s = TestSession.query.filter_by(id=s.id).first()
+            results = test_schema.dump(t_s)
+            test_time = testhelper.calculate_time_consumption(results['end_datetime'], results['start_datetime'])
+            records["Time Consumption"] = test_time
+            records['Vocabulary Grade'] = TestSessionExportProvider().vocabulary_test_grade(results)
+            records["Reading Comprehension Grade"] = TestSessionExportProvider().rc_test_grade(results)
+            records["Cloze Grade"] = TestSessionExportProvider().cloze_test_grade(results)
+            records["Writing Grade"] = TestSessionExportProvider().writing_test_grade(results)
+            records_list.append(records)
+
+        output = BytesIO()
+
+        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+            pd.DataFrame(records_list).to_excel(writer,
+                                                sheet_name="Test Session Summary",
+                                                index=False)
+            workbook = writer.book
+            worksheet = writer.sheets["Test Session Summary"]
+            format = workbook.add_format()
+            format.set_align('center')
+            format.set_align('vcenter')
+            worksheet.set_column('A:A', 13, format)
+            worksheet.set_column('B:B', 45, format)
+            worksheet.set_column('C:C', 13, format)
+            worksheet.set_column('D:D', 20, format)
+            worksheet.set_column('E:E', 20, format)
+            worksheet.set_column('F:F', 20, format)
+            worksheet.set_column('G:I', 36, format)
+
+            max_voc_test = 0
+            max_rc_test = 0
+            max_cloze_test = 0
+            max_writing_test = 0
+            for i1 in range(len(sessions)):
+                t_s = TestSession.query.filter_by(id=i1 + 1).first()
+                result = test_schema.dump(t_s)
+                test_results = result['test']
+                if 'test_vocabulary' in test_results:
+                    voc_results = test_results["test_vocabulary"]
+                    if max_voc_test < len(voc_results):
+                        max_voc_test = len(voc_results)
+                if 'test_rc' in test_results:
+                    rc_results = test_results["test_rc"]
+                    if max_rc_test < len(rc_results):
+                        max_rc_test = len(rc_results)
+
+                if 'test_cloze' in test_results:
+                    cloze_results = test_results["test_cloze"]
+                    if max_cloze_test < len(cloze_results):
+                        max_cloze_test = len(cloze_results)
+                if 'test_writing' in test_results:
+                    writing_results = test_results["test_writing"]
+                    if max_writing_test < len(writing_results):
+                        max_writing_test = len(writing_results)
+
+            # for detailed test info
+            for i2 in range(len(sessions)):
+                t_s = TestSession.query.filter_by(id=i2 + 1).first()
+                result = test_schema.dump(t_s)
+                test_results = result['test']
+                if 'test_rc' in test_results:
+                    max_rc_counter = 0
+                    for irc in range(len(rc_results)):
+                        rc_questions = test_results["test_rc"][irc]['questions']
+                        for jrc in range(len(rc_questions)):
+                            max_rc_counter = max_rc_counter + 1
+                    if max_rc_test < max_rc_counter:
+                        max_rc_test = max_rc_counter
+                if 'test_cloze' in test_results:
+                    max_cloze_counter = 0
+                    for icloze in range(len(cloze_results)):
+                        cloze_questions = test_results["test_cloze"][icloze]['questions']
+                        for jcloze in range(len(cloze_questions)):
+                            max_cloze_counter = max_cloze_counter + 1
+                    if max_cloze_test < max_cloze_counter:
+                        max_cloze_test = max_cloze_counter
+            test_info = []
+            for i in range(len(sessions)):
+                t_s = TestSession.query.filter_by(id=i + 1).first()
+                result = test_schema.dump(t_s)
+
+                test_info.append(TestSessionExportProvider().test_session_grade_summary(result, max_voc_test,
+                                                                            max_rc_test, max_cloze_test,
+                                                                            max_writing_test))
+            pd.DataFrame(test_info).to_excel(writer,
+                                             sheet_name="Test Info",
+                                             index=False)
+            workbook = writer.book
+            format = workbook.add_format()
+            format.set_align('center')
+            format.set_align('vcenter')
+            worksheet = writer.sheets["Test Info"]
+            worksheet.set_column('A:A', 13, format)
+            worksheet.set_column('B:B', 45, format)
+            writer.save()
+
+        output.seek(0)
+        return output
+
