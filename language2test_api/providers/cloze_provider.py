@@ -153,20 +153,26 @@ class ClozeProvider(BaseProvider):
         return cloze
 
     @staticmethod
+    def generate_options(word):
+        options = []
+        for syn in wordnet.synsets(word): 
+            for l in syn.lemmas(): 
+                options.append(l.name()) 
+                if l.antonyms(): 
+                    options.append(l.antonyms()[0].name())
+        return set(options)
+
+    @staticmethod
     def generate_cloze_question_options(word, previous_letter = ''):
         word = word.strip(',.-\n')
         options = []
         synonyms = wordnet.synsets(word)
-        lemmas = set(chain.from_iterable([word.lemma_names() for word in synonyms]))
         previous_letter = previous_letter.strip(',.-\n')
         has_previous_letter = previous_letter != ' ' and previous_letter != ''
+        lemmas = ClozeProvider.generate_options(word)
         if word in lemmas:
             lemmas.remove(word)
-        lemmas = list(lemmas)
-        if len(lemmas) >= 3:
-            options.extend(lemmas[:3])
-        else:
-            options.extend(lemmas)
+        options.extend(lemmas)
         if has_previous_letter:
             def filter_options(option):
                 return option[0] == previous_letter
@@ -193,7 +199,7 @@ class ClozeProvider(BaseProvider):
                 elif word == '*' and bracket_open:
                     # We take into consideration about the fact that, words can be a<pple> words can be sliced up.
                     previous_letter = text[i - len(segment) - 2]
-                    has_previous_letter = previous_letter != ' ' and previous_letter != ''
+                    has_previous_letter = previous_letter != ' ' and previous_letter != '' and previous_letter != '*'
                     if has_previous_letter:
                         segment = previous_letter + segment
                     if not typed:
@@ -225,19 +231,3 @@ class ClozeProvider(BaseProvider):
         else:
             ssl._create_default_https_context = _create_unverified_https_context
         nltk.download("wordnet")
-
-    @staticmethod
-    def generate_options(word):
-        synonyms = wordnet.synsets(word)
-        lemmas = set(chain.from_iterable([word.lemma_names() for word in synonyms]))
-        if word in lemmas:
-            lemmas.remove(word)
-        lemmas = list(lemmas)
-        res = []
-        if len(lemmas) >= 4:
-            res.extend(lemmas[:4])
-        else:
-            res.extend(lemmas)
-            words = ["mark", "synonym", "similar", "same"]
-            res.extend(words[:(4 - len(res))])
-        return word, res
