@@ -37,21 +37,31 @@ def get_cloze_count():
 @authentication
 @authorization(['read-cloze'])
 def get_cloze():
-    id = request.args.get('id')
-    if id:
-        properties = Cloze.query.filter_by(id=int(id)).first()
-        result = cloze_schema.dump(properties)
-        return jsonify(result)
+    try:
+        id = request.args.get('id')
+        if id:
+            properties = Cloze.query.filter_by(id=int(id)).first()
+            result = cloze_schema.dump(properties)
+            result = provider.get_correctly_typed_answers(result)
+            return jsonify(result)
 
-    name = request.args.get('name')
-    if name:
-        properties = Cloze.query.filter_by(name=name).first()
-        result = cloze_schema.dump(properties)
-        return jsonify(result)
+        name = request.args.get('name')
+        if name:
+            properties = Cloze.query.filter_by(name=name).first()
+            result = cloze_schema.dump(properties)
+            result = provider.get_correctly_typed_answers(result)
+            return jsonify(result)
 
-    properties = provider.query_all(Cloze)
-    result = cloze_schema_many.dump(properties)
-    return jsonify(result)
+        properties = provider.query_all(Cloze)
+        result = cloze_schema_many.dump(properties)
+        result = provider.get_correctly_typed_answers_all_clozes(result)
+        return jsonify(result)
+    except Exception as e:
+        error = { "exception": str(e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500, mimetype="application/json")
+
+    return response
+
 
 @language2test_bp.route("/cloze", methods=['POST'])
 @crossdomain(origin='*')
@@ -61,7 +71,6 @@ def add_cloze():
     try:
         data = request.get_json()
         cloze = provider.add(data)
-        db.session.commit()
         result = cloze_schema.dump(cloze)
         response = jsonify(result)
     except Exception as e:

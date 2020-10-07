@@ -91,13 +91,19 @@ class TestSessionResultsClozeProvider(BaseProvider):
         # Uncomment the following line once the id are properly generated.
         #test_session.results_cloze = []
         if data.get('results_cloze') is not None:
+
+            offset = 0
             for index, data_results_cloze in enumerate(data.get('results_cloze')):
-                data_results_cloze['id'] = self.generate_id(index, TestSessionResultsCloze.id)
+                #data_results_cloze['id'] = self.generate_id(index, TestSessionResultsCloze.id)
+                data_results_cloze['id'] = self.generate_id(offset, TestSessionResultsCloze.id)
+
                 results_cloze = TestSessionResultsCloze(data_results_cloze)
                 for index_data_answers, data_answers in enumerate(data_results_cloze.get('answers')):
                     data_answers['id'] = self.generate_id(index_data_answers, TestSessionResultsClozeAnswers.id)
                     answer = TestSessionResultsClozeAnswers(data_answers)
                     results_cloze.answers.append(answer)
+                    offset = offset + 1
+
                 test_session.results_cloze.append(results_cloze)
         return test_session
 
