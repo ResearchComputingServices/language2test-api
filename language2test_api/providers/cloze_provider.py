@@ -7,12 +7,15 @@ from language2test_api.providers.base_provider import BaseProvider
 from language2test_api.models.cloze import Cloze, ClozeSchema
 from language2test_api.models.cloze_question import ClozeQuestion, ClozeQuestionSchema
 from language2test_api.models.cloze_question_option import ClozeQuestionOption, ClozeQuestionOptionSchema
+from language2test_api.providers.cloze_question_correctly_typed_provider import ClozeQuestionCorrectlyTypedProvider
 from random import randint
 
 from nltk.corpus import wordnet
 import nltk
 import ssl
 from itertools import chain
+
+correctly_typed_provider = ClozeQuestionCorrectlyTypedProvider()
 
 class ClozeProvider(BaseProvider):
     def get_count(self, field, cloze_question_id=None):
@@ -48,6 +51,57 @@ class ClozeProvider(BaseProvider):
             question['id'] = self.generate_id(index, ClozeQuestion.id)
             cloze_question = ClozeQuestion(question)
 
+            #The cloze question is not typed.
+            if not type(cloze_question.typed) or not cloze_question.typed:
+                for index_option, option in enumerate(question.get('options')):
+                    cloze_question_option = ClozeQuestionOption(option)
+                    cloze_question_option.id = self.generate_id(index_option + offset, ClozeQuestionOption.id)
+                    cloze_question.options.append(cloze_question_option)
+
+                offset = offset + index_option + 1
+            cloze.questions.append(cloze_question)
+        db.session.add(cloze)
+        db.session.commit()
+        self.__add_correctly_typed_answers(data)
+        return cloze
+
+    def __add_correctly_typed_answers(self, data):
+        for question in (data.get('questions')):
+            if type(question['typed'])==bool and question['typed']:
+                for accepted_answer in question.get('accepted_answers'):
+                   if 'text' in accepted_answer:
+                        correctly_typed_provider.add(accepted_answer['text'], question['id'])
+        return
+
+    def get_correctly_typed_answers_all_clozes(self, data):
+        for cloze in data:
+            self.get_correctly_typed_answers(cloze)
+        return data
+
+    def get_correctly_typed_answers(self, cloze):
+        for question in cloze['questions']:
+            question['accepted_answers'] = []
+            if question['typed']:
+                accepted_answers_list = correctly_typed_provider.get_query(question['id'])
+                temp = []
+                for accepted_answer in accepted_answers_list:
+                    d = {}
+                    d['text'] = accepted_answer.text
+                    temp.append(d)
+                question['accepted_answers'] = temp
+        return cloze
+
+
+    def add_original(self, data):
+        data['id'] = self.generate_id(field=Cloze.id)
+        data = self.add_category_to_data(data)
+        cloze = Cloze(data)
+        offset = 0
+
+        for index, question in enumerate(data.get('questions')):
+            question['id'] = self.generate_id(index, ClozeQuestion.id)
+            cloze_question = ClozeQuestion(question)
+
             for index_option, option in enumerate(question.get('options')):
                 cloze_question_option = ClozeQuestionOption(option)
                 cloze_question_option.id = self.generate_id(index_option + offset, ClozeQuestionOption.id)
@@ -58,6 +112,7 @@ class ClozeProvider(BaseProvider):
 
         db.session.add(cloze)
         return cloze
+
 
 
     def delete(self, data, cloze):

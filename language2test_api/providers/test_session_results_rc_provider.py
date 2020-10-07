@@ -8,15 +8,20 @@ from language2test_api.models.rc import RC, RCSchema
 class TestSessionResultsRCProvider(BaseProvider):
     def add_results_rc(self, data, test_session):
         if data.get('results_rc') is not None:
+
+            offset=0
             for index, data_results_rc in enumerate(data.get('results_rc')):
                 data_results_rc['id'] = self.generate_id(index, TestSessionResultsRC.id)
                 results_rc = TestSessionResultsRC(data_results_rc)
+
                 for index_data_answers, data_answers in enumerate(data_results_rc.get('answers')):
-                    data_answers['id'] = self.generate_id(index_data_answers, TestSessionResultsRCAnswers.id)
+                    #data_answers['id'] = self.generate_id(index_data_answers, TestSessionResultsRCAnswers.id)
+                    data_answers['id'] = self.generate_id(offset, TestSessionResultsRCAnswers.id)
                     answer = TestSessionResultsRCAnswers(data_answers)
                     results_rc.answers.append(answer)
-                    #self.update_rc_answered_correctly(answer.text, test_session.test_id, results_rc.rc_id, answer.rc_question_id)
                     self.update_rc_answered_correctly(answer)
+                    offset = offset + 1
+
                 rc = RC.query.filter_by(id=results_rc.rc_id).first()
                 if rc:
                     rc.unremovable = True  # Update flags: unremovable and immutable from the RC
