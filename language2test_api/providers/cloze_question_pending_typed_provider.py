@@ -9,6 +9,11 @@ class ClozeQuestionPendingTypedProvider(BaseProvider):
         query = query.filter(ClozeQuestionPendingTyped.text == text).first()
         return query != None
 
+    def get_query(self, cloze_question_id):
+        query = ClozeQuestionPendingTyped.query
+        query = query.filter(ClozeQuestionPendingTyped.cloze_question_id == cloze_question_id).all()
+        return query
+
     def add(self, text, cloze_question_id):
         data = {}
         data['id'] = self.generate_id(field=ClozeQuestionPendingTyped.id)
