@@ -131,33 +131,16 @@ def delete_cloze():
 
     return response
 
-@language2test_bp.route("/cloze/generate_questions", methods=['POST'])
+@language2test_bp.route("/cloze/generate", methods=['POST'])
 @crossdomain(origin='*')
 @authentication
 @authorization(['read-cloze'])
-def generate_questions():
+def generate():
     try:
         data = request.get_json()
         text = data.get('text')
-        typed = data.get('typed')
         if text:
-            return Response(json.dumps(provider.generate_questions(text, typed)), 200, mimetype="application/json")
-        else:
-            return Response({}, 400, mimetype="application/json")
-    except Exception as e:
-        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        return Response(json.dumps(error), 500, mimetype="application/json")
-
-@language2test_bp.route("/cloze/generate_options", methods=['POST'])
-@crossdomain(origin='*')
-@authentication
-@authorization(['read-cloze'])
-def generate_word():
-    try:
-        data = request.get_json()
-        word = data.get('word')
-        if word:
-            return Response(json.dumps(provider.generate_cloze_question_options(word)), 200, mimetype="application/json")
+            return Response(json.dumps(provider.generate_questions(text)), 200, mimetype="application/json")
         else:
             return Response({}, 400, mimetype="application/json")
     except Exception as e:

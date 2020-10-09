@@ -129,19 +129,10 @@ class ClozeProvider(BaseProvider):
         cloze.type = data.get("type")
         cloze.filename = data.get("filename")
         cloze.time_limit = data.get("time_limit")
-
-
-        #for question in cloze.questions:
-        #    for option in question.options:
-        #        db.session.query(ClozeQuestionOption).filter(ClozeQuestionOption.id == option.id).delete()
-        #    db.session.query(ClozeQuestion).filter(ClozeQuestion.id == question.id).delete()
-
         cloze.questions = []
 
         for index, question in enumerate(data.get('questions')):
             question['id'] = self.generate_id(field=ClozeQuestion.id)
-
-
             cloze_question = ClozeQuestion(question)
             for index_option, option in enumerate(question.get('options')):
                 cloze_question_option = ClozeQuestionOption(option)
@@ -153,40 +144,37 @@ class ClozeProvider(BaseProvider):
         return cloze
 
     @staticmethod
-    def generate_options(word):
-        options = []
-        for syn in wordnet.synsets(word): 
-            for l in syn.lemmas(): 
-                options.append(l.name()) 
-                if l.antonyms(): 
-                    options.append(l.antonyms()[0].name())
-        return set(options)
-
-    @staticmethod
-    def generate_cloze_question_options(word, previous_letter = ''):
-        word = word.strip(',.-\n')
-        options = []
-        synonyms = wordnet.synsets(word)
-        previous_letter = previous_letter.strip(',.-\n')
-        has_previous_letter = previous_letter != ' ' and previous_letter != ''
-        lemmas = ClozeProvider.generate_options(word)
-        if word in lemmas:
-            lemmas.remove(word)
-        options.extend(lemmas)
+    def generate_options(word, full_text, index):
+        hint = False
+        previous_letter = full_text[index - len(word) - 2] or ''
+        has_previous_letter = previous_letter != ' ' and previous_letter != '' and previous_letter != '*'
         if has_previous_letter:
-            def filter_options(option):
-                return option[0] == previous_letter
-            options = filter(filter_options, options)
-        mapped_options = []
-        for option in options:
-            option = ' '.join(option.split('_'))
-            mapped_options.append({ 'text': option })
-        random_correct = randint(0, len(mapped_options))
-        mapped_options.insert(random_correct, { 'text': word })
-        return mapped_options, random_correct + 1
+            word = previous_letter + word
+            hint = True
+        new_word = word.replace('<typed/>', '')
+        typed = len(word) != len(new_word)
+        option_bracket_open = False
+        option_segment = ''
+        segment = ''
+        for i in range(len(new_word)):
+            letter = new_word[i]
+            if letter == '<':
+                option_bracket_open = True
+                continue
+            if letter == '>':
+                option_bracket_open = False
+                continue
+            if option_bracket_open:
+                option_segment += letter;
+            elif (word != '<' and word != '>'):
+                segment += letter
+        options = option_segment.split(',')
+        options = [{ 'text': x } for x in options if x]
+        options = [{ 'text': segment }] + options;
+        return segment, typed, options, 1, hint
 
     @staticmethod
-    def generate_questions(text, typed = False):
+    def generate_questions(text):
         words = []
         if text:
             segment = ''
@@ -197,24 +185,20 @@ class ClozeProvider(BaseProvider):
                     segment = ''
                     bracket_open = True
                 elif word == '*' and bracket_open:
-                    # We take into consideration about the fact that, words can be a<pple> words can be sliced up.
-                    previous_letter = text[i - len(segment) - 2]
-                    has_previous_letter = previous_letter != ' ' and previous_letter != '' and previous_letter != '*'
-                    if has_previous_letter:
-                        segment = previous_letter + segment
-                    if not typed:
-                        options, random_correct = ClozeProvider.generate_cloze_question_options(segment, previous_letter)
+                    word, typed, options, correct, hint = ClozeProvider.generate_options(segment, text, i)
+                    if typed:
                         words.append({
-                            'text': segment,
-                            'options': options,
-                            'correct': random_correct,
-                            'typed': typed
+                            'text': word,
+                            'typed': typed,
+                            'hint': hint,
+                            'accepted_answers': options,
                         })
                     else:
                         words.append({
-                            'text': segment,
-                            'accepted_answers': [{ 'text': segment }],
-                            'typed': typed
+                            'text': word,
+                            'typed': typed,
+                            'options': options,
+                            'correct': correct,
                         })
                     segment = ''
                     bracket_open = False
