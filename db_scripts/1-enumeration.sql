@@ -7,3 +7,5 @@ VALUES (2, 'Language');
 INSERT INTO public."enumeration"(id, name)
 VALUES (3, 'University');
 
+INSERT INTO public."enumeration"(id, name)
+VALUES (4, 'Education')

@@ -31,3 +31,17 @@ VALUES (10, 'University of Ottawa', 3);
 INSERT INTO public."enumeration_value"(id, text, enumeration_id)
 VALUES (11, 'McGill University', 3);
 
+INSERT INTO public."enumeration_value"(id, text, enumeration_id)
+VALUES (12, 'High School', 4);
+
+INSERT INTO public."enumeration_value"(id, text, enumeration_id)
+VALUES (13, 'Bachelor''s Degree', 4);
+
+INSERT INTO public."enumeration_value"(id, text, enumeration_id)
+VALUES (14, 'Master''s Degree', 4);
+
+INSERT INTO public."enumeration_value"(id, text, enumeration_id)
+VALUES (15, 'Doctoral Degree', 4);
+
+INSERT INTO public."enumeration_value"(id, text, enumeration_id)
+VALUES (16, 'Medical Doctor', 4);

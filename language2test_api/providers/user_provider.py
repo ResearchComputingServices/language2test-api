@@ -60,4 +60,3 @@ class UserProvider(BaseProvider):
             for field in user.fields:
                 db.session.query(UserField).filter(UserField.id == field.id).delete()
         return user
-

@@ -17,16 +17,21 @@ pending_typed_provider = ClozeQuestionPendingTypedProvider()
 class TestSessionResultsClozeProvider(BaseProvider):
     def add_results_cloze(self, data, test_session):
         if data.get('results_cloze') is not None:
+            offset = 0
             for index, data_results_cloze in enumerate(data.get('results_cloze')):
                 data_results_cloze['id'] = self.generate_id(index, TestSessionResultsCloze.id)
                 results_cloze = TestSessionResultsCloze(data_results_cloze)
+
                 for index_data_answers, data_answers in enumerate(data_results_cloze.get('answers')):
-                    data_answers['id'] = self.generate_id(index_data_answers, TestSessionResultsClozeAnswers.id)
+                    #data_answers['id'] = self.generate_id(index_data_answers, TestSessionResultsClozeAnswers.id)
+                    data_answers['id'] = self.generate_id(offset, TestSessionResultsClozeAnswers.id)
                     answer = TestSessionResultsClozeAnswers(data_answers)
                     results_cloze.answers.append(answer)
                     self.add_typed_text_to_pending_list(answer.text, test_session.test_id,
                                                         results_cloze.cloze_id, answer.cloze_question_id)
                     self.update_cloze_answered_correctly(answer, test_session.test_id, results_cloze.cloze_id)
+                    offset = offset + 1
+
                 cloze = Cloze.query.filter_by(id=results_cloze.cloze_id).first()
                 if cloze:
                     cloze.unremovable = True  # Update flags: unremovable and immutable from the RC
