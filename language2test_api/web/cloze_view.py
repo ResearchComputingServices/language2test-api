@@ -70,9 +70,14 @@ def get_cloze():
 def add_cloze():
     try:
         data = request.get_json()
-        cloze = provider.add(data)
-        result = cloze_schema.dump(cloze)
-        response = jsonify(result)
+        cloze_exists = Cloze.query.filter_by(name=data.get('name')).first()
+        if not cloze_exists:
+            cloze = provider.add(data)
+            result = cloze_schema.dump(cloze)
+            response = jsonify(result)
+        else:
+            error = "message:" "Cloze name already exists."
+            response = Response(json.dumps(error), 403, mimetype="application/json")
     except Exception as e:
         error = { "exception": str(e), "message": "Exception has occurred. Check the format of the request."}
         response = Response(json.dumps(error), 500, mimetype="application/json")

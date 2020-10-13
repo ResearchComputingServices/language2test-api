@@ -9,6 +9,12 @@ class ClozeQuestionCorrectlyTypedProvider(BaseProvider):
         query = query.filter(ClozeQuestionCorrectlyTyped.text == text).first()
         return query != None
 
+    def get(self, text, cloze_question_id):
+        query = ClozeQuestionCorrectlyTyped.query
+        query = query.filter(ClozeQuestionCorrectlyTyped.cloze_question_id == cloze_question_id)
+        query = query.filter(ClozeQuestionCorrectlyTyped.text == text).first()
+        return query
+
     def get_query(self, cloze_question_id):
         query = ClozeQuestionCorrectlyTyped.query
         query = query.filter(ClozeQuestionCorrectlyTyped.cloze_question_id == cloze_question_id).all()
@@ -23,12 +29,6 @@ class ClozeQuestionCorrectlyTypedProvider(BaseProvider):
         db.session.add(item)
         db.session.commit()
 
-    def add_2(self, text, cloze_question_id):
-        data = {}
-        data['id'] = self.generate_id(field=ClozeQuestionCorrectlyTyped.id)
-        data['text'] = text
-        data['cloze_question_id'] = cloze_question_id
-        item = ClozeQuestionCorrectlyTyped(data)
-        db.session.add(item)
+
 
 

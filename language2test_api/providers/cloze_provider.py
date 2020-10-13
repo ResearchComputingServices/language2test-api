@@ -8,6 +8,11 @@ from language2test_api.models.cloze import Cloze, ClozeSchema
 from language2test_api.models.cloze_question import ClozeQuestion, ClozeQuestionSchema
 from language2test_api.models.cloze_question_option import ClozeQuestionOption, ClozeQuestionOptionSchema
 from language2test_api.providers.cloze_question_correctly_typed_provider import ClozeQuestionCorrectlyTypedProvider
+from language2test_api.providers.cloze_question_incorrectly_typed_provider import ClozeQuestionIncorrectlyTypedProvider
+from language2test_api.providers.cloze_question_pending_typed_provider import ClozeQuestionPendingTypedProvider
+from language2test_api.models.cloze_question_correctly_typed import ClozeQuestionCorrectlyTyped, ClozeQuestionCorrectlyTypedSchema
+from language2test_api.models.cloze_question_incorrectly_typed import ClozeQuestionIncorrectlyTyped
+from language2test_api.models.cloze_question_pending_typed import ClozeQuestionPendingTyped
 from random import randint
 
 from nltk.corpus import wordnet
@@ -16,6 +21,8 @@ import ssl
 from itertools import chain
 
 correctly_typed_provider = ClozeQuestionCorrectlyTypedProvider()
+incorrectly_typed_provider = ClozeQuestionIncorrectlyTypedProvider()
+pending_typed_provider = ClozeQuestionPendingTypedProvider()
 
 class ClozeProvider(BaseProvider):
     def get_count(self, field, cloze_question_id=None):
@@ -67,10 +74,11 @@ class ClozeProvider(BaseProvider):
 
     def __add_correctly_typed_answers(self, data):
         for question in (data.get('questions')):
-            if type(question['typed'])==bool and question['typed']:
-                for accepted_answer in question.get('accepted_answers'):
-                   if 'text' in accepted_answer:
-                        correctly_typed_provider.add(accepted_answer['text'], question['id'])
+            if 'typed' in question:
+                if type(question['typed'])==bool and question['typed']:
+                    for accepted_answer in question.get('accepted_answers'):
+                        if 'text' in accepted_answer:
+                            correctly_typed_provider.add(accepted_answer['text'], question['id'])
         return
 
     def get_correctly_typed_answers_all_clozes(self, data):
@@ -92,56 +100,124 @@ class ClozeProvider(BaseProvider):
         return cloze
 
 
-    def add_original(self, data):
-        data['id'] = self.generate_id(field=Cloze.id)
-        data = self.add_category_to_data(data)
-        cloze = Cloze(data)
-        offset = 0
-
-        for index, question in enumerate(data.get('questions')):
-            question['id'] = self.generate_id(index, ClozeQuestion.id)
-            cloze_question = ClozeQuestion(question)
-
-            for index_option, option in enumerate(question.get('options')):
-                cloze_question_option = ClozeQuestionOption(option)
-                cloze_question_option.id = self.generate_id(index_option + offset, ClozeQuestionOption.id)
-                cloze_question.options.append(cloze_question_option)
-
-            offset = offset + index_option + 1
-            cloze.questions.append(cloze_question)
-
-        db.session.add(cloze)
-        return cloze
-
-
-
     def delete(self, data, cloze):
+        self.__delete_answers_in_typed_lists(cloze)
         for question in cloze.questions:
             for option in question.options:
                 db.session.query(ClozeQuestionOption).filter(ClozeQuestionOption.id == option.id).delete()
             db.session.query(ClozeQuestion).filter(ClozeQuestion.id == question.id).delete()
         db.session.query(Cloze).filter(Cloze.name == data.get('name')).delete()
 
+
+    def __delete_answers_in_typed_lists(self, cloze):
+        for question in cloze.questions:
+            list = correctly_typed_provider.get_query(question.id)
+            for answer in list:
+                db.session.query(ClozeQuestionCorrectlyTyped).filter(
+                    ClozeQuestionCorrectlyTyped.id == answer.id).delete()
+
+            list = incorrectly_typed_provider.get_query(question.id)
+            for answer in list:
+                db.session.query(ClozeQuestionIncorrectlyTyped).filter(
+                    ClozeQuestionIncorrectlyTyped.id == answer.id).delete()
+
+            list = pending_typed_provider.get_query(question.id)
+            for answer in list:
+                db.session.query(ClozeQuestionPendingTyped).filter(ClozeQuestionPendingTyped.id == answer.id).delete()
+        db.session.commit()
+
     def update(self, data, cloze):
+
         data = self.add_category_to_data(data)
         cloze.test_category_id = data.get("test_category_id")
         cloze.text = data.get("text")
         cloze.type = data.get("type")
         cloze.filename = data.get("filename")
         cloze.time_limit = data.get("time_limit")
-        cloze.questions = []
 
-        for index, question in enumerate(data.get('questions')):
-            question['id'] = self.generate_id(field=ClozeQuestion.id)
-            cloze_question = ClozeQuestion(question)
-            for index_option, option in enumerate(question.get('options')):
-                cloze_question_option = ClozeQuestionOption(option)
-                cloze_question_option.id = self.generate_id(index_option, ClozeQuestionOption.id)
-                cloze_question.options.append(cloze_question_option)
-            cloze.questions.append(cloze_question)
+
+        list_of_accepted_answers = []
+        list_correctly_typed=[]
+        list_incorrectly_typed =[]
+        list_pending_typed=[]
+
+        # Delete accepted_answers in the cloze_question_correctly_typed
+        for question in cloze.questions:
+            if type(question.typed) == bool and question.typed:
+                list_correctly_typed = correctly_typed_provider.get_query(question.id)
+                for answer in list_correctly_typed:
+                    db.session.query(ClozeQuestionCorrectlyTyped).filter(ClozeQuestionCorrectlyTyped.id == answer.id).delete()
+
+                list_incorrectly_typed = incorrectly_typed_provider.get_query(question.id)
+                for answer in list_incorrectly_typed:
+                    db.session.query(ClozeQuestionIncorrectlyTyped).filter(ClozeQuestionIncorrectlyTyped.id == answer.id).delete()
+
+                list_pending_typed = pending_typed_provider.get_query(question.id)
+                for answer in list_pending_typed:
+                    db.session.query(ClozeQuestionPendingTyped).filter(ClozeQuestionPendingTyped.id == answer.id).delete()
+
+        db.session.commit()
+
+        # Delete questions and options from DB
+        for question in cloze.questions:
+            for option in question.options:
+                db.session.query(ClozeQuestionOption).filter(ClozeQuestionOption.id == option.id).delete()
+            db.session.query(ClozeQuestion).filter(ClozeQuestion.id == question.id).delete()
+
+        #Add questions and options to DB
+        cloze_questions_oldid_newid = {}
+        for index, question_data in enumerate(data.get('questions')):
+            # These questions are in the request
+
+            new_id = self.generate_id(field=ClozeQuestion.id)
+
+            if 'id' in question_data and type(question_data['id'])==int:
+                previous_id = question_data['id']
+                cloze_questions_oldid_newid[previous_id] = new_id
+
+            question_data['id'] = new_id
+            question = ClozeQuestion(question_data)
+
+            if 'typed' in question_data and type(question_data['typed']) == bool:
+                question.typed = question_data['typed']
+            else:
+                question.typed = False
+
+            if not question.typed:
+                # Add options if question is not typed
+                for index_option, option in enumerate(question_data.get('options')):
+                    question_option = ClozeQuestionOption(option)
+                    question_option.id = self.generate_id(index_option, ClozeQuestionOption.id)
+                    question.options.append(question_option)
+            else:
+                #Add accepted answers to a list (to add them to a database)
+                for accepted_answer in question_data.get('accepted_answers'):
+                    d = {}
+                    d['answer_text'] = accepted_answer['text']
+                    d['question_id'] = question.id
+                    list_of_accepted_answers.append(d)
+
+            cloze.questions.append(question)
+
+        # Add all accepted answers to db
+        for accepted_answer in list_of_accepted_answers:
+            correctly_typed_provider.add(accepted_answer['answer_text'], accepted_answer['question_id'])
+
+        #Add pending answers to db
+        for pending_word in list_pending_typed:
+            if pending_word.cloze_question_id in cloze_questions_oldid_newid:
+                new_id = cloze_questions_oldid_newid[pending_word.cloze_question_id]
+                pending_typed_provider.add(pending_word.text, new_id)
+
+        #Add incorrect answers to db
+        for incorrect_word in list_incorrectly_typed:
+            if incorrect_word.cloze_question_id in cloze_questions_oldid_newid:
+                new_id = cloze_questions_oldid_newid[incorrect_word.cloze_question_id]
+                incorrectly_typed_provider.add(incorrect_word.text, new_id)
 
         db.session.commit()
         return cloze
+
 
     @staticmethod
     def generate_options(word, full_text, index):

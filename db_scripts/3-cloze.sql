@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION add_cloze_question (text, text, text, text, text, text, text, integer, integer) RETURNS timestamp with time zone AS '
+CREATE OR REPLACE FUNCTION add_cloze_question (text, text, text, text, text, text, text, integer, integer, boolean) RETURNS timestamp with time zone AS '
 DECLARE
   text ALIAS FOR $1;
   cloze_name ALIAS FOR $2;
@@ -9,6 +9,7 @@ DECLARE
   option_5_text ALIAS FOR $7;
   correct ALIAS FOR $8;
   difficulty ALIAS FOR $9;
+  typed ALIAS FOR $10;
   right_now timestamp;
   cloze_question_id integer;
   cloze_id integer;
@@ -20,8 +21,8 @@ BEGIN
 
   cloze_id := (SELECT cloze.id FROM cloze WHERE cloze.name=$2);
 
-  INSERT INTO cloze_question(id, text, cloze_id, correct, difficulty)
-  VALUES(cloze_question_id, text, cloze_id, correct, difficulty);
+  INSERT INTO cloze_question(id, text, cloze_id, correct, difficulty, typed)
+  VALUES(cloze_question_id, text, cloze_id, correct, difficulty, typed);
 
   INSERT INTO cloze_question_option(text, cloze_question_id)
   VALUES (option_1_text, cloze_question_id);
@@ -43,7 +44,7 @@ END;
 ' LANGUAGE 'plpgsql';
 
 INSERT INTO public."cloze"(name, text, type, filename, test_category_id, time_limit, immutable, unremovable)
-VALUES ('Cloze-1', 'Can we see *that<if, where, whether, when>* the earth is a globe? Yes, we can, when we watch a ship that sails out to sea. If we watch closely, we see that the ship begins *to disappear<being disappeared, to be disappeared, to have disappeared, having disappeared>* . The bottom of the ship disappears first, and then the ship seems to sink lower and lower, *until<since, after, by the time, unless>* we can only see the top of the ship, and then we see nothing at all. What is hiding the ship from us? It is the earth. Stick a pin most of the way into an orange, and *slowly<reluctantly, accidentally, slowly, passionately, carefully>* turn the orange away from you. You will see the pin disappear, *similar to<the same, alike, by the way, similar>* a ship does on the earth.', 'text', '', 3, 600, False, True);
+VALUES ('Cloze-1', 'Can we see *that <typed/><as>* the earth is a globe? Yes, we can, when we watch a ship that sails out to sea. If we watch closely, we see that the ship begins *to disappear<being disappeared, to be disappeared, to have disappeared, having disappeared>* . The bottom of the ship disappears first, and then the ship seems to sink lower and lower, *until<since, by the time, after, unless>* we can only see the top of the ship, and then we see nothing at all. What is hiding the ship from us? It is the earth. Stick a pin most of the way into an orange, and *slowly <reluctantly, accidentally, passionately, carefully>* turn the orange away from you. You will see the pin disappear, *just as <the same, alike,  just as, by the way, similar to>* a ship does on the earth.', 'text', '', 3, 600, False, True);
 
 select add_cloze_question('that',
                        'Cloze-1',
@@ -52,7 +53,7 @@ select add_cloze_question('that',
                        'that',
                        'whether',
                        'when',
-                       3, 1);
+                       3, 1, True);
 select add_cloze_question('to disappear',
                        'Cloze-1',
                        'being disappeared',
@@ -60,7 +61,7 @@ select add_cloze_question('to disappear',
                        'to have disappeared',
                        'to disappear',
                        'having disappeared',
-                       4, 1);
+                       4, 1, False);
 
 select add_cloze_question('until',
                        'Cloze-1',
@@ -69,7 +70,7 @@ select add_cloze_question('until',
                        'after',
                        'by the time',
                        'unless',
-                       1, 1);
+                       1, 1, False);
 
 select add_cloze_question('slowly',
                        'Cloze-1',
@@ -78,7 +79,7 @@ select add_cloze_question('slowly',
                        'slowly',
                        'passionately',
                        'carefully',
-                       3, 1);
+                       3, 1, False);
 
 select add_cloze_question('just as',
                        'Cloze-1',
@@ -87,7 +88,7 @@ select add_cloze_question('just as',
                        'just as',
                        'by the way',
                        'similar to',
-                       3, 1);
+                       3, 1, False);
 
 /* Correct */
 INSERT INTO public."cloze_question_correctly_typed"(id, text, cloze_question_id)

@@ -9,6 +9,11 @@ class ClozeQuestionIncorrectlyTypedProvider(BaseProvider):
         query = query.filter(ClozeQuestionIncorrectlyTyped.text == text).first()
         return query != None
 
+    def get_query(self, cloze_question_id):
+        query = ClozeQuestionIncorrectlyTyped.query
+        query = query.filter(ClozeQuestionIncorrectlyTyped.cloze_question_id == cloze_question_id).all()
+        return query
+
     def add(self, text, cloze_question_id):
         data = {}
         data['id'] = self.generate_id(field=ClozeQuestionIncorrectlyTyped.id)
