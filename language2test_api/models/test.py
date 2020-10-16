@@ -62,7 +62,6 @@ class Test(BaseModel):
     test_user_field_category = relationship("UserFieldCategory", secondary=test_user_field_category)
     mandatory_test_user_field_category = relationship("UserFieldCategory", secondary=mandatory_test_user_field_category)
     test_student_class = relationship("StudentClass", secondary=test_student_class)
-    assignation_to_class = relationship("TestAssignation")
     immutable = db.Column(db.Boolean, default=False)
     unremovable = db.Column(db.Boolean, default=False)
 
