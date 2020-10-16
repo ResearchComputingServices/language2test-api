@@ -79,8 +79,7 @@ def delete_test_assignation():
         data = request.get_json()
         test_assignation = TestAssignation.query.filter_by(id=data.get('id')).first()
         if test_assignation:
-            db.session.delete(test_assignation)
-            db.session.commit()
+            provider.delete(test_assignation)
             response = Response(json.dumps(data), 200, mimetype="application/json")
         else:
             response = Response(json.dumps(data), 404, mimetype="application/json")
@@ -89,11 +88,3 @@ def delete_test_assignation():
         response = Response(json.dumps(error), 500, mimetype="application/json")
 
     return response
-
-
-
-
-
-
-
-
