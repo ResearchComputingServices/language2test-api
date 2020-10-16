@@ -9,6 +9,7 @@ from language2test_api.models.student_class import StudentClass, StudentClassSch
 from language2test_api.models.writing import Writing, WritingSchema
 from language2test_api.models.base_model import BaseModel, BaseModelSchema
 
+
 from language2test_api.models.mutable_list import MutableList
 from sqlalchemy.dialects.postgresql import ARRAY
 

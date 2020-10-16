@@ -13,3 +13,4 @@ from language2test_api.models.test import *
 from language2test_api.models.student_class import *
 from language2test_api.models.enumeration import *
 from language2test_api.models.authorization import *
+from language2test_api.models.test_assignation import *
