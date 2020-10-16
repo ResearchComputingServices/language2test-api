@@ -80,8 +80,6 @@ def delete_test_assignation():
         test_assignation = TestAssignation.query.filter_by(id=data.get('id')).first()
         if test_assignation:
             provider.delete(test_assignation)
-            #db.session.delete(test_assignation)
-            #db.session.commit()
             response = Response(json.dumps(data), 200, mimetype="application/json")
         else:
             response = Response(json.dumps(data), 404, mimetype="application/json")
