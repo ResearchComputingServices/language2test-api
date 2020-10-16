@@ -8,6 +8,7 @@ from language2test_api.models.user_field_category import UserFieldCategory, User
 from language2test_api.models.student_class import StudentClass, StudentClassSchema
 from language2test_api.models.writing import Writing, WritingSchema
 from language2test_api.models.base_model import BaseModel, BaseModelSchema
+from language2test_api.models.test_assignation import TestAssignation, TestAssignationSchema
 
 from language2test_api.models.mutable_list import MutableList
 from sqlalchemy.dialects.postgresql import ARRAY
@@ -61,6 +62,7 @@ class Test(BaseModel):
     test_user_field_category = relationship("UserFieldCategory", secondary=test_user_field_category)
     mandatory_test_user_field_category = relationship("UserFieldCategory", secondary=mandatory_test_user_field_category)
     test_student_class = relationship("StudentClass", secondary=test_student_class)
+    assignation_to_class = relationship("TestAssignation")
     immutable = db.Column(db.Boolean, default=False)
     unremovable = db.Column(db.Boolean, default=False)
 
