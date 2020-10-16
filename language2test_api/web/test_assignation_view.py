@@ -59,7 +59,8 @@ def update_test_assignation():
         data = request.get_json()
         test_assignation = TestAssignation.query.filter_by(id=data.get('id')).first()
         if test_assignation:
-            result = provider.update(data,test_assignation)
+            test_assignation = provider.update(data,test_assignation)
+            result = test_assignation_schema.dump(test_assignation)
             response = Response(json.dumps(result), 200, mimetype="application/json")
         else:
             response = Response(json.dumps(data), 404, mimetype="application/json")

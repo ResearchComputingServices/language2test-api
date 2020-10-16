@@ -36,7 +36,7 @@ class TestAssignationProvider(BaseProvider):
                 test_assignation.student_class.append(student_class_db)
 
         db.session.commit()
-        return data
+        return test_assignation
 
 
 
