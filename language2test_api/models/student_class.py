@@ -17,11 +17,13 @@ class StudentClass(BaseModel):
     instructor_id = db.Column(db.Integer(), ForeignKey('user.id'))
     instructor = relationship("User")
     student_student_class = relationship("User", secondary=student_student_class)
+    unremovable = db.Column(db.Boolean, default=False)
 
     def __init__(self, item):
         BaseModel.__init__(self, item)
         self.display = item.get('display')
         self.instructor_id = item.get('instructor_id')
+        self.unremovable = item.get('unremovable')
 
     def __repr__(self):
         return '<student_class %r>' % self.name
@@ -34,3 +36,4 @@ class StudentClassSchema(BaseModelSchema):
     instructor_id = fields.String()
     instructor = fields.Nested(UserSchema)
     student_student_class = fields.Nested(UserSchema, many=True)
+    unremovable = fields.Boolean()
