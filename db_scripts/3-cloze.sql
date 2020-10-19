@@ -44,7 +44,7 @@ END;
 ' LANGUAGE 'plpgsql';
 
 INSERT INTO public."cloze"(name, text, type, filename, test_category_id, time_limit, immutable, unremovable)
-VALUES ('Cloze-1', 'Can we see *that <typed/><as>* the earth is a globe? Yes, we can, when we watch a ship that sails out to sea. If we watch closely, we see that the ship begins *to disappear<being disappeared, to be disappeared, to have disappeared, having disappeared>* . The bottom of the ship disappears first, and then the ship seems to sink lower and lower, *until<since, by the time, after, unless>* we can only see the top of the ship, and then we see nothing at all. What is hiding the ship from us? It is the earth. Stick a pin most of the way into an orange, and *slowly <reluctantly, accidentally, passionately, carefully>* turn the orange away from you. You will see the pin disappear, *just as <the same, alike,  just as, by the way, similar to>* a ship does on the earth.', 'text', '', 3, 600, False, True);
+VALUES ('Cloze-1', 'Can we see *that <if, where, that, whether, when>* the earth is a globe? Yes, we can, when we watch a ship that sails out to sea. If we watch closely, we see that the ship begins *to disappear<being disappeared, to be disappeared, to have disappeared, having disappeared>* . The bottom of the ship disappears first, and then the ship seems to sink lower and lower, *until<since, by the time, after, unless>* we can only see the top of the ship, and then we see nothing at all. What is hiding the ship from us? It is the earth. Stick a pin most of the way into an orange, and *slowly <reluctantly, accidentally, passionately, carefully>* turn the orange away from you. You will see the pin disappear, *just as <the same, alike,  just as, by the way, similar to>* a ship does on the earth.', 'text', '', 3, 600, False, True);
 
 select add_cloze_question('that',
                        'Cloze-1',
@@ -53,7 +53,7 @@ select add_cloze_question('that',
                        'that',
                        'whether',
                        'when',
-                       3, 1, True);
+                       3, 1, False);
 select add_cloze_question('to disappear',
                        'Cloze-1',
                        'being disappeared',
