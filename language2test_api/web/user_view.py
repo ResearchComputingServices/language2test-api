@@ -494,7 +494,7 @@ def __import_user_in_db(d):
 
 def  __import_user_in_keycloak(user_dict, token):
     # Password for keycloak import
-    if ('password' in user_dict):
+    if ('Password' in user_dict):
         user_password = user_dict['Password']
         # Check for empty password
         # If empty password assign username as password
