@@ -1,11 +1,11 @@
 INSERT INTO public."student_class"(id, name, display, instructor_id, unremovable)
-VALUES (1, 'level_1_class_1_fall', 'Level 1 - Class 1 - Fall', 1, False);
+VALUES (1, 'level_1_class_1_fall', 'Level 1 - Class 1 - Fall', 1, True);
 
 INSERT INTO public."student_class"(id, name, display, instructor_id, unremovable)
-VALUES (2, 'level_1_class_1_winter', 'Level 1 - Class 1 - Winter', 1, False);
+VALUES (2, 'level_1_class_1_winter', 'Level 1 - Class 1 - Winter', 1, True);
 
 INSERT INTO public."student_class"(id, name, display, instructor_id, unremovable)
-VALUES (3, 'level_1_class_1_spring', 'Level 1 - Class 1 - Spring', 1, False);
+VALUES (3, 'level_1_class_1_spring', 'Level 1 - Class 1 - Spring', 1, True);
 
 INSERT INTO public."student_class"(id, name, display, instructor_id, unremovable)
 VALUES (4, 'level_1_class_1_summer', 'Level 1 - Class 1 - Summer', 1, False);
