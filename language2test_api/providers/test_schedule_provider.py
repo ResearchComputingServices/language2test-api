@@ -43,7 +43,7 @@ class TestScheduleProvider(BaseProvider):
                         taken = True
 
                     info_schedule['student_class_id'] = student_class_id
-                    info_schedule['student_class_name'] = student_class.name
+                    info_schedule['student_class_name'] = student_class.display
                     info_schedule['test_id'] = test_id
                     info_schedule['test_name'] = test_assignation.test.name
                     info_schedule['start_datetime'] = test_assignation.start_datetime
