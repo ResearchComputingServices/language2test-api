@@ -15,9 +15,9 @@ def authorization(params=None):
             auth = request.headers.get('Authorization')
             auth_fragments = auth.split(' ')
             token = auth_fragments[1]
-            token_json = jwt.decode(token, algorithms=['RS256'], verify=False)
-            if 'preferred_username' in token_json:
-                username = token_json['preferred_username']
+            user_info = oidc.user_getinfo(['preferred_username', 'given_name', 'family_name'], token)
+            username = user_info['preferred_username']
+
 
             #2 Retrieve user information
             user = User.query.filter_by(name=username).first()

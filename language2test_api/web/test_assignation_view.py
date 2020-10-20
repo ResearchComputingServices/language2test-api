@@ -88,3 +88,4 @@ def delete_test_assignation():
         response = Response(json.dumps(error), 500, mimetype="application/json")
 
     return response
+

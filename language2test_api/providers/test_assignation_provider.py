@@ -65,7 +65,3 @@ class TestAssignationProvider(BaseProvider):
         db.session.commit()
 
 
-
-
-
-

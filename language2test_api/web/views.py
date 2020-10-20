@@ -24,6 +24,7 @@ import language2test_api.web.enumeration_view
 import language2test_api.web.user_keycloak
 import language2test_api.web.authorization_view
 import language2test_api.web.test_assignation_view
+import language2test_api.web.test_schedule_view
 
 
 @language2test_bp.route("/", methods=['GET'])
