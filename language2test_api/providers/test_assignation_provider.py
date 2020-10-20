@@ -3,7 +3,8 @@ from language2test_api.models.test_assignation import TestAssignation
 from language2test_api.providers.base_provider import BaseProvider
 from language2test_api.models.student_class import StudentClass
 from language2test_api.models.test import Test
-
+from language2test_api.models.test_session import TestSession
+from datetime import datetime
 
 class TestAssignationProvider(BaseProvider):
 
@@ -63,9 +64,5 @@ class TestAssignationProvider(BaseProvider):
 
         db.session.delete(test_assignation)
         db.session.commit()
-
-
-
-
 
 
