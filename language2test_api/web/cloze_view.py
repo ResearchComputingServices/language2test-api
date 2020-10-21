@@ -279,35 +279,37 @@ def upload_cloze():
     if file is not None:
         try:
             text = file.read().decode("utf8")
-            words = list(map(lambda x: x.replace("*", ""), re.findall(r"([a-zA-z]?\*[a-zA-Z\-']+\*)", text)))
-            idx = 1
-            pattern = re.compile(r"(\*[a-zA-Z\-']+\*)")
-            match = re.search(pattern, text)
-            while match is not None:
-                text = text[:match.start()] + "({})......".format(idx) + text[match.end():]
-                match = re.search(pattern, text)
-                idx += 1
+
             cloze_data = {
                 "id": provider.generate_id(field=Cloze.id),
                 "text": text,
                 "time_limit": 600,
-                "filename": " ",
+                "filename": "",
                 "type": "text",
-                "test_category_id": 3
+                "test_category_id": 3,
+                "immutable": False,
+                "unremovable": True
+
             }
             cloze_data["name"] = "Cloze-{}".format(cloze_data["id"])
             cloze = Cloze(cloze_data)
             db.session.add(cloze)
-            for i, word in enumerate(words):
-                correct = randint(1, 5)
+
+            for i in range(len(provider.generate_questions(text))):
+                correct = 1
                 cloze_question = ClozeQuestion({
                     "id": provider.generate_id(field=ClozeQuestion.id),
-                    "text": str(i + 1),
+                    "text": provider.generate_questions(text)[i]['text'].lstrip("\n"),
                     "cloze_id": cloze.id,
-                    "correct": correct
+                    "difficulty": 1,
+                    "correct": correct,
+                    "typed": provider.generate_questions(text)[i]['typed']
                 })
-                answer, fake_answer = provider.generate_options(word)
-                options = fake_answer[:correct - 1] + [answer] + fake_answer[correct - 1:]
+                if "options" in provider.generate_questions(text)[i]:
+                    options = [option['text'].lstrip("\n") for option in provider.generate_questions(text)[i]['options']]
+                else:
+                    options = [option['text'].lstrip("\n") for option in provider.generate_questions(text)[i]['accepted_answers']]
+
                 for op in options:
                     cloze_question_option = ClozeQuestionOption({
                         "id": provider.generate_id(field=ClozeQuestionOption.id),
