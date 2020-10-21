@@ -1,6 +1,7 @@
 from flask import request, jsonify, url_for, Blueprint, send_file
 from flask import json, jsonify, Response, blueprints
 from language2test_api.models.student_class import StudentClass, StudentClassSchema
+from language2test_api.models.role import Role, RoleSchema
 from language2test_api.models.user import User, UserSchema
 from language2test_api.models.user_field import UserField
 from language2test_api.extensions import db, ma
@@ -260,10 +261,88 @@ def export_student_class():
             response = Response(json.dumps(error), 404, mimetype="application/json")
             return response
 
+def __import_user_in_db(d):
+    try:
+        user = []
+        if type(d["User Name"]) == str:
+            user = User.query.filter_by(name=d["User Name"]).first()
+            if user is not None:
+                marked = {}
+                print(user.fields)
+                for field in user.fields:
+                    if field.name == "student_id":
+                        marked["student_id"] = True
+                        field.value = d["Student ID"]
+                    elif field.name == "first_language":
+                        marked["first_language"] = True
+                        field.value = d["First Language"]
+                    elif field.name == "email":
+                        marked["email"] = True
+                        field.value = d["Email"]
+                    elif field.name == "education":
+                        marked["education"] = True
+                        field.value = d["Education"]
+                    elif field.name == "phone":
+                        marked["phone"] = True
+                        field.value = d["Phone"]
+                    elif field.name == "address":
+                        marked["address"] = True
+                        field.value = d["Address"]
+                if not marked.get("student_id", False):
+                    user.fields.append(UserField(
+                        {"name": "student_id", "type": "text", "value": d["Student Id"], "user_id": user.id}))
+                if not marked.get("first_language", False):
+                    user.fields.append(UserField(
+                        {"name": "first_language", "type": "Language",
+                         "value": d["First Language"], "user_id": user.id}))
+                if not marked.get("email", False):
+                    user.fields.append(UserField(
+                        {"name": "email", "type": "text", "value": d["Email"], "user_id": user.id}))
+                if not marked.get("education", False):
+                    user.fields.append(UserField(
+                        {"name": "education", "type": "University", "value": d["Education"], "user_id": user.id}))
+                if not marked.get("phone", False):
+                    user.fields.append(UserField(
+                        {"name": "phone", "type": "text", "value": d["Phone"], "user_id": user.id}))
+                if not marked.get("address", False):
+                    user.fields.append(UserField(
+                        {"name": "address", "type": "text", "value": d["Address"], "user_id": user.id}))
+                d['db_import'] = 'Updated'
+            else:
+                user_data = {}
+                user_data["name"] = d["User Name"]
+                user_data["first_name"] = d["First Name"]
+                user_data["last_name"] = d["Last Name"]
+                user_data["id"] = provider.generate_id(field=User.id)
+                user = User(user_data)
+                role = Role.query.filter_by(name="Test Taker").first()
+                user.roles.append(role)
+                user.fields.append(UserField(
+                    {"name": "student_id", "type": "text", "value": d["Student ID"], "user_id": user.id}))
+                user.fields.append(UserField(
+                    {"name": "first_language", "type": "Language",
+                     "value": d["First Language"], "user_id": user.id}))
+                user.fields.append(UserField(
+                    {"name": "email", "type": "text", "value": d["Email"], "user_id": user.id}))
+                user.fields.append(UserField(
+                    {"name": "education", "type": "University", "value": d["Education"], "user_id": user.id}))
+                user.fields.append(UserField(
+                    {"name": "phone", "type": "text", "value": d["Phone"], "user_id": user.id}))
+                user.fields.append(UserField(
+                    {"name": "address", "type": "text", "value": d["Address"], "user_id": user.id}))
+                d['db_import'] = 'Imported'
+            db.session.add(user)
+            db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        user = []
+        d['db_import'] = 'Error: ' + str(e)
+    return user
+
 @language2test_bp.route("/student_classes/upload", methods=['POST'])
 @crossdomain(origin='*')
-@authentication
-@authorization(['import-student-class'])
+#@authentication
+#@authorization(['import-student-class'])
 def upload_student_class():
     raw_data = request.get_data()
     data = pd.read_excel(raw_data, engine="openpyxl")
@@ -271,55 +350,69 @@ def upload_student_class():
         scs = {}
         for _, row in data.iterrows():
             d = dict(row)
-            exist_sc = StudentClass.query.filter_by(name=d["class_name"]).first()
-            sc = scs.get(d["class_name"])
+            exist_sc = StudentClass.query.filter_by(name=d["Class Name"]).first()
+            sc = scs.get(d["Class Name"])
             if sc is None and exist_sc is None:
                 sc_data = {}
-                sc_data["name"] = d["class_name"]
-                sc_data["display"] = "-".join(d["class_name"].split("_"))
+                sc_data["name"] = d["Class Name"]
+                sc_data["display"] = "-".join(d["Class Name"].split("_"))
                 sc_data["id"] = provider.generate_id(field=StudentClass.id)
-                instructor = User.query.filter_by(name=d["instructor_name"]).first()
+                instructor = User.query.filter_by(name=d["Instructor Name"]).first()
                 sc = StudentClass(sc_data)
-                if "Instructor" in map(lambda e: e.name, instructor.roles):
+                if "Administrator" in map(lambda e: e.name, instructor.roles):
                     sc.instructor_id = instructor.id
                     sc.instructor = instructor
-                scs[d["class_name"]] = sc
-            user = User.query.filter_by(name=d["student_name"]).first()
-            if user is not None:
+                scs[d["Class Name"]] = sc
+            user = User.query.filter_by(name=d["User Name"]).first()
+            if user is None:
+                user = __import_user_in_db(d)
+            else:
                 marked = {}
                 for field in user.fields:
-                    if field.name == "student_id":
-                        marked["student_id"] = True
-                        field.value = d["student_id"]
-                    elif field.name == "first_language":
-                        marked["first_language"] = True
-                        field.value = d["first_language"]
-                    elif field.name == "email":
-                        marked["email"] = True
-                        field.value = d["email"]
-                    elif field.name == "education":
-                        marked["education"] = True
-                        field.value = d["education"]
-                if not marked.get("student_id", False):
+                    if field.name == "Student ID":
+                        marked["Student ID"] = True
+                        field.value = d["Student ID"]
+                    elif field.name == "First Language":
+                        marked["First Language"] = True
+                        field.value = d["First Language"]
+                    elif field.name == "Email":
+                        marked["Email"] = True
+                        field.value = d["Email"]
+                    elif field.name == "Education":
+                        marked["Education"] = True
+                        field.value = d["Education"]
+                    elif field.name == "Phone":
+                        marked["Phone"] = True
+                        field.value = d["Phone"]
+                    elif field.name == "Address":
+                        marked["Address"] = True
+                        field.value = d["Address"]
+                if not marked.get("Student ID", False):
                     user.fields.append(UserField(
-                        {"name": "student_id", "type": "student_id", "value": d["student_id"], "user_id": user.id}))
-                if not marked.get("first_language", False):
+                        {"name": "student_id", "type": "text", "value": d["Student ID"], "user_id": user.id}))
+                if not marked.get("First Language", False):
                     user.fields.append(UserField(
-                        {"name": "first_language", "type": "first_language",
-                         "value": d["first_language"], "user_id": user.id}))
-                if not marked.get("email", False):
+                        {"name": "first_language", "type": "Language",
+                         "value": d["First Language"], "user_id": user.id}))
+                if not marked.get("Email", False):
                     user.fields.append(UserField(
-                        {"name": "email", "type": "email", "value": d["email"], "user_id": user.id}))
-                if not marked.get("education", False):
+                        {"name": "email", "type": "text", "value": d["Email"], "user_id": user.id}))
+                if not marked.get("Education", False):
                     user.fields.append(UserField(
-                        {"name": "education", "type": "education", "value": d["education"], "user_id": user.id}))
-            if "Test Taker" in map(lambda e: e.name, user.roles):
+                        {"name": "education", "type": "University", "value": d["Education"], "user_id": user.id}))
+                if not marked.get("Phone", False):
+                    user.fields.append(UserField(
+                        {"name": "phone", "type": "text", "value": d["Phone"], "user_id": user.id}))
+                if not marked.get("Address", False):
+                    user.fields.append(UserField(
+                        {"name": "address", "type": "text", "value": d["Address"], "user_id": user.id}))
+            if "Test Taker" in map(lambda e: e.name, user.roles) or "Administrator" in map(lambda e: e.name, user.roles):
                 if exist_sc is not None:
                     if user not in exist_sc.student_student_class:
                         exist_sc.student_student_class.append(user)
                 else:
-                    if user not in scs[d["class_name"]].student_student_class:
-                        scs[d["class_name"]].student_student_class.append(user)
+                    if user not in scs[d["Class Name"]].student_student_class:
+                        scs[d["Class Name"]].student_student_class.append(user)
 
             db.session.add_all(scs.values())
             db.session.commit()
