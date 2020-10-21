@@ -25,9 +25,10 @@ def test_schedule():
         user_info = oidc.user_getinfo(['preferred_username', 'given_name', 'family_name'], token)
         name = user_info['preferred_username']
         user = User.query.filter_by(name=name).first()
-        data = request.get_json()
+        start_datetime_rq = request.args.get('start_datetime')
+        end_datetime_rq = request.args.get('end_datetime')
         if user:
-            result = provider.get_schedule(data, user.id)
+            result = provider.get_schedule(user.id, start_datetime_rq, end_datetime_rq)
             response = jsonify(result)
         else:
             response = Response(json.dumps(data), 404, mimetype="application/json")

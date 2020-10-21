@@ -9,12 +9,11 @@ from datetime import datetime
 
 class TestScheduleProvider(BaseProvider):
 
-    def get_schedule(self, data, user_id):
+    def get_schedule(self, user_id, start_datetime_rq, end_datetime_rq):
         tests_schedule = []
-
-        start_datetime = datetime.strptime(data.get('start_datetime'), '%Y-%m-%dT%H:%M:%S.%fZ')
-        end_datetime = datetime.strptime(data.get('end_datetime'), '%Y-%m-%dT%H:%M:%S.%fZ')
-
+        
+        start_datetime = datetime.strptime(start_datetime_rq, '%Y-%m-%dT%H:%M:%S.%fZ')
+        end_datetime = datetime.strptime(end_datetime_rq, '%Y-%m-%dT%H:%M:%S.%fZ')
 
         # Retrieve all student classes of the user_id
         user_student_classes = db.session.execute('SELECT * FROM student_student_class WHERE student_id = :val',
