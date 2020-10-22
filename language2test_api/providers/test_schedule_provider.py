@@ -11,9 +11,9 @@ class TestScheduleProvider(BaseProvider):
 
     def get_schedule(self, user_id, start_datetime_rq, end_datetime_rq):
         tests_schedule = []
-        
-        start_datetime = datetime.strptime(start_datetime_rq, '%Y-%m-%dT%H:%M:%S.%fZ')
-        end_datetime = datetime.strptime(end_datetime_rq, '%Y-%m-%dT%H:%M:%S.%fZ')
+
+        query_start_datetime = datetime.strptime(start_datetime_rq, '%Y-%m-%dT%H:%M:%S.%fZ')
+        query_end_datetime = datetime.strptime(end_datetime_rq, '%Y-%m-%dT%H:%M:%S.%fZ')
 
         # Retrieve all student classes of the user_id
         user_student_classes = db.session.execute('SELECT * FROM student_student_class WHERE student_id = :val',
@@ -30,7 +30,8 @@ class TestScheduleProvider(BaseProvider):
                 test_assignation_id = item_ta['test_assignation_id']
                 test_assignation = TestAssignation.query.filter_by(id=test_assignation_id).first()
 
-                if test_assignation.start_datetime >= start_datetime and test_assignation.end_datetime <= end_datetime:
+                if not ((test_assignation.end_datetime <= query_start_datetime) or (
+                        test_assignation.start_datetime >= query_end_datetime)):
 
                     info_schedule = {}
                     test_id = test_assignation.test_id
@@ -53,4 +54,6 @@ class TestScheduleProvider(BaseProvider):
                     tests_schedule.append(info_schedule)
 
         return tests_schedule
+
+
 
