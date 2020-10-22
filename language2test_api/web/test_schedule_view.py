@@ -31,7 +31,8 @@ def test_schedule():
             result = provider.get_schedule(user.id, start_datetime_rq, end_datetime_rq)
             response = jsonify(result)
         else:
-            response = Response(json.dumps(data), 404, mimetype="application/json")
+            message = {"message": "User does not exist. Check the format of the request."}
+            response = Response(json.dumps(message), 404, mimetype="application/json")
     except Exception as e:
         error = {"exception": str(e), "message": "Exception has occurred."}
         response = Response(json.dumps(error), 500, mimetype="application/json")
