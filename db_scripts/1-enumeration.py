@@ -56,7 +56,6 @@ def populate(db, models):
 
     enumeration = Enumeration(data)
     db.session.add(enumeration)
-    # db.session.commit()
 
     # Add Country Enumeration Values
     with open('data/education.txt') as file:
