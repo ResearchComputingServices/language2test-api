@@ -14,7 +14,6 @@ def populate(db, models):
 
     enumeration = Enumeration(data)
     db.session.add(enumeration)
-    #db.session.commit()
 
     #Add Language Enumeration Values
     with open('data/languages.txt') as file:
@@ -71,4 +70,3 @@ def populate(db, models):
             db.session.add(value)
             enumeration.values.append(value)
     db.session.commit()
-
