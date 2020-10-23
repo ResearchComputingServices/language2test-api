@@ -26,8 +26,10 @@ INSERT INTO public."user_field_type"(id, name)
 VALUES (9, 'checkbox');
 
 INSERT INTO public."user_field_type"(id, name, enumeration_id)
-VALUES (10, 'Language', 2);
+VALUES (10, 'Language', 1);
 
 INSERT INTO public."user_field_type"(id, name, enumeration_id)
-VALUES (11, 'University', 3);
+VALUES (11, 'Country', 2);
 
+INSERT INTO public."user_field_type"(id, name, enumeration_id)
+VALUES (12, 'Education', 3);
