@@ -24,7 +24,6 @@ def populate(db, models):
              value = EnumerationValue(d)
              db.session.add(value)
              enumeration.values.append(value)
-    #db.session.commit()
 
 
     #Creates Countries Enumeration
