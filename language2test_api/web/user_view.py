@@ -420,7 +420,7 @@ def __import_user_in_db(d):
             user = User.query.filter_by(name=d["User Name"]).first()
             if user is not None:
                 marked = {}
-                print(user.fields)
+
                 for field in user.fields:
                     if field.name == "student_id":
                         marked["student_id"] = True
@@ -442,7 +442,7 @@ def __import_user_in_db(d):
                         field.value = d["Address"]
                 if not marked.get("student_id", False):
                     user.fields.append(UserField(
-                        {"name": "student_id", "type": "text", "value": d["Student Id"], "user_id": user.id}))
+                        {"name": "student_id", "type": "text", "value": d["Student ID"], "user_id": user.id}))
                 if not marked.get("first_language", False):
                     user.fields.append(UserField(
                         {"name": "first_language", "type": "Language",
