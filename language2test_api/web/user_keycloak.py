@@ -25,11 +25,11 @@ class UserKeycloak():
             r = response.json()
         return r
 
-    def get_users_keycloak(self, user):
+    def get_user_keycloak(self, username):
         url = oidc.client_secrets["keycloak_uri_language2test"]
 
-        if user:
-            url = url + '?username='+user['User Name']
+        if username:
+            url = url + '?username='+ username
 
         token = self.obtain_keycloak_token()
 
@@ -39,7 +39,7 @@ class UserKeycloak():
 
             response = requests.get(url, headers=headers)
 
-        return token, response
+        return response
 
 
     def obtain_payload_keycloak(self,data):
@@ -84,6 +84,7 @@ class UserKeycloak():
 
 
 
+
     def import_user(self, user, token):
         try:
             count = 0
@@ -119,6 +120,44 @@ class UserKeycloak():
         return token
 
 
+    def reset_user_password(self, user, data):
+        try:
+            status_code = 403
+            password = data['password']
+            #Obtain keycloak token
+            token = self.obtain_keycloak_token()
+            if token:
+                #Obtain keycloak userid
+                response = self.get_user_keycloak(user.name)
+                status_code = response.status_code
+                if response.status_code >= 200 and response.status_code<=300:
+                    #Make call to change password of user
+                    data = response.json()
+                    if len(data)>0:
+                        user_keycloak_id = data[0]['id']
+                        url = oidc.client_secrets["keycloak_uri_language2test"] + '/'+ user_keycloak_id + '/reset-password'
+                        p = {"type": "password",
+                             "temporary": "true",
+                              "value": password
+                            }
+                        payload = json.dumps(p)
+                        bearer_token = 'Bearer ' + token['access_token']
+                        headers = {'Authorization': bearer_token,
+                               'Content-Type': 'application/json'}
+                        response = requests.put(url, headers=headers, data=payload)
+                        status_code = response.status_code
+        except Exception as e:
+             status_code = 400
+
+        return status_code
 
 
+
+
+
+
+
+
+
+        return payload
 

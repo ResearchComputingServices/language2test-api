@@ -104,6 +104,12 @@ def add_user():
     try:
         data = request.get_json()
         user = provider.add(data)
+        if user:
+            user_dict = {}
+            user_dict['User Name'] = user.name
+            user_dict['First Name'] = user.first_name
+            user_dict['Last Name'] = user.last_name
+            __import_user_in_keycloak(user_dict, [])
         result = user_schema.dump(user)
         response = jsonify(result)
     except Exception as e:
@@ -111,6 +117,33 @@ def add_user():
         response = Response(json.dumps(error), 500, mimetype="application/json")
 
     return response
+
+@language2test_bp.route("/users/reset_keycloak_password", methods=['PUT'])
+@crossdomain(origin='*')
+@authentication
+@authorization(['create-user'])
+def reset_user_keycloak_password():
+    try:
+        data = request.get_json()
+        user = User.query.filter_by(id=data.get('id')).first()
+        if not user:
+            user = User.query.filter_by(name=data.get('name')).first()
+        if user:
+            status_code = keycloak.reset_user_password(user, data)
+            if status_code>=200 and status_code<=300:
+                result = user_schema.dump(user)
+                response = jsonify(result)
+            else:
+                response = Response(json.dumps(data), status_code, mimetype="application/json")
+        else:
+            response = Response(json.dumps(data), 404, mimetype="application/json")
+    except Exception as e:
+        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500, mimetype="application/json")
+
+    return response
+
+
 
 @language2test_bp.route("/users/demographic_questionnaire", methods=['PUT'])
 @crossdomain(origin='*')
