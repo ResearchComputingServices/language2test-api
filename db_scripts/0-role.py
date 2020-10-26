@@ -40,7 +40,7 @@ def populate(db, models):
         'id': 3,
         'name': 'Test Developer',
         'authorizations': [],
-        'immutable': False
+        'immutable': True
     }
 
     role = Role(data)
@@ -52,46 +52,12 @@ def populate(db, models):
             role.authorizations.append(auth)
     db.session.add(role)
 
-    # Creates Researcher Role
-    data = {
-        'id': 4,
-        'name': 'Researcher',
-        'authorizations': [],
-        'immutable': False
-    }
-
-    role = Role(data)
-
-    with open('data/researcher_authorization.json') as file:
-        data = json.load(file)
-        for datum in data:
-            auth = Authorization.query.filter_by(name=datum.get('name')).first()
-            role.authorizations.append(auth)
-    db.session.add(role)
-
-    # Creates Teacher Role
-    data = {
-        'id': 5,
-        'name': 'Teacher',
-        'authorizations': [],
-        'immutable': False
-    }
-
-    role = Role(data)
-
-    with open('data/teacher_authorization.json') as file:
-        data = json.load(file)
-        for datum in data:
-            auth = Authorization.query.filter_by(name=datum.get('name')).first()
-            role.authorizations.append(auth)
-    db.session.add(role)
-
     # Creates Instructor Role
     data = {
         'id': 6,
         'name': 'Instructor',
         'authorizations': [],
-        'immutable': False
+        'immutable': True
     }
 
     role = Role(data)
