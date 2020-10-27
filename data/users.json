@@ -88,7 +88,7 @@
     {
         "name": "admin",
         "first_name": "admin",
-        "last_name": "Cook",
+        "last_name": "User",
         "roles": [
             {
                 "name": "Administrator"
