@@ -1,6 +1,6 @@
 import json
 
-def populate(db, models):
+def populate(db, models, providers):
 
     Enumeration = models.enumeration.Enumeration
     EnumerationValue = models.enumeration.EnumerationValue

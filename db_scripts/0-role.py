@@ -1,6 +1,6 @@
 import json
 
-def populate(db, models):
+def populate(db, models, providers):
 
     Authorization = models.authorization.Authorization
     Role = models.role.Role

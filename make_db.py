@@ -1,6 +1,6 @@
 import subprocess
 from language2test_api.extensions import db, ma
-from language2test_api import models, language2test_factory
+from language2test_api import models, providers, language2test_factory
 import glob
 import importlib
 import os
@@ -15,7 +15,7 @@ def execute_python_script(name, db, models):
     name = name.replace('.py', '')
     if name != '__init__':
         module = importlib.import_module("." + name, 'db_scripts')
-        module.populate(db, models)
+        module.populate(db, models, providers)
 
 def execute_sql_script(name, db):
     with open(name) as fn:

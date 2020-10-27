@@ -1,6 +1,6 @@
 import json
 
-def populate(db, models):
+def populate(db, models, providers):
     Authorization = models.authorization.Authorization
     with open('data/authorization.json') as file:
         data = json.load(file)
