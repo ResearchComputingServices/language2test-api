@@ -1,20 +1,20 @@
-INSERT INTO public."student_class"(id, name, display, instructor_id, unremovable)
-VALUES (1, 'level_1_class_1_fall', 'Level 1 - Class 1 - Fall', 1, True);
+INSERT INTO public."student_class"(id, name, display, term, "level", program, instructor_id, unremovable)
+VALUES (1, 'level_1_class_1_fall', 'English 101', 'Fall 2020', 'Level 1', 'CS', 1, True);
 
-INSERT INTO public."student_class"(id, name, display, instructor_id, unremovable)
-VALUES (2, 'level_1_class_1_winter', 'Level 1 - Class 1 - Winter', 1, True);
+INSERT INTO public."student_class"(id, name, display, term, "level", program, instructor_id, unremovable)
+VALUES (2, 'level_1_class_1_winter', 'English 101', 'Winter 2021', 'Level 1', 'CS', 1, True);
 
-INSERT INTO public."student_class"(id, name, display, instructor_id, unremovable)
-VALUES (3, 'level_1_class_1_spring', 'Level 1 - Class 1 - Spring', 1, True);
+INSERT INTO public."student_class"(id, name, display, term, "level", program, instructor_id, unremovable)
+VALUES (3, 'level_1_class_1_spring', 'English 101', 'Spring 2021', 'Level 1', 'CS', 1, True);
 
-INSERT INTO public."student_class"(id, name, display, instructor_id, unremovable)
-VALUES (4, 'level_1_class_1_summer', 'Level 1 - Class 1 - Summer', 1, False);
+INSERT INTO public."student_class"(id, name, display, term, "level", program, instructor_id, unremovable)
+VALUES (4, 'level_1_class_1_summer', 'English 101', 'Spring 2021', 'Level 1', 'CS', 1, False);
 
-INSERT INTO public."student_class"(id, name, display, instructor_id, unremovable)
-VALUES (5, 'level_1_class_2_fall', 'Level 1 - Class 2 - Fall', 2, False);
+INSERT INTO public."student_class"(id, name, display, term, "level", program, instructor_id, unremovable)
+VALUES (5, 'level_1_class_2_fall', 'English 102', 'Fall 2020', 'Level 2', 'CS', 2, False);
 
-INSERT INTO public."student_class"(id, name, display, instructor_id, unremovable)
-VALUES (6, 'level_1_class_2_winter', 'Level 1 - Class 2 - Winter', 2, False);
+INSERT INTO public."student_class"(id, name, display, term, "level", program, instructor_id, unremovable)
+VALUES (6, 'level_1_class_2_winter', 'English 102', 'Winter 2021', 'Level 2', 'CS', 2, False);
 
 CREATE OR REPLACE  FUNCTION add_student_to_class (text, text) RETURNS timestamp with time zone AS '
 DECLARE

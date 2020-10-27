@@ -10,6 +10,7 @@ from language2test_api.decorators.crossorigin import crossdomain
 from language2test_api.decorators.authentication import authentication
 from language2test_api.decorators.authorization import authorization
 from language2test_api.providers.student_class_provider import StudentClassProvider
+from language2test_api.providers.user_provider import UserProvider
 
 import pandas as pd
 from io import BytesIO
@@ -18,6 +19,8 @@ student_class_schema = StudentClassSchema(many=False)
 student_class_schema_many = StudentClassSchema(many=True)
 
 provider = StudentClassProvider()
+user_provider = UserProvider()
+
 
 @language2test_bp.route("/student_classes/count", methods=['GET'])
 @crossdomain(origin='*')
@@ -52,6 +55,10 @@ def get_student_class():
     properties = provider.query_all(StudentClass)
     result = student_class_schema_many.dump(properties)
     return jsonify(result)
+
+
+
+
 
 @language2test_bp.route("/student_classes", methods=['POST'])
 @crossdomain(origin='*')
@@ -428,4 +435,32 @@ def upload_student_class():
     except Exception as e:
         error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
         response = Response(json.dumps(error), 500, mimetype="application/json")
+    return response
+
+
+@language2test_bp.route("/instructor/student_classes", methods=['GET'])
+@crossdomain(origin='*')
+@authentication
+@authorization(['read-student-class'])
+def get_instructor_student_class():
+    try:
+        #Retrieve user
+        user = user_provider.get_authenticated_user()
+        is_instructor = user_provider.has_role(user, 'Instructor')
+        if is_instructor:
+            instructor_id =user.id
+            if instructor_id:
+                properties = StudentClass.query.filter_by(instructor_id=int(instructor_id)).all()
+                result = student_class_schema_many.dump(properties)
+                return jsonify(result)
+            else:
+                error = {"message": "No Id found for the user."}
+                response = Response(json.dumps(error), 404, mimetype="application/json")
+        else:
+            error = {"message": "The user is not an instructor."}
+            response = Response(json.dumps(error), 403, mimetype="application/json")
+    except Exception as e:
+        error = { "exception": str(e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500, mimetype="application/json")
+
     return response

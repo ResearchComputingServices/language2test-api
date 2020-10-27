@@ -20,6 +20,7 @@ class TestAssignation(db.Model):
     end_datetime = db.Column(db.DateTime)
     student_class = relationship("StudentClass", secondary=test_assignation_student_class)
     test = relationship("Test")
+    created_datetime = db.Column(db.DateTime(), default=datetime.datetime.utcnow)
 
 
     def __init__(self, item):

@@ -3,6 +3,7 @@ from sqlalchemy import func, ForeignKey, Sequence, Table, Column, Integer
 from sqlalchemy.orm import relationship
 from language2test_api.extensions import db, ma
 from language2test_api.models.test_category import TestCategory, TestCategorySchema
+import datetime
 
 class Vocabulary(db.Model):
     __tablename__ = 'vocabulary'
@@ -17,6 +18,7 @@ class Vocabulary(db.Model):
     test_category = relationship("TestCategory")
     immutable = db.Column(db.Boolean, default=False)
     unremovable = db.Column(db.Boolean, default=False)
+    created_datetime = db.Column(db.DateTime(), default=datetime.datetime.utcnow)
 
     def __init__(self, item):
         self.id = item.get('id')

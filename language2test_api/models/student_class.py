@@ -14,6 +14,9 @@ class StudentClass(BaseModel):
     __tablename__ = 'student_class'
 
     display = db.Column(db.String())
+    term = db.Column(db.String())
+    level = db.Column(db.String())
+    program = db.Column(db.String())
     instructor_id = db.Column(db.Integer(), ForeignKey('user.id'))
     instructor = relationship("User")
     student_student_class = relationship("User", secondary=student_student_class)

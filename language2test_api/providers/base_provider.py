@@ -78,3 +78,4 @@ class BaseProvider():
     def fill_out_name_based_on_display(self, data):
         data['name'] = data.get('display') if data.get('name') is None else data.get('name')
         return data
+

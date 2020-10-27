@@ -151,13 +151,3 @@ class UserKeycloak():
 
         return status_code
 
-
-
-
-
-
-
-
-
-        return payload
-
