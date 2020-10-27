@@ -127,3 +127,28 @@ def export_test_sessions():
             error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
             response = Response(json.dumps(error), 404, mimetype="application/json")
             return response
+
+
+@language2test_bp.route("/instructor/test_sessions", methods=['GET'])
+@crossdomain(origin='*')
+@authentication
+@authorization(['read-test-session'])
+def get_test_sessions_for_test_assignation():
+
+    try:
+        test_assignation_id = request.args.get('test_assignation_id')
+        if test_assignation_id:
+            test_sessions = provider.get_test_sessions_for_test_assignation(test_assignation_id)
+            result = test_schema_many.dump(test_sessions)
+            return jsonify(result)
+        else:
+            error = {"message": "Test Assignation Id expected. Check the format of the request."}
+            response = Response(json.dumps(error), 404, mimetype="application/json")
+    except Exception as e:
+        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 404, mimetype="application/json")
+
+    return response
+
+
+

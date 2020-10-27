@@ -1,3 +1,5 @@
+from language2test_api.extensions import oidc
+from flask import request
 from language2test_api.extensions import db, ma
 from language2test_api.providers.base_provider import BaseProvider
 from language2test_api.models.role import Role, RoleSchema
@@ -60,3 +62,22 @@ class UserProvider(BaseProvider):
             for field in user.fields:
                 db.session.query(UserField).filter(UserField.id == field.id).delete()
         return user
+
+    def get_authenticated_user(self):
+        auth = request.headers.get('Authorization')
+        auth_fragments = auth.split(' ')
+        token = auth_fragments[1]
+        user_info = oidc.user_getinfo(['preferred_username', 'given_name', 'family_name'], token)
+        username = user_info['preferred_username']
+
+        # 2 Retrieve user information
+        user = User.query.filter_by(name=username).first()
+
+        return user
+
+    def has_role(self, user, query_role):
+        for role in user.roles:
+            if query_role == role.name:
+                return True
+
+        return False

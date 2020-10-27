@@ -3,6 +3,7 @@ from sqlalchemy import func, ForeignKey, Sequence
 from sqlalchemy.orm import relationship
 from language2test_api.extensions import db, ma
 from language2test_api.models.test_type import TestType, TestTypeSchema
+import datetime
 
 class TestCategory(db.Model):
     __tablename__ = 'test_category'
@@ -12,6 +13,7 @@ class TestCategory(db.Model):
     test_type_id = db.Column(db.Integer(), ForeignKey('test_type.id'))
     test_type = relationship("TestType")
     db.UniqueConstraint('name', 'test_type_id', name='_name_test_type_id')
+    created_datetime = db.Column(db.DateTime(), default=datetime.datetime.utcnow)
 
     def __init__(self, item):
         self.id = item.get('id')

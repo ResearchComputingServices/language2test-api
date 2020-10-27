@@ -24,6 +24,7 @@ user_schema_many = UserSchema(many=True)
 provider = UserProvider()
 keycloak = UserKeycloak()
 
+
 @language2test_bp.route('/users/login', methods=['GET'])
 @crossdomain(origin='*')
 @authentication
@@ -560,7 +561,7 @@ def import_users():
             if user :
                 token_kc = __import_user_in_keycloak(d, token_kc)
             else:
-                d['kc_import'] = 'Import Canceled'
+                d['kc_import'] = 'Import Cancelled'
 
             list_users.append(d)
 

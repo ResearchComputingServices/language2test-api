@@ -16,7 +16,6 @@ class TestSession(BaseModel):
 
     user_id = db.Column(db.Integer(), ForeignKey('user.id'))
     user = relationship("User")
-    created_datetime = db.Column(db.DateTime(), default=datetime.datetime.utcnow)
     start_datetime = db.Column(db.DateTime())
     end_datetime = db.Column(db.DateTime())
     result_as_json = db.Column(db.String())

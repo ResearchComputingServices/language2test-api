@@ -2,6 +2,7 @@ from marshmallow import Schema, fields, ValidationError, pre_load
 from sqlalchemy import func, ForeignKey, Sequence, Table, Column, Integer
 from sqlalchemy.orm import relationship
 from language2test_api.extensions import db, ma
+import datetime
 
 class UserField(db.Model):
     __tablename__ = 'user_field'
@@ -11,6 +12,7 @@ class UserField(db.Model):
     value = db.Column(db.String())
     user_id = Column(db.Integer(), ForeignKey('user.id'))
     user = relationship("User", back_populates="fields")
+    created_datetime = db.Column(db.DateTime(), default=datetime.datetime.utcnow)
 
     def __init__(self, item):
         self.name = item.get('name')

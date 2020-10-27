@@ -65,3 +65,30 @@ class TestAssignationProvider(BaseProvider):
         db.session.commit()
 
 
+    def get_instructor_test_assignations(self, instructor_id):
+        #1. Get all student classes for the instructor_id
+        student_classes = StudentClass.query.filter_by(instructor_id=int(instructor_id)).all()
+        test_assignation_id_list = []
+        test_assignation_list = []
+
+        #2 Get the test assignations for each student class
+        for item_sc in student_classes:
+            student_class_id = item_sc.id
+
+            # Retrieve all test assignation in the student_class
+            student_class_test_assignations = db.session.execute(
+                'SELECT * FROM test_assignation_student_class WHERE student_class_id = :val', {'val': student_class_id})
+
+            for item_ta in student_class_test_assignations:
+
+                #Since a test assignation can contain multiple classes,
+                #we need to avoid returning more than once the same test assignation
+                test_assignation_id = item_ta['test_assignation_id']
+
+                if test_assignation_id not in test_assignation_id_list:
+                    test_assignation_id_list.append(test_assignation_id)
+                    test_assignation = TestAssignation.query.filter_by(id=test_assignation_id).first()
+                    test_assignation_list.append(test_assignation)
+
+
+        return test_assignation_list
