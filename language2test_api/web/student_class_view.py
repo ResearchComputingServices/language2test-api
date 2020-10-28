@@ -399,8 +399,9 @@ def upload_student_class():
                 user = User.query.filter_by(name=d["User Name"]).first()
                 if user is None:
                     user = __import_user_in_db(d)
+                    if user:
+                        token_kc = __import_user_in_keycloak(d, token_kc)
                 else:
-                    token_kc = __import_user_in_keycloak(d, token_kc)
                     marked = {}
                     for field in user.fields:
                         if field.name == "student_id" and "Student ID" in d:
