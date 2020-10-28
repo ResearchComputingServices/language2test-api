@@ -40,7 +40,8 @@ class TestScheduleProvider(BaseProvider):
                     test_session = TestSession.query.filter_by(test_id=test_id, user_id=user_id).first()
                     taken = False
                     if test_session:
-                        taken = True
+                        if test_session.created_datetime>=test_assignation.start_datetime and test_session.created_datetime<=test_assignation.end_datetime:
+                            taken = True
 
                     info_schedule['student_class_id'] = student_class_id
                     info_schedule['student_class_name'] = student_class.display

@@ -33,3 +33,9 @@ VALUES (11, 'Country', 2);
 
 INSERT INTO public."user_field_type"(id, name, enumeration_id)
 VALUES (12, 'Education', 3);
+
+INSERT INTO public."user_field_type"(id, name, enumeration_id)
+VALUES (13, 'Age', 4);
+
+INSERT INTO public."user_field_type"(id, name, enumeration_id)
+VALUES (14, 'Sex', 5);
