@@ -1,3 +1,5 @@
+import math
+
 from flask import request, jsonify, url_for, Blueprint, send_file
 from flask import json, jsonify, Response, blueprints
 from language2test_api.models.student_class import StudentClass, StudentClassSchema
@@ -11,7 +13,7 @@ from language2test_api.decorators.authentication import authentication
 from language2test_api.decorators.authorization import authorization
 from language2test_api.providers.student_class_provider import StudentClassProvider
 from language2test_api.providers.user_provider import UserProvider
-
+from language2test_api.web.user_keycloak import UserKeycloak
 import pandas as pd
 from io import BytesIO
 
@@ -20,7 +22,7 @@ student_class_schema_many = StudentClassSchema(many=True)
 
 provider = StudentClassProvider()
 user_provider = UserProvider()
-
+keycloak = UserKeycloak()
 
 @language2test_bp.route("/student_classes/count", methods=['GET'])
 @crossdomain(origin='*')
@@ -352,6 +354,22 @@ def __import_user_in_db(d):
         d['db_import'] = 'Error: ' + str(e)
     return user
 
+def  __import_user_in_keycloak(user_dict, token):
+    # Password for keycloak import
+    if ('Password' in user_dict):
+        user_password = user_dict['Password']
+        # Check for empty password
+        # If empty password assign username as password
+        if type(user_password) != str and math.isnan(user_password):
+            user_password = user_dict["User Name"]
+    else:
+        user_password = user_dict["User Name"]
+    user_dict['Password'] = user_password
+
+    # Import user into keycloak
+    token = keycloak.import_user(user_dict, token)
+    return token
+
 @language2test_bp.route("/student_classes/upload", methods=['POST'])
 @crossdomain(origin='*')
 @authentication
@@ -360,6 +378,7 @@ def upload_student_class():
     raw_data = request.get_data()
     data = pd.read_excel(raw_data, engine="openpyxl")
     try:
+        token_kc = []
         scs = {}
         for _, row in data.iterrows():
             d = dict(row)
@@ -382,6 +401,7 @@ def upload_student_class():
                 if user is None:
                     user = __import_user_in_db(d)
                 else:
+                    token_kc = __import_user_in_keycloak(d, token_kc)
                     marked = {}
                     for field in user.fields:
                         if field.name == "student_id" and "Student ID" in d:
