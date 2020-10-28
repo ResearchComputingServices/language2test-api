@@ -1,5 +1,3 @@
-import math
-
 from flask import request, jsonify, url_for, Blueprint, send_file
 from flask import json, jsonify, Response, blueprints
 from language2test_api.models.student_class import StudentClass, StudentClassSchema
@@ -15,6 +13,7 @@ from language2test_api.providers.student_class_provider import StudentClassProvi
 from language2test_api.providers.user_provider import UserProvider
 from language2test_api.web.user_keycloak import UserKeycloak
 import pandas as pd
+import math
 from io import BytesIO
 
 student_class_schema = StudentClassSchema(many=False)
