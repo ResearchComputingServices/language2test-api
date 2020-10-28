@@ -55,7 +55,7 @@ def populate(db, models, providers):
     enumeration = Enumeration(data)
     db.session.add(enumeration)
 
-    # Add Country Enumeration Values
+    # Add Education Enumeration Values
     with open('data/education.txt') as file:
         for line in file:
             d = {}
@@ -64,4 +64,50 @@ def populate(db, models, providers):
             value = EnumerationValue(d)
             db.session.add(value)
             enumeration.values.append(value)
+
+
+    # Creates Age Enumeration
+    data = {
+        'id': 4,
+        'name': 'Age',
+        'values': [],
+    }
+
+    enumeration = Enumeration(data)
+    db.session.add(enumeration)
+
+    # Add Age Enumeration Values
+    with open('data/age.txt') as file:
+        for line in file:
+            d = {}
+            d['text'] = line
+            d['enumeration_id'] = enumeration.id
+            value = EnumerationValue(d)
+            db.session.add(value)
+            enumeration.values.append(value)
+
+
+    # Creates Sex Enumeration
+    data = {
+        'id': 5,
+        'name': 'Sex',
+        'values': [],
+    }
+
+    enumeration = Enumeration(data)
+    db.session.add(enumeration)
+
+    # Add Sex Enumeration Values
+    with open('data/sex.txt') as file:
+        for line in file:
+            d = {}
+            d['text'] = line
+            d['enumeration_id'] = enumeration.id
+            value = EnumerationValue(d)
+            db.session.add(value)
+            enumeration.values.append(value)
+
+
+
+
     db.session.commit()

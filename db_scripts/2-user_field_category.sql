@@ -15,3 +15,4 @@ VALUES (5, 'address', 'Address', 1);
 
 INSERT INTO public."user_field_category"(id, name, display, user_field_type_id)
 VALUES (6, 'education', 'Education', 12);
+
