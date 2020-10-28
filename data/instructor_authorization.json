@@ -383,6 +383,24 @@
         "dependencies": ["read-user-field-type"]
     },
     {
+        "name": "create-demographic-questionnaire-field",
+        "text": "Grants access to create demographic questionnaire field(s)",
+        "category": "Demographic Questionnaire Field",
+        "dependencies": ["read-demographic-questionnaire-field", "read-user-field-type"]
+    },
+    {
+        "name": "update-demographic-questionnaire-field",
+        "text": "Grants access to update demographic questionnaire field(s)",
+        "category": "Demographic Questionnaire Field",
+        "dependencies": ["read-demographic-questionnaire-field", "read-user-field-type"]
+    },
+    {
+        "name": "delete-demographic-questionnaire-field",
+        "text": "Grants access to delete demographic questionnaire field(s)",
+        "category": "Demographic Questionnaire Field",
+        "dependencies": ["read-demographic-questionnaire-field", "read-user-field-type"]
+    },
+    {
         "name": "export-demographic-questionnaire-field",
         "text": "Grants access to export demographic questionnaire field(s)",
         "category": "Demographic Questionnaire Field",
@@ -395,13 +413,55 @@
         "dependencies": ["read-enumeration"]
     },
     {
+        "name": "create-user-field-type",
+        "text": "Grants access to create user field type(s)",
+        "category": "User Field Type",
+        "dependencies": ["read-user-field-type", "read-enumeration"]
+    },
+    {
+        "name": "update-user-field-type",
+        "text": "Grants access to update user field type(s)",
+        "category": "User Field Type",
+        "dependencies": ["read-user-field-type", "read-enumeration"]
+    },
+    {
+        "name": "delete-user-field-type",
+        "text": "Grants access to delete user field type(s)",
+        "category": "User Field Type",
+        "dependencies": ["read-user-field-type", "read-enumeration"]
+    },
+    {
         "name": "read-enumeration",
         "text": "Grants access to read user enumeration(s)",
         "category": "Enumeration"
     },
     {
+        "name": "create-enumeration",
+        "text": "Grants access to create user enumeration(s)",
+        "category": "Enumeration",
+        "dependencies": ["read-enumeration"]
+    },
+    {
+        "name": "update-enumeration",
+        "text": "Grants access to update user enumeration(s)",
+        "category": "Enumeration",
+        "dependencies": ["read-enumeration"]
+    },
+    {
+        "name": "delete-enumeration",
+        "text": "Grants access to delete user enumeration(s)",
+        "category": "Enumeration",
+        "dependencies": ["read-enumeration"]
+    },
+    {
         "name": "export-enumeration",
         "text": "Grants access to export user enumeration(s)",
+        "category": "Enumeration",
+        "dependencies": ["read-enumeration"]
+    },
+    {
+        "name": "import-enumeration",
+        "text": "Grants access to import user enumeration(s)",
         "category": "Enumeration",
         "dependencies": ["read-enumeration"]
     },
@@ -412,6 +472,24 @@
         "dependencies": ["read-authorization"]
     },
     {
+        "name": "create-role",
+        "text": "Grants access to create role(s)",
+        "category": "Roles",
+        "dependencies": ["read-role", "read-authorization"]
+    },
+    {
+        "name": "update-role",
+        "text": "Grants access to update role(s)",
+        "category": "Roles",
+        "dependencies": ["read-role", "read-authorization"]
+    },
+    {
+        "name": "delete-role",
+        "text": "Grants access to delete role(s)",
+        "category": "Roles",
+        "dependencies": ["read-role", "read-authorization"]
+    },
+        {
         "name": "read-authorization",
         "text": "Grants access to read authorization(s)",
         "category": "Authorization"

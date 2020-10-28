@@ -16,10 +16,70 @@
         "dependencies": ["read-role", "read-user-field-type"]
     },
     {
+        "name": "create-user",
+        "text": "Grants access to create user(s)",
+        "category": "User",
+        "dependencies": ["read-user", "read-role", "read-user-field-type"]
+    },
+    {
+        "name": "update-user",
+        "text": "Grants access to update user(s)",
+        "category": "User",
+        "dependencies": ["read-user", "read-role", "read-user-field-type"]
+    },
+    {
+        "name": "delete-user",
+        "text": "Grants access to delete user(s)",
+        "category": "User",
+        "dependencies": ["read-user", "read-role", "read-user-field-type"]
+    },
+    {
+        "name": "export-user",
+        "text": "Grants access to export user(s)",
+        "category": "User",
+        "dependencies": ["read-user", "read-role", "read-user-field-type"]
+    },
+    {
+        "name": "import-user",
+        "text": "Grants access to import user(s)",
+        "category": "User",
+        "dependencies": ["read-user"]
+    },
+    {
         "name": "read-student-class",
         "text": "Grants access to read student class(es)",
         "category": "Student Class",
         "dependencies": ["read-user"]
+    },
+    {
+        "name": "create-student-class",
+        "text": "Grants access to create student class(es)",
+        "category": "Student Class",
+        "dependencies": ["read-student-class", "read-user"]
+    },
+    {
+        "name": "update-student-class",
+        "text": "Grants access to update student class(es)",
+        "category": "Student Class",
+        "dependencies": ["read-student-class", "read-user"]
+    },
+    {
+        "name": "delete-student-class",
+        "text": "Grants access to delete student class(es)",
+        "category": "Student Class",
+        "dependencies": ["read-student-class", "read-user"]
+    },
+    {
+        "name": "export-student-class",
+        "text": "Grants access to export student class(es)",
+        "category": "Student Class",
+        "dependencies": ["read-student-class", "read-user"]
+    },
+    {
+        "name": "import-student-class",
+        "text": "Grants access to import student class(es)",
+        "category": "Student Class",
+        "dependencies": ["read-student-class"]
     },
     {
         "name": "read-test",
@@ -412,6 +472,24 @@
         "dependencies": ["read-authorization"]
     },
     {
+        "name": "create-role",
+        "text": "Grants access to create role(s)",
+        "category": "Roles",
+        "dependencies": ["read-role", "read-authorization"]
+    },
+    {
+        "name": "update-role",
+        "text": "Grants access to update role(s)",
+        "category": "Roles",
+        "dependencies": ["read-role", "read-authorization"]
+    },
+    {
+        "name": "delete-role",
+        "text": "Grants access to delete role(s)",
+        "category": "Roles",
+        "dependencies": ["read-role", "read-authorization"]
+    },
+        {
         "name": "read-authorization",
         "text": "Grants access to read authorization(s)",
         "category": "Authorization"
