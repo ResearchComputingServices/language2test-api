@@ -81,3 +81,11 @@ class UserProvider(BaseProvider):
                 return True
 
         return False
+
+
+
+    def hide_roles(self, users):
+        for user in users:
+            user.roles = []
+
+

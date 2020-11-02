@@ -79,22 +79,28 @@ def get_user_count():
 @authentication
 @authorization(['read-user'])
 def get_user():
-    id = request.args.get('id')
-    name = request.args.get('name')
-    roles_param = request.args.get('roles')
-    users = User.query
-    if roles_param:
-        roles_param = tuple(roles_param.split(','))
-        roles = Role.query.filter(Role.name.in_(roles_param)).all()
-        users = users.join(User.roles).filter(Role.id.in_(role.id for role in roles))
-    if id:
-        properties = users.filter_by(id=id).first()
-    elif name:
-        properties = users.filter_by(name=name).first()
-    else:
-        properties = provider.query_all_by_subquery(users)
-    result = user_schema.dump(properties) if (type(properties) is User) else user_schema_many.dump(properties)
-    return jsonify(result)
+    try:
+        id = request.args.get('id')
+        name = request.args.get('name')
+        roles_param = request.args.get('roles')
+        users = User.query
+        if roles_param:
+            roles_param = tuple(roles_param.split(','))
+            roles = Role.query.filter(Role.name.in_(roles_param)).all()
+            users = users.join(User.roles).filter(Role.id.in_(role.id for role in roles))
+        if id:
+            properties = users.filter_by(id=id).first()
+        elif name:
+            properties = users.filter_by(name=name).first()
+        else:
+            properties = provider.query_all_by_subquery(users, 'user')
+        result = user_schema.dump(properties) if (type(properties) is User) else user_schema_many.dump(properties)
+        response = jsonify(result)
+    except Exception as e:
+        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500, mimetype="application/json")
+
+    return response
 
 
 @language2test_bp.route("/users", methods=['POST'])

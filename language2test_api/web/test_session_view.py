@@ -134,11 +134,23 @@ def export_test_sessions():
 @authentication
 @authorization(['read-test-session'])
 def get_test_sessions_for_test_assignation():
-
     try:
+        limit = request.args.get('limit')
+        offset = request.args.get('offset')
+
+        if 'column' in request.args:
+            column = request.args.get('column')
+        else:
+            column = 'id'
+
+        if 'order' in request.args:
+            order = request.args.get('order')
+        else:
+            order = 'asc'
+
         test_assignation_id = request.args.get('test_assignation_id')
         if test_assignation_id:
-            test_sessions = provider.get_test_sessions_for_test_assignation(test_assignation_id)
+            test_sessions = provider.get_test_sessions_for_test_assignation(test_assignation_id,offset, limit, column, order)
             result = test_schema_many.dump(test_sessions)
             return jsonify(result)
         else:

@@ -9,7 +9,7 @@ from datetime import datetime
 
 class TestScheduleProvider(BaseProvider):
 
-    def get_schedule(self, user_id, start_datetime_rq, end_datetime_rq):
+    def get_test_taker_schedule(self, user_id, start_datetime_rq, end_datetime_rq):
         tests_schedule = []
 
         query_start_datetime = datetime.strptime(start_datetime_rq, '%Y-%m-%dT%H:%M:%S.%fZ')
@@ -55,6 +55,43 @@ class TestScheduleProvider(BaseProvider):
                     tests_schedule.append(info_schedule)
 
         return tests_schedule
+
+
+
+    def get_instructor_test_schedule(self, instructor_id, start_datetime_rq, end_datetime_rq):
+
+        query_start_datetime = datetime.strptime(start_datetime_rq, '%Y-%m-%dT%H:%M:%S.%fZ')
+        query_end_datetime = datetime.strptime(end_datetime_rq, '%Y-%m-%dT%H:%M:%S.%fZ')
+
+        #Get all student classes for the instructor_id
+        student_classes_for_instructor = StudentClass.query.filter_by(instructor_id=int(instructor_id)).all()
+        test_assignations_id = []
+        test_assignations = []
+
+        # Get all the test assignations for all the student_classes
+        for item_sc in student_classes_for_instructor:
+            student_class_id = item_sc.id
+
+            # Retrieve all test assignations that contain the student_class_id
+            test_assignations_with_student_class = db.session.execute(
+                'SELECT * FROM test_assignation_student_class WHERE student_class_id = :val', {'val': student_class_id})
+
+            for item_ta in test_assignations_with_student_class:
+
+                # Since a test assignation can contain multiple classes,
+                # we need to avoid returning more than once the same test assignation
+                test_assignation_id = item_ta['test_assignation_id']
+
+                if test_assignation_id not in test_assignations_id:
+                    test_assignation = TestAssignation.query.filter_by(id=test_assignation_id).first()
+
+                    if not ((test_assignation.end_datetime <= query_start_datetime) or (
+                            test_assignation.start_datetime >= query_end_datetime)):
+
+                        test_assignations_id.append(test_assignation_id)
+                        test_assignations.append(test_assignation)
+
+        return test_assignations
 
 
 

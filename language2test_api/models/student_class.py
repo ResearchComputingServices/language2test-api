@@ -27,6 +27,9 @@ class StudentClass(BaseModel):
         self.display = item.get('display')
         self.instructor_id = item.get('instructor_id')
         self.unremovable = item.get('unremovable')
+        self.term = item.get('term')
+        self.level = item.get('level')
+        self.program = item.get('program')
 
     def __repr__(self):
         return '<student_class %r>' % self.name
@@ -40,3 +43,6 @@ class StudentClassSchema(BaseModelSchema):
     instructor = fields.Nested(UserSchema)
     student_student_class = fields.Nested(UserSchema, many=True)
     unremovable = fields.Boolean()
+    term = fields.String()
+    level = fields.String()
+    program = fields.String()
