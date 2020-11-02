@@ -2,6 +2,7 @@ from language2test_api.extensions import db, ma
 from language2test_api.providers.base_provider import BaseProvider
 from language2test_api.models.student_class import StudentClass, StudentClassSchema
 from language2test_api.models.user import User, UserSchema
+from sqlalchemy.sql import text
 
 class StudentClassProvider(BaseProvider):
     def add(self, data):
@@ -39,3 +40,39 @@ class StudentClassProvider(BaseProvider):
             if student:
                 student_class.student_student_class.append(student)
         return student_class
+
+
+
+
+
+    def get_instructor_students(self, instructor_id, offset, limit, column, order):
+
+        # 1. Get all instructor classes
+        instructor_classes = StudentClass.query.filter_by(instructor_id=instructor_id).all()
+
+        # 2.Retrieve all students
+        all_students_ids = []
+
+        for _class in instructor_classes:
+            for _student in _class.student_student_class:
+                all_students_ids.append(_student.id)
+
+        # 3. Remove repeated/duplicated ids
+        all_students_ids = list(set(all_students_ids))
+
+        p = column + ' ' + order
+
+        #Keep this for now for debugging purposes (just to verify that is really filtering)
+        #query = User.query.filter(User.id.in_(all_students_ids))
+        #results1 = query.all()
+
+        if limit and offset:
+            limit = int(limit)
+            offset = int(offset)
+            page = int(offset / limit) + 1
+            #4. Filter query to match only the uers ids
+            students = User.query.filter(User.id.in_(all_students_ids)).order_by(text(p)).paginate(page=page, per_page=limit, error_out=False).items
+        else:
+            students = User.query.filter(User.id.in_(all_students_ids)).order_by(text(p)).all()
+
+        return students

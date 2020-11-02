@@ -33,7 +33,6 @@ class BaseProvider():
 
         p = column + ' ' + order
 
-        #query = query.order_by(text("id desc"))
         query = query.order_by(text(p))
         if limit:
             query = query.limit(limit)
@@ -43,7 +42,7 @@ class BaseProvider():
 
         return result
 
-    def query_all_by_subquery(self, query):
+    def query_all_by_subquery_original(self, query):
         limit = request.args.get('limit')
         offset = request.args.get('offset')
 
@@ -60,13 +59,39 @@ class BaseProvider():
         p = column + ' ' + order
         query = query.order_by(text(p))
 
-        #query = query.order_by(text("id desc"))
         if limit:
             query = query.limit(limit)
         if offset:
             query = query.offset(offset)
         result = query.all()
         return result
+
+
+    def query_all_by_subquery(self, query, model):
+        limit = request.args.get('limit')
+        offset = request.args.get('offset')
+
+        #default values
+        column = model + '_id'
+        order = 'asc'
+
+        if 'column' in request.args:
+            column = model + '_' + request.args.get('column')
+
+        if 'order' in request.args:
+            order = request.args.get('order')
+
+        p = column + ' ' + order
+        query = query.order_by(text(p))
+
+        if limit:
+            query = query.limit(limit)
+        if offset:
+            query = query.offset(offset)
+        result = query.all()
+        return result
+
+
 
 
     def add_category_to_data(self, data):
@@ -78,4 +103,34 @@ class BaseProvider():
     def fill_out_name_based_on_display(self, data):
         data['name'] = data.get('display') if data.get('name') is None else data.get('name')
         return data
+
+
+    def query_filter_by(self, model, filters):
+        query = model.query
+        limit = request.args.get('limit')
+        offset = request.args.get('offset')
+
+
+        # default values
+        column = 'id'
+        order = 'asc'
+
+        if 'column' in request.args:
+            column = request.args.get('column')
+
+        if 'order' in request.args:
+            order = request.args.get('order')
+
+        p = column + ' ' + order
+
+        if limit and offset:
+            limit = int(limit)
+            offset = int(offset)
+            page = int(offset / limit) + 1
+            result = query.filter_by(**filters).order_by(text(p)).paginate(page=page, per_page=limit,error_out=False).items
+        else:
+            result = query.filter_by(**filters).order_by(text(p)).all()
+
+        return result
+
 
