@@ -62,10 +62,6 @@ class StudentClassProvider(BaseProvider):
 
         p = column + ' ' + order
 
-        #Keep this for now for debugging purposes (just to verify that is really filtering)
-        #query = User.query.filter(User.id.in_(all_students_ids))
-        #results1 = query.all()
-
         if limit and offset:
             limit = int(limit)
             offset = int(offset)
@@ -76,3 +72,28 @@ class StudentClassProvider(BaseProvider):
             students = User.query.filter(User.id.in_(all_students_ids)).order_by(text(p)).all()
 
         return students
+
+
+
+
+    def get_instructor_students_count(self, instructor_id):
+
+        instructor_classes = StudentClass.query.filter_by(instructor_id=instructor_id).all()
+        all_students_ids = []
+
+        for _class in instructor_classes:
+            for _student in _class.student_student_class:
+                all_students_ids.append(_student.id)
+
+        all_students_ids = list(set(all_students_ids))
+        dict = {"count": len(all_students_ids)}
+
+        return dict
+
+
+    def get_instructor_student_classes_count(self, instructor_id):
+
+        instructor_classes = StudentClass.query.filter_by(instructor_id=instructor_id).all()
+        dict = {"count": len(instructor_classes)}
+
+        return dict
