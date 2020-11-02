@@ -529,4 +529,62 @@ def get_instructor_students():
 
     return response
 
+@language2test_bp.route("/instructor/students/count", methods=['GET'])
+@crossdomain(origin='*')
+@authentication
+@authorization(['read-student-class'])
+def get_instructor_students_count():
+    try:
+        # Retrieve user
+        user = user_provider.get_authenticated_user()
+        is_instructor = user_provider.has_role(user, 'Instructor')
+        if is_instructor:
+            instructor_id = user.id
+            if instructor_id:
+                count = provider.get_instructor_students_count(instructor_id)
+                response = Response(json.dumps(count), 200, mimetype="application/json")
+            else:
+                error = {"message": "No Id found for the user."}
+                response = Response(json.dumps(error), 404, mimetype="application/json")
+        else:
+            error = {"message": "The user is not an instructor."}
+            response = Response(json.dumps(error), 403, mimetype="application/json")
+        return response
+    except Exception as e:
+        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500, mimetype="application/json")
+
+    return response
+
+
+@language2test_bp.route("/instructor/student_classes/count", methods=['GET'])
+@crossdomain(origin='*')
+@authentication
+@authorization(['read-student-class'])
+def get_instructor_student_class_count():
+    try:
+        #Retrieve user
+        user = user_provider.get_authenticated_user()
+        is_instructor = user_provider.has_role(user, 'Instructor')
+        if is_instructor:
+            instructor_id =user.id
+            if instructor_id:
+                count = provider.get_instructor_student_classes_count(instructor_id)
+                response = Response(json.dumps(count), 200, mimetype="application/json")
+            else:
+                error = {"message": "No Id found for the user."}
+                response = Response(json.dumps(error), 404, mimetype="application/json")
+        else:
+            error = {"message": "The user is not an instructor."}
+            response = Response(json.dumps(error), 403, mimetype="application/json")
+
+        return response
+    except Exception as e:
+        error = { "exception": str(e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500, mimetype="application/json")
+
+    return response
+
+
+
 

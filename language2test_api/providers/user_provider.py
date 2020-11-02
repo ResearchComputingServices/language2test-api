@@ -33,11 +33,13 @@ class UserProvider(BaseProvider):
     def update(self, data, user):
         user.first_name = data.get('first_name')
         user.last_name = data.get('last_name')
-        user.roles = []
-        for role_item in data.get('roles'):
-            role = Role.query.filter_by(name=role_item.get('name')).first()
-            if role:
-                user.roles.append(role)
+
+        if 'roles' in data and data.get('roles'):
+            user.roles = []
+            for role_item in data.get('roles'):
+                role = Role.query.filter_by(name=role_item.get('name')).first()
+                if role:
+                    user.roles.append(role)
 
         for field in user.fields:
             db.session.query(UserField).filter(UserField.id == field.id).delete()
