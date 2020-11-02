@@ -17,7 +17,7 @@ provider = TestScheduleProvider()
 user_provider = UserProvider()
 test_assignation_schema_many = TestAssignationSchema(many=True)
 
-@language2test_bp.route('/test_schedule', methods=['GET'])
+@language2test_bp.route('/test_schedule/test_taker', methods=['GET'])
 @crossdomain(origin='*')
 @authentication
 #@authorization(['create-user'])
