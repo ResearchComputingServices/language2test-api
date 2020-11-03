@@ -5,7 +5,6 @@ from language2test_api.extensions import db, ma
 from language2test_api.web.common_view import language2test_bp
 from language2test_api.decorators.crossorigin import crossdomain
 from language2test_api.decorators.authentication import authentication
-from language2test_api.decorators.authorization import authorization
 from language2test_api.providers.test_assignation_provider import TestAssignationProvider
 from language2test_api.models.test_assignation import TestAssignation, TestAssignationSchema
 from language2test_api.providers.user_provider import UserProvider
@@ -32,14 +31,12 @@ def get_authenticated_user():
 @language2test_bp.route("/test_assignation/count", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-#@authorization(['read-test-assignation'])
 def get_test_assignation_count():
     return provider.get_count(TestAssignation)
 
 @language2test_bp.route("/test_assignation", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-#@authorization(['read-test'])
 def get_test_assignation():
     id = request.args.get('id')
     if id:
@@ -53,7 +50,6 @@ def get_test_assignation():
 @language2test_bp.route("/test_assignation", methods=['POST'])
 @crossdomain(origin='*')
 @authentication
-#@authorization(['create-test'])
 def add_test_assignation():
     try:
         data = request.get_json()
@@ -69,7 +65,6 @@ def add_test_assignation():
 @language2test_bp.route("/test_assignation", methods=['PUT'])
 @crossdomain(origin='*')
 @authentication
-#@authorization(['create-test'])
 def update_test_assignation():
     try:
         data = request.get_json()
@@ -89,7 +84,6 @@ def update_test_assignation():
 @language2test_bp.route("/test_assignation", methods=['DELETE'])
 @crossdomain(origin='*')
 @authentication
-#@authorization(['delete-student-class'])
 def delete_test_assignation():
     try:
         data = request.get_json()
@@ -109,7 +103,6 @@ def delete_test_assignation():
 @language2test_bp.route("/instructor/test_assignation", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-#@authorization(['read-test'])
 def get_instructor_test_assignation():
     try:
         # Retrieve user

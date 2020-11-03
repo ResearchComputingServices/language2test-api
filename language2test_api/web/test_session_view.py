@@ -4,7 +4,6 @@ from language2test_api.extensions import db, ma
 from language2test_api.web.common_view import language2test_bp
 from language2test_api.decorators.crossorigin import crossdomain
 from language2test_api.decorators.authentication import authentication
-from language2test_api.decorators.authorization import authorization
 from language2test_api.providers.test_session_provider import TestSessionProvider
 from language2test_api.providers.test_session_export_helper import TestSessionExportHelper as testhelper
 import pandas as pd
@@ -20,14 +19,12 @@ export_provider = TestSessionExportProvider()
 @language2test_bp.route("/test_sessions/count", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['read-test-session'])
 def get_test_sessions_count():
     return provider.get_count(TestSession)
 
 @language2test_bp.route("/test_sessions", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['read-test-session'])
 def get_test_session():
     id = request.args.get('id')
     if id:
@@ -48,7 +45,6 @@ def get_test_session():
 @language2test_bp.route("/test_sessions", methods=['POST'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['create-test-session'])
 def add_test_session():
     try:
         data = request.get_json()
@@ -66,7 +62,6 @@ def add_test_session():
 @language2test_bp.route("/test_sessions", methods=['PUT'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['update-test-session'])
 def update_test_session():
     try:
         data = request.get_json()
@@ -90,7 +85,6 @@ def update_test_session():
 @language2test_bp.route("/test_sessions", methods=['DELETE'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['delete-test-session'])
 def delete_test_session():
     try:
         data = request.get_json()
@@ -112,7 +106,6 @@ def delete_test_session():
 @language2test_bp.route("/test_sessions/export", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['export-test-session'])
 def export_test_sessions():
     specific_id = request.args.get('id')
     if specific_id is None:
@@ -132,7 +125,6 @@ def export_test_sessions():
 @language2test_bp.route("/instructor/test_sessions", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['read-test-session'])
 def get_test_sessions_for_test_assignation():
     try:
         limit = request.args.get('limit')

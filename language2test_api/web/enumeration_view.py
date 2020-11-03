@@ -6,7 +6,6 @@ from language2test_api.extensions import db, ma
 from language2test_api.web.common_view import language2test_bp
 from language2test_api.decorators.crossorigin import crossdomain
 from language2test_api.decorators.authentication import authentication
-from language2test_api.decorators.authorization import authorization
 from language2test_api.providers.view_helper import ViewHelper
 from language2test_api.providers.enumeration_provider import EnumerationProvider
 from language2test_api.extensions import oidc
@@ -26,7 +25,6 @@ provider = EnumerationProvider()
 @language2test_bp.route("/enumerations/count", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['read-enumeration'])
 def get_enumeration_count():
     return view_helper.get_count(Enumeration)
 
@@ -34,7 +32,6 @@ def get_enumeration_count():
 @language2test_bp.route("/enumerations", methods=["GET"])
 @crossdomain(origin='*')
 @authentication
-@authorization(['read-enumeration'])
 def get_enumeration():
     id = request.args.get('id')
     if id:
@@ -55,7 +52,6 @@ def get_enumeration():
 @language2test_bp.route("/enumerations", methods=['POST'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['create-enumeration'])
 def add_enumeration():
     try:
         data = request.get_json()
@@ -70,7 +66,6 @@ def add_enumeration():
 @language2test_bp.route("/enumerations", methods=['PUT'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['update-enumeration'])
 def update_enumeration():
     try:
         data = request.get_json()
@@ -93,7 +88,6 @@ def update_enumeration():
 @language2test_bp.route("/enumerations", methods=['DELETE'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['delete-enumeration'])
 def delete_enumeration():
     try:
         data = request.get_json()
@@ -116,7 +110,6 @@ def delete_enumeration():
 @language2test_bp.route("/enumerations/export", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['export-enumeration'])
 def export_enumerations():
     specific_id = request.args.get('id')
     if specific_id is None:
@@ -192,7 +185,6 @@ def export_enumerations():
 @language2test_bp.route("/enumerations/upload", methods=['POST'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['import-enumeration'])
 def upload_enumerations():
     raw_data = request.get_data()
     data = pd.read_excel(raw_data, engine="openpyxl")

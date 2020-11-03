@@ -5,7 +5,6 @@ from language2test_api.extensions import db, ma
 from language2test_api.web.common_view import language2test_bp
 from language2test_api.decorators.crossorigin import crossdomain
 from language2test_api.decorators.authentication import authentication
-from language2test_api.decorators.authorization import authorization
 from language2test_api.providers.writing_provider import WritingProvider
 import pandas as pd
 from io import BytesIO
@@ -18,14 +17,12 @@ provider = WritingProvider()
 @language2test_bp.route("/writings/count", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['read-writing'])
 def get_writings_count():
     return provider.get_count(Writing)
 
 @language2test_bp.route("/writings", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['read-writing'])
 def get_writing():
     id = request.args.get('id')
     if id:
@@ -46,7 +43,6 @@ def get_writing():
 @language2test_bp.route("/writings", methods=['POST'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['create-writing'])
 def add_writing():
     try:
         data = request.get_json()
@@ -62,7 +58,6 @@ def add_writing():
 @language2test_bp.route("/writings", methods=['PUT'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['update-writing'])
 def update_writing():
     try:
         data = request.get_json()
@@ -89,7 +84,6 @@ def update_writing():
 @language2test_bp.route("/writings", methods=['DELETE'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['delete-writing'])
 def delete_writing():
     try:
         data = request.get_json()
@@ -114,7 +108,6 @@ def delete_writing():
 @language2test_bp.route("/writings/export", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['export-writing'])
 def export_writings():
     specific_id = request.args.get('id')
     if specific_id is None:
@@ -204,7 +197,6 @@ def export_writings():
 @language2test_bp.route("/writings/upload", methods=['POST'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['import-writing'])
 def upload_writing():
     raw_data = request.get_data()
     data = pd.read_excel(raw_data, engine="openpyxl")

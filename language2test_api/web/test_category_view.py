@@ -6,11 +6,9 @@ from language2test_api.extensions import db, ma
 from language2test_api.web.common_view import language2test_bp
 from language2test_api.decorators.crossorigin import crossdomain
 from language2test_api.decorators.authentication import authentication
-from language2test_api.decorators.authorization import authorization
 from language2test_api.providers.test_category_provider import TestCategoryProvider
 import pandas as pd
 from io import BytesIO
-from language2test_api.models.test_session import TestSession
 from language2test_api.models.test_session import TestSession, TestSessionSchema
 
 test_category_schema = TestCategorySchema(many=False)
@@ -24,14 +22,12 @@ test_schema_many = TestSessionSchema(many=True)
 @language2test_bp.route("/test_categories/count", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['read-test-category'])
 def get_test_categories_count():
     return provider.get_count(TestCategory)
 
 @language2test_bp.route("/test_categories", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['read-test-category'])
 def get_test_category():
     id = request.args.get('id')
     if id:
@@ -67,7 +63,6 @@ def get_test_category():
 @language2test_bp.route("/test_categories", methods=['POST'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['create-test-category'])
 def add_test_category():
     try:
         data = request.get_json()
@@ -85,7 +80,6 @@ def add_test_category():
 @language2test_bp.route("/test_categories", methods=['PUT'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['update-test-category'])
 def update_test_category():
     try:
         data = request.get_json()
@@ -107,7 +101,6 @@ def update_test_category():
 @language2test_bp.route("/test_categories", methods=['DELETE'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['delete-test-category'])
 def delete_test_category():
     try:
         data = request.get_json()
@@ -130,7 +123,6 @@ def delete_test_category():
 @language2test_bp.route("/test_categories/export", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['export-test-category'])
 def export_test_categories():
     specific_id = request.args.get('id')
     if specific_id is None:

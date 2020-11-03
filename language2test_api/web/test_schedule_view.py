@@ -5,7 +5,6 @@ from language2test_api.extensions import db, ma
 from language2test_api.web.common_view import language2test_bp
 from language2test_api.decorators.crossorigin import crossdomain
 from language2test_api.decorators.authentication import authentication
-from language2test_api.decorators.authorization import authorization
 from language2test_api.providers.test_schedule_provider import TestScheduleProvider
 from language2test_api.providers.user_provider import UserProvider
 from language2test_api.models.test_assignation import TestAssignationSchema
@@ -20,7 +19,6 @@ test_assignation_schema_many = TestAssignationSchema(many=True)
 @language2test_bp.route('/test_schedule/test_taker', methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-#@authorization(['create-user'])
 def test_schedule_test_taker():
     auth = request.headers.get('Authorization')
     auth_fragments = auth.split(' ')
@@ -47,7 +45,6 @@ def test_schedule_test_taker():
 @language2test_bp.route('/test_schedule/instructor', methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-#@authorization(['read-test'])
 def test_schedule_instructor():
     try:
         # Retrieve user

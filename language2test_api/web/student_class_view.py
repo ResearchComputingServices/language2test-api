@@ -8,7 +8,6 @@ from language2test_api.extensions import db, ma
 from language2test_api.web.common_view import language2test_bp
 from language2test_api.decorators.crossorigin import crossdomain
 from language2test_api.decorators.authentication import authentication
-from language2test_api.decorators.authorization import authorization
 from language2test_api.providers.student_class_provider import StudentClassProvider
 from language2test_api.providers.user_provider import UserProvider
 from language2test_api.web.user_keycloak import UserKeycloak
@@ -28,14 +27,12 @@ keycloak = UserKeycloak()
 @language2test_bp.route("/student_classes/count", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['read-student-class'])
 def get_student_classes_count():
     return provider.get_count(StudentClass)
 
 @language2test_bp.route("/student_classes", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['read-student-class'])
 def get_student_class():
     id = request.args.get('id')
     if id:
@@ -66,7 +63,6 @@ def get_student_class():
 @language2test_bp.route("/student_classes", methods=['POST'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['create-student-class'])
 def add_student_class():
     try:
         data = request.get_json()
@@ -83,7 +79,6 @@ def add_student_class():
 @language2test_bp.route("/student_classes", methods=['PUT'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['update-student-class'])
 def update_student_class():
     try:
         data = request.get_json()
@@ -105,7 +100,6 @@ def update_student_class():
 @language2test_bp.route("/student_classes", methods=['DELETE'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['delete-student-class'])
 def delete_student_class():
     try:
         data = request.get_json()
@@ -127,7 +121,6 @@ def delete_student_class():
 @language2test_bp.route("/student_classes/export", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['export-student-class'])
 def export_student_class():
     specific_id = request.args.get('id')
     if specific_id is None:
@@ -374,7 +367,6 @@ def  __import_user_in_keycloak(user_dict, token):
 @language2test_bp.route("/student_classes/upload", methods=['POST'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['import-student-class'])
 def upload_student_class():
     raw_data = request.get_data()
     data = pd.read_excel(raw_data, engine="openpyxl")
@@ -463,7 +455,6 @@ def upload_student_class():
 @language2test_bp.route("/instructor/student_classes", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['read-student-class'])
 def get_instructor_student_class():
     try:
         #Retrieve user
@@ -492,7 +483,6 @@ def get_instructor_student_class():
 @language2test_bp.route("/instructor/students", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['read-student-class'])
 def get_instructor_students():
     try:
         limit = request.args.get('limit')
@@ -532,7 +522,6 @@ def get_instructor_students():
 @language2test_bp.route("/instructor/students/count", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['read-student-class'])
 def get_instructor_students_count():
     try:
         # Retrieve user
@@ -560,7 +549,6 @@ def get_instructor_students_count():
 @language2test_bp.route("/instructor/student_classes/count", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['read-student-class'])
 def get_instructor_student_class_count():
     try:
         #Retrieve user

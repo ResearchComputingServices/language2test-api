@@ -5,7 +5,6 @@ from language2test_api.extensions import db, ma
 from language2test_api.web.common_view import language2test_bp
 from language2test_api.decorators.crossorigin import crossdomain
 from language2test_api.decorators.authentication import authentication
-from language2test_api.decorators.authorization import authorization
 from language2test_api.providers.base_provider import BaseProvider
 
 test_type_schema = TestTypeSchema(many=False)
@@ -16,14 +15,12 @@ provider = BaseProvider()
 @language2test_bp.route("/test_types/count", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-@authorization(["read-test-type"])
 def get_test_types_count():
     return provider.get_count(TestType)
 
 @language2test_bp.route("/test_types", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-@authorization(["read-test-type"])
 def get_test_type():
     id = request.args.get('id')
     if id:
@@ -44,7 +41,6 @@ def get_test_type():
 @language2test_bp.route("/test_types", methods=['POST'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['create-test-type'])
 def add_test_type():
     try:
         data = request.get_json()
@@ -62,7 +58,6 @@ def add_test_type():
 @language2test_bp.route("/test_types", methods=['PUT'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['update-test-type'])
 def update_test_type():
     try:
         data = request.get_json()
@@ -83,7 +78,6 @@ def update_test_type():
 @language2test_bp.route("/test_types", methods=['DELETE'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['delete-test-type'])
 def delete_test_type():
     try:
         data = request.get_json()

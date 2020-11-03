@@ -7,7 +7,6 @@ from language2test_api.extensions import db, ma
 from language2test_api.web.common_view import language2test_bp
 from language2test_api.decorators.crossorigin import crossdomain
 from language2test_api.decorators.authentication import authentication
-from language2test_api.decorators.authorization import authorization
 from language2test_api.providers.cloze_provider import ClozeProvider
 from language2test_api.models.test_session import TestSession, TestSessionSchema
 
@@ -28,14 +27,12 @@ cloze_schema_many = ClozeSchema(many=True)
 @language2test_bp.route("/cloze/count", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['read-cloze'])
 def get_cloze_count():
     return provider.get_count(Cloze)
 
 @language2test_bp.route("/cloze", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['read-cloze'])
 def get_cloze():
     try:
         id = request.args.get('id')
@@ -66,7 +63,6 @@ def get_cloze():
 @language2test_bp.route("/cloze", methods=['POST'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['create-cloze'])
 def add_cloze():
     try:
         data = request.get_json()
@@ -87,7 +83,6 @@ def add_cloze():
 @language2test_bp.route("/cloze", methods=['PUT'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['update-cloze'])
 def update_cloze():
     try:
         data = request.get_json()
@@ -114,7 +109,6 @@ def update_cloze():
 @language2test_bp.route("/cloze", methods=['DELETE'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['delete-cloze'])
 def delete_cloze():
     try:
         data = request.get_json()
@@ -139,7 +133,6 @@ def delete_cloze():
 @language2test_bp.route("/cloze/generate", methods=['POST'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['read-cloze'])
 def generate():
     try:
         data = request.get_json()
@@ -155,7 +148,6 @@ def generate():
 @language2test_bp.route("/cloze/export", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['export-cloze'])
 def export_cloze():
     specific_id = request.args.get('id')
     if specific_id is None:
@@ -273,7 +265,6 @@ def export_cloze():
 @language2test_bp.route("/cloze/upload", methods=['POST'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['import-cloze'])
 def upload_cloze():
     file = request.files.get("file")
     if file is not None:
