@@ -1,20 +1,11 @@
 INSERT INTO public."student_class"(id, name, display, term, "level", program, instructor_id, unremovable)
-VALUES (1, 'level_1_class_1_fall', 'English 101', 'Fall 2020', 'Level 1', 'CS', 1, True);
+VALUES (1, 'level_1_class_1_fall', 'English 101 F', 'Fall 2020', 'Level 1', 'CS', 16, True);
 
 INSERT INTO public."student_class"(id, name, display, term, "level", program, instructor_id, unremovable)
-VALUES (2, 'level_1_class_1_winter', 'English 101', 'Winter 2021', 'Level 1', 'CS', 1, True);
+VALUES (2, 'level_1_class_1_winter', 'English 101 W', 'Winter 2021', 'Level 1', 'CS', 16, True);
 
 INSERT INTO public."student_class"(id, name, display, term, "level", program, instructor_id, unremovable)
-VALUES (3, 'level_1_class_1_spring', 'English 101', 'Spring 2021', 'Level 1', 'CS', 1, True);
-
-INSERT INTO public."student_class"(id, name, display, term, "level", program, instructor_id, unremovable)
-VALUES (4, 'level_1_class_1_summer', 'English 101', 'Spring 2021', 'Level 1', 'CS', 1, False);
-
-INSERT INTO public."student_class"(id, name, display, term, "level", program, instructor_id, unremovable)
-VALUES (5, 'level_1_class_2_fall', 'English 102', 'Fall 2020', 'Level 2', 'CS', 2, False);
-
-INSERT INTO public."student_class"(id, name, display, term, "level", program, instructor_id, unremovable)
-VALUES (6, 'level_1_class_2_winter', 'English 102', 'Winter 2021', 'Level 2', 'CS', 2, False);
+VALUES (3, 'level_1_class_1_spring', 'English 101 S', 'Spring 2021', 'Level 1', 'CS', 17, True);
 
 CREATE OR REPLACE  FUNCTION add_student_to_class (text, text) RETURNS timestamp with time zone AS '
 DECLARE
@@ -37,14 +28,17 @@ BEGIN
 END;
 ' LANGUAGE 'plpgsql';
 
-select add_student_to_class('sergiubuhatel', 'level_1_class_1_fall');
-select add_student_to_class('tanvirislam', 'level_1_class_1_fall');
-select add_student_to_class('jazminromero', 'level_1_class_1_fall');
-select add_student_to_class('andrewschoenrock', 'level_1_class_1_fall');
-select add_student_to_class('hanqingzhou', 'level_1_class_1_fall');
+select add_student_to_class('testtaker1', 'level_1_class_1_fall');
+select add_student_to_class('testtaker2', 'level_1_class_1_fall');
+select add_student_to_class('testtaker3', 'level_1_class_1_fall');
 
-select add_student_to_class('sergiubuhatel', 'level_1_class_1_winter');
-select add_student_to_class('tanvirislam', 'level_1_class_1_winter');
-select add_student_to_class('jazminromero', 'level_1_class_1_winter');
-select add_student_to_class('andrewschoenrock', 'level_1_class_1_winter');
-select add_student_to_class('hanqingzhou', 'level_1_class_1_winter');
+
+select add_student_to_class('testtaker2', 'level_1_class_1_winter');
+select add_student_to_class('testtaker4', 'level_1_class_1_winter');
+select add_student_to_class('testtaker5', 'level_1_class_1_winter');
+select add_student_to_class('testtaker7', 'level_1_class_1_winter');
+
+select add_student_to_class('testtaker1', 'level_1_class_1_spring');
+select add_student_to_class('testtaker3', 'level_1_class_1_spring');
+select add_student_to_class('testtaker6', 'level_1_class_1_spring');
+select add_student_to_class('testtaker7', 'level_1_class_1_spring');
