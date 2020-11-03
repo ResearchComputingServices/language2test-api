@@ -6,7 +6,6 @@ from language2test_api.models.cloze import Cloze, ClozeSchema
 from language2test_api.models.writing import Writing, WritingSchema
 from language2test_api.models.vocabulary import Vocabulary, VocabularySchema, VocabularyOption, VocabularyOptionSchema
 from language2test_api.models.user_field_category import UserFieldCategory, UserFieldCategorySchema
-from language2test_api.models.student_class import StudentClass, StudentClassSchema
 
 class TestProvider(BaseProvider):
     def exist(self, text, test_id, cloze_id, cloze_question_id):
@@ -64,11 +63,6 @@ class TestProvider(BaseProvider):
             if user_field_category:
                 test.mandatory_test_user_field_category.append(user_field_category)
 
-        for test_student_class in data.get('test_student_class'):
-            student_class = StudentClass.query.filter_by(name=test_student_class.get('name')).first()
-            if student_class:
-                test.test_student_class.append(student_class)
-
         for order in data.get('order'):
             test.order.append(order)
 
@@ -88,7 +82,6 @@ class TestProvider(BaseProvider):
         test.order = []
         test.test_user_field_category = []
         test.mandatory_test_user_field_category = []
-        test.test_student_class = []
         for test_rc in data.get('test_rc'):
             rc = RC.query.filter_by(name=test_rc.get('name')).first()
             if rc:
@@ -123,11 +116,6 @@ class TestProvider(BaseProvider):
                 name=mandatory_test_user_field_category.get('name')).first()
             if user_field_category:
                 test.mandatory_test_user_field_category.append(user_field_category)
-
-        for test_student_class in data.get('test_student_class'):
-            student_class = StudentClass.query.filter_by(name=test_student_class.get('name')).first()
-            if student_class:
-                test.test_student_class.append(student_class)
 
         for order in data.get('order'):
             test.order.append(order)
