@@ -5,7 +5,6 @@ from language2test_api.extensions import db, ma
 from language2test_api.web.common_view import language2test_bp
 from language2test_api.decorators.crossorigin import crossdomain
 from language2test_api.decorators.authentication import authentication
-from language2test_api.decorators.authorization import authorization
 from language2test_api.providers.user_field_type_provider import UserFieldTypeProvider
 
 user_field_type_schema = UserFieldTypeSchema(many=False)
@@ -16,14 +15,12 @@ provider = UserFieldTypeProvider()
 @language2test_bp.route("/user_field_types/count", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['read-user-field-type'])
 def get_user_field_types_count():
     return provider.get_count(UserFieldType)
 
 @language2test_bp.route("/user_field_types", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['read-user-field-type'])
 def get_user_field_type():
     id = request.args.get('id')
     if id:
@@ -45,7 +42,6 @@ def get_user_field_type():
 @language2test_bp.route("/user_field_types", methods=['POST'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['create-user-field-type'])
 def add_user_field_type():
     try:
         data = request.get_json()
@@ -61,7 +57,6 @@ def add_user_field_type():
 @language2test_bp.route("/user_field_types", methods=['PUT'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['update-user-field-type'])
 def update_user_field_type():
     try:
         data = request.get_json()
@@ -80,7 +75,6 @@ def update_user_field_type():
 @language2test_bp.route("/user_field_types", methods=['DELETE'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['delete-user-field-type'])
 def delete_user_field_type():
     try:
         data = request.get_json()

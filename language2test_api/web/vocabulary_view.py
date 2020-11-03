@@ -6,7 +6,6 @@ from language2test_api.extensions import db, ma
 from language2test_api.web.common_view import language2test_bp
 from language2test_api.decorators.crossorigin import crossdomain
 from language2test_api.decorators.authentication import authentication
-from language2test_api.decorators.authorization import authorization
 from language2test_api.providers.vocabulary_provider import VocabularyProvider
 from language2test_api.models.test_category import TestCategory, TestCategorySchema
 
@@ -28,14 +27,12 @@ provider = VocabularyProvider()
 @language2test_bp.route("/vocabulary/count", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['read-vocabulary'])
 def get_vocabulary_count():
     return provider.get_count(Vocabulary)
 
 @language2test_bp.route("/vocabulary", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['read-vocabulary'])
 def get_vocabulary():
     id = request.args.get('id')
     if id:
@@ -56,7 +53,6 @@ def get_vocabulary():
 @language2test_bp.route("/vocabulary", methods=['POST'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['create-vocabulary'])
 def add_vocabulary():
     try:
         data = request.get_json()
@@ -72,7 +68,6 @@ def add_vocabulary():
 @language2test_bp.route("/vocabulary", methods=['PUT'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['update-vocabulary'])
 def update_vocabulary():
     try:
         data = request.get_json()
@@ -99,7 +94,6 @@ def update_vocabulary():
 @language2test_bp.route("/vocabulary", methods=['DELETE'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['delete-vocabulary'])
 def delete_vocabulary():
     try:
         data = request.get_json()
@@ -121,7 +115,6 @@ def delete_vocabulary():
 @language2test_bp.route("/vocabulary/export", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['export-vocabulary'])
 def export_vocabulary():
     specific_id = request.args.get('id')
     if specific_id is None:
@@ -219,7 +212,6 @@ def export_vocabulary():
 @language2test_bp.route("/vocabulary/upload", methods=['POST'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['import-vocabulary'])
 def upload_vocabulary():
     raw_data = request.get_data()
     data = pd.read_excel(raw_data, engine="openpyxl")

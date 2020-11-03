@@ -5,7 +5,6 @@ from language2test_api.extensions import db, ma
 from language2test_api.web.common_view import language2test_bp
 from language2test_api.decorators.crossorigin import crossdomain
 from language2test_api.decorators.authentication import authentication
-from language2test_api.decorators.authorization import authorization
 from language2test_api.providers.roles_provider import RoleProvider
 
 role_schema = RoleSchema(many=False)
@@ -16,14 +15,12 @@ provider = RoleProvider()
 @language2test_bp.route("/roles/count", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['read-role'])
 def get_role_count():
     return provider.get_count(Role)
 
 @language2test_bp.route("/roles", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['read-role'])
 def get_role():
     id = request.args.get('id')
     if id:
@@ -44,7 +41,6 @@ def get_role():
 @language2test_bp.route("/roles", methods=['POST'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['create-role'])
 def add_role():
     try:
         data = request.get_json()
@@ -62,7 +58,6 @@ def add_role():
 @language2test_bp.route("/roles", methods=['PUT'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['update-role'])
 def update_role():
     try:
         data = request.get_json()
@@ -86,7 +81,6 @@ def update_role():
 @language2test_bp.route("/roles", methods=['DELETE'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['delete-role'])
 def delete_role():
     try:
         data = request.get_json()

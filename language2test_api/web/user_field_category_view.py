@@ -6,7 +6,6 @@ from language2test_api.extensions import db, ma
 from language2test_api.web.common_view import language2test_bp
 from language2test_api.decorators.crossorigin import crossdomain
 from language2test_api.decorators.authentication import authentication
-from language2test_api.decorators.authorization import authorization
 from language2test_api.providers.user_field_category_provider import UserFieldCategoryProvider
 
 import pandas as pd
@@ -20,14 +19,12 @@ provider = UserFieldCategoryProvider()
 @language2test_bp.route("/user_field_categories/count", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-@authorization(["read-demographic-questionnaire-field"])
 def get_user_field_categories_count():
     return provider.get_count(UserFieldCategory)
 
 @language2test_bp.route("/user_field_categories", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-@authorization(["read-demographic-questionnaire-field"])
 def get_user_field_category():
     id = request.args.get('id')
     if id:
@@ -69,7 +66,6 @@ def get_user_field_category():
 @language2test_bp.route("/user_field_categories", methods=['POST'])
 @crossdomain(origin='*')
 @authentication
-@authorization(["create-demographic-questionnaire-field"])
 def add_user_field_category():
     try:
         data = request.get_json()
@@ -86,7 +82,6 @@ def add_user_field_category():
 @language2test_bp.route("/user_field_categories", methods=['PUT'])
 @crossdomain(origin='*')
 @authentication
-@authorization(["update-demographic-questionnaire-field"])
 def update_user_field_category():
     data = request.get_json()
     user_field_category = UserFieldCategory.query.filter_by(id=data.get('id')).first()
@@ -104,7 +99,6 @@ def update_user_field_category():
 @language2test_bp.route("/user_field_categories", methods=['DELETE'])
 @crossdomain(origin='*')
 @authentication
-@authorization(["delete-demographic-questionnaire-field"])
 def delete_user_field_category():
     data = request.get_json()
     user_field_category = UserFieldCategory.query.filter_by(id=data.get('id')).first()
@@ -122,7 +116,6 @@ def delete_user_field_category():
 @language2test_bp.route("/user_field_categories/export", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-@authorization(["export-demographic-questionnaire-field"])
 def export_demographic_field():
     specific_id = request.args.get('id')
     if specific_id is None:

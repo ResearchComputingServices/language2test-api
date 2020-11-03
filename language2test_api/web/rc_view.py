@@ -24,14 +24,12 @@ test_schema_many = TestSessionSchema(many=True)
 @language2test_bp.route("/rc/count", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['read-reading-comprehension'])
 def get_rc_count():
     return provider.get_count(RC)
 
 @language2test_bp.route("/rc", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['read-reading-comprehension'])
 def get_rc():
     id = request.args.get('id')
     if id:
@@ -52,7 +50,6 @@ def get_rc():
 @language2test_bp.route("/rc", methods=['POST'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['create-reading-comprehension'])
 def add_rc():
     try:
         data = request.get_json()
@@ -69,7 +66,6 @@ def add_rc():
 @language2test_bp.route("/rc", methods=['PUT'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['update-reading-comprehension'])
 def update_rc():
     try:
         data = request.get_json()
@@ -96,7 +92,6 @@ def update_rc():
 @language2test_bp.route("/rc", methods=['DELETE'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['delete-reading-comprehension'])
 def delete_rc():
     try:
         data = request.get_json()
@@ -121,7 +116,6 @@ def delete_rc():
 @language2test_bp.route("/rc/export", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['export-reading-comprehension'])
 def export_rc():
     specific_id = request.args.get('id')
     if specific_id is None:
@@ -246,7 +240,6 @@ def export_rc():
 @language2test_bp.route("/rc/upload", methods=['POST'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['import-reading-comprehension'])
 def upload_rc():
     file = request.files.get("file")
     if file is not None:

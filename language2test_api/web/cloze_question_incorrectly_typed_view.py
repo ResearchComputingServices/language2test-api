@@ -5,7 +5,6 @@ from language2test_api.extensions import db, ma
 from language2test_api.web.common_view import language2test_bp
 from language2test_api.decorators.crossorigin import crossdomain
 from language2test_api.decorators.authentication import authentication
-from language2test_api.decorators.authorization import authorization
 from language2test_api.providers.cloze_provider import ClozeProvider
 from language2test_api.providers.base_provider import BaseProvider
 
@@ -18,21 +17,18 @@ cloze_provider = ClozeProvider()
 @language2test_bp.route("/cloze_question_incorrectly_typed/count/<cloze_question_id>", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['create-cloze'])
 def get_cloze_question_incorrectly_typed_count_by_cloze_question_id(cloze_question_id):
     return cloze_provider.get_count(ClozeQuestionIncorrectlyTyped, cloze_question_id)
 
 @language2test_bp.route("/cloze_question_incorrectly_typed/count", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['create-cloze'])
 def get_cloze_question_incorrectly_typed_count():
     return provider.get_count(ClozeQuestionIncorrectlyTyped)
 
 @language2test_bp.route("/cloze_question_incorrectly_typed", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['create-cloze'])
 def get_cloze_question_incorrectly_typed():
     id = request.args.get('id')
     if id:
@@ -53,7 +49,6 @@ def get_cloze_question_incorrectly_typed():
 @language2test_bp.route("/cloze_question_incorrectly_typed/<cloze_question_id>", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['create-cloze'])
 def get_cloze_question_incorrectly_typed_by_cloze_question_id(cloze_question_id):
     id = request.args.get('id')
     if id:
@@ -74,7 +69,6 @@ def get_cloze_question_incorrectly_typed_by_cloze_question_id(cloze_question_id)
 @language2test_bp.route("/cloze_question_incorrectly_typed", methods=['POST'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['create-cloze'])
 def add_cloze_question_incorrectly_typed():
     try:
         data = request.get_json()
@@ -93,7 +87,6 @@ def add_cloze_question_incorrectly_typed():
 @language2test_bp.route("/cloze_question_incorrectly_typed", methods=['PUT'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['create-cloze'])
 def update_cloze_question_incorrectly_typed():
     try:
         data = request.get_json()
@@ -114,7 +107,6 @@ def update_cloze_question_incorrectly_typed():
 @language2test_bp.route("/cloze_question_incorrectly_typed", methods=['DELETE'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['create-cloze'])
 def delete_cloze_question_incorrectly_typed():
     try:
         data = request.get_json()

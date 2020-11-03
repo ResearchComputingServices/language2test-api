@@ -60,7 +60,6 @@ def login():
 @language2test_bp.route("/users/count", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['read-user'])
 def get_user_count():
     roles_param = request.args.get('roles')
     users = User.query
@@ -77,7 +76,6 @@ def get_user_count():
 @language2test_bp.route("/users", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['read-user'])
 def get_user():
     try:
         id = request.args.get('id')
@@ -106,7 +104,6 @@ def get_user():
 @language2test_bp.route("/users", methods=['POST'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['create-user'])
 def add_user():
     try:
         data = request.get_json()
@@ -128,7 +125,6 @@ def add_user():
 @language2test_bp.route("/users/reset_keycloak_password", methods=['PUT'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['create-user'])
 def reset_user_keycloak_password():
     try:
         data = request.get_json()
@@ -181,7 +177,6 @@ def update_demographic_questionnaire():
 @language2test_bp.route("/users", methods=['PUT'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['update-user'])
 def update_user():
     try:
         data = request.get_json()
@@ -205,7 +200,6 @@ def update_user():
 @language2test_bp.route("/users", methods=['DELETE'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['delete-user'])
 def delete_user():
     try:
         data = request.get_json()
@@ -228,7 +222,6 @@ def delete_user():
 @language2test_bp.route("/users/export", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['export-user'])
 def export_users():
     specific_id = request.args.get('id')
     if specific_id is None:
@@ -552,7 +545,6 @@ def  __import_user_in_keycloak(user_dict, token):
 @language2test_bp.route("users/upload", methods=['POST'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['import-user'])
 def import_users():
     raw_data = request.get_data()
     data = pd.read_excel(raw_data, engine="openpyxl")

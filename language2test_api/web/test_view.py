@@ -7,7 +7,6 @@ from language2test_api.extensions import db, ma
 from language2test_api.web.common_view import language2test_bp
 from language2test_api.decorators.crossorigin import crossdomain
 from language2test_api.decorators.authentication import authentication
-from language2test_api.decorators.authorization import authorization
 from language2test_api.providers.test_provider import TestProvider
 from language2test_api.providers.test_export_provider import TestExportProvider
 import pandas as pd
@@ -21,7 +20,6 @@ provider = TestProvider()
 @language2test_bp.route("/test/count", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['read-test'])
 def get_test_count():
     return provider.get_count(Test)
 
@@ -68,7 +66,6 @@ def __shuffle_test_order(tests):
 @language2test_bp.route("/test/wizard", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['read-test'])
 def get_test_wizard():
     id = request.args.get('id')
     if id:
@@ -93,7 +90,6 @@ def get_test_wizard():
 @language2test_bp.route("/test", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['read-test'])
 def get_test():
     id = request.args.get('id')
     if id:
@@ -115,7 +111,6 @@ def get_test():
 @language2test_bp.route("/test", methods=['POST'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['create-test'])
 def add_test():
     try:
         data = request.get_json()
@@ -132,7 +127,6 @@ def add_test():
 @language2test_bp.route("/test", methods=['PUT'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['update-test'])
 def update_test():
     try:
         data = request.get_json()
@@ -160,7 +154,6 @@ def update_test():
 @language2test_bp.route("/test", methods=['DELETE'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['delete-test'])
 def delete_test():
     try:
         data = request.get_json()
@@ -186,7 +179,6 @@ def delete_test():
 @language2test_bp.route("/test/export", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-@authorization(['export-test'])
 def export_test():
     specific_id = request.args.get('id')
     if specific_id is None:
