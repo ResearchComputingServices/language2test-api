@@ -43,11 +43,6 @@ mandatory_test_user_field_category = db.Table('mandatory_test_user_field_categor
     db.Column('test_id', db.Integer, db.ForeignKey('test.id'), primary_key=True)
 )
 
-test_student_class = db.Table('test_student_class',
-    db.Column('student_class_id', db.Integer, db.ForeignKey('student_class.id'), primary_key=True),
-    db.Column('test_id', db.Integer, db.ForeignKey('test.id'), primary_key=True)
-)
-
 class Test(BaseModel):
     __tablename__ = 'test'
 
@@ -61,7 +56,6 @@ class Test(BaseModel):
     test_writing = relationship("Writing", secondary=test_writing)
     test_user_field_category = relationship("UserFieldCategory", secondary=test_user_field_category)
     mandatory_test_user_field_category = relationship("UserFieldCategory", secondary=mandatory_test_user_field_category)
-    test_student_class = relationship("StudentClass", secondary=test_student_class)
     immutable = db.Column(db.Boolean, default=False)
     unremovable = db.Column(db.Boolean, default=False)
 

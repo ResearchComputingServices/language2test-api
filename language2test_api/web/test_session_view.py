@@ -155,4 +155,24 @@ def get_test_sessions_for_test_assignation():
     return response
 
 
+@language2test_bp.route("/instructor/test_sessions/count", methods=['GET'])
+@crossdomain(origin='*')
+@authentication
+def get_test_sessions_for_test_assignation_count():
+    try:
+        test_assignation_id = request.args.get('test_assignation_id')
+        if test_assignation_id:
+            count = provider.get_test_sessions_for_test_assignation_count(test_assignation_id)
+            response = Response(json.dumps(count), 200, mimetype="application/json")
+        else:
+            error = {"message": "Test Assignation Id expected. Check the format of the request."}
+            response = Response(json.dumps(error), 404, mimetype="application/json")
+        return response
+    except Exception as e:
+        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 404, mimetype="application/json")
+
+    return response
+
+
 

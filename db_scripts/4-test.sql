@@ -220,8 +220,3 @@ BEGIN
   RETURN right_now;
 END;
 ' LANGUAGE 'plpgsql';
-
-select add_student_class('Beginner', 'level_1_class_1_fall');
-select add_student_class('Beginner', 'level_1_class_1_winter');
-select add_student_class('Intermediate', 'level_1_class_1_fall');
-select add_student_class('Advanced', 'level_1_class_1_spring');
