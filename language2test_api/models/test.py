@@ -76,7 +76,6 @@ class TestSchema(BaseModelSchema):
     test_writing = fields.Nested(WritingSchema, many=True)
     test_user_field_category = fields.Nested(UserFieldCategorySchema, many=True)
     mandatory_test_user_field_category = fields.Nested(UserFieldCategorySchema, many=True)
-    test_student_class = fields.Nested(StudentClassSchema, many=True)
     immutable = fields.Boolean()
     unremovable = fields.Boolean()
 
