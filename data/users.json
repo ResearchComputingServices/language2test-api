@@ -130,8 +130,30 @@
         "fields": []
     },
     {
-        "name": "testtaker",
-        "first_name": "Test Taker",
+        "name": "testtaker1",
+        "first_name": "Test Taker 1",
+        "last_name": "User",
+        "roles": [
+            {
+                "name": "Test Taker"
+            }
+        ],
+        "fields": []
+    },
+        {
+        "name": "testtaker2",
+        "first_name": "Test Taker 2",
+        "last_name": "User",
+        "roles": [
+            {
+                "name": "Test Taker"
+            }
+        ],
+        "fields": []
+    },
+        {
+        "name": "testtaker3",
+        "first_name": "Test Taker 3",
         "last_name": "User",
         "roles": [
             {
@@ -141,8 +163,63 @@
         "fields": []
     },
     {
-        "name": "instructor",
-        "first_name": "Instructor",
+        "name": "testtaker4",
+        "first_name": "Test Taker 4",
+        "last_name": "User",
+        "roles": [
+            {
+                "name": "Test Taker"
+            }
+        ],
+        "fields": []
+    },
+    {
+        "name": "testtaker5",
+        "first_name": "Test Taker 5",
+        "last_name": "User",
+        "roles": [
+            {
+                "name": "Test Taker"
+            }
+        ],
+        "fields": []
+    },
+    {
+        "name": "testtaker6",
+        "first_name": "Test Taker 6",
+        "last_name": "User",
+        "roles": [
+            {
+                "name": "Test Taker"
+            }
+        ],
+        "fields": []
+    },
+    {
+        "name": "testtaker7",
+        "first_name": "Test Taker 7",
+        "last_name": "User",
+        "roles": [
+            {
+                "name": "Test Taker"
+            }
+        ],
+        "fields": []
+    },
+    {
+        "name": "instructor1",
+        "first_name": "Instructor 1",
+        "last_name": "User",
+        "roles": [
+            {
+                "name": "Instructor"
+            }
+        ],
+        "fields": []
+    },
+    {
+        "name": "instructor2",
+        "first_name": "Instructor 2",
         "last_name": "User",
         "roles": [
             {
