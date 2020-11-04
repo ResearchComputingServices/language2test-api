@@ -265,7 +265,8 @@ class TestSessionExportProvider(RawSqlProvider):
             else:
                 zip_file.writestr("Test Details.xlsx", xlsx.getvalue())
             xlsx = BytesIO
-            zip_file.writestr("Test Summary.xlsx", xlsx.getvalue(TestSessionExportProvider().test_session_summary()))
+            zip_file.writestr("User Test Summary.xlsx", xlsx.getvalue(TestSessionExportProvider().test_session_summary()))
+            zip_file.writestr("Specific Test Summary.xlsx", xlsx.getvalue(TestSessionExportProvider().test_session_summary_for_each_test_category()))
 
         output.seek(0)
         return output
@@ -523,6 +524,222 @@ class TestSessionExportProvider(RawSqlProvider):
             worksheet = writer.sheets["Test Info"]
             worksheet.set_column('A:A', 13, format)
             worksheet.set_column('B:B', 45, format)
+            writer.save()
+
+        output.seek(0)
+        return output
+
+    def test_session_user_answer_summary(self, results, max_voc_test, max_rc_test, max_cloze_test, max_writing_test):
+
+        test_results = results['test']
+
+        test_infos = {
+            "User ID": results['user_id'],
+            "Test Info": results['name'],
+            "User Name": results['user']['name'],
+            "First Name": results['user']['first_name'],
+            "Last Name": results['user']['last_name']
+        }
+        if max_voc_test > 0:
+            if ('test_vocabulary' in test_results) and (len(test_results['test_vocabulary']) > 0):
+                voc_results = test_results["test_vocabulary"]
+                for i in range(len(results['results_vocabulary'][0]['answers'])):
+
+                    answer = results['results_vocabulary'][0]['answers'][i]['text']
+
+                    if answer is None:
+                        test_result = "Empty Answer!"
+                    else:
+                        test_result = answer
+
+                    test_infos["voc #" + str(i+1)] = test_result
+
+                    if len(results['results_vocabulary'][0]['answers']) < max_voc_test:
+                        missing_num_voc = max_voc_test - len(results['results_vocabulary'][0]['answers'])
+                        for j in range(missing_num_voc):
+                            test_infos["voc #" + str(i + j + 1)] = 0
+
+            else:
+                for k in range(max_voc_test):
+                    test_infos["voc #" + str(k + 1)]: ""
+
+        if max_rc_test > 0:
+            rc_results = test_results["test_rc"]
+
+            if 'test_rc' in test_results and (len(test_results['test_rc']) > 0):
+
+                for i in range(len(rc_results)):
+                    rc_questions = test_results["test_rc"][i]['questions']
+                    for j in range(len(rc_questions)):
+                        answer = results['results_rc'][i]['answers'][j]['text']
+                        if answer is None:
+                            test_result = "Empty Answer!"
+                        else:
+                            test_result = answer
+                        test_infos["rc #" + str(i + 1) + " q #" + str(j + 1)] = test_result
+
+                        if len(test_results["test_rc"][i]['questions']) < max_rc_test:
+                            missing_num_rc = max_rc_test - len(test_results["test_rc"][i]['questions'])
+                            for k in range(missing_num_rc):
+                                test_infos["rc #" + str(j + k + 1)]: " "
+
+            else:
+                for h in range(max_rc_test):
+                    test_infos["rc #" + str(h + 1)]: ""
+
+        if max_cloze_test > 0:
+            if 'test_cloze' in test_results and (len(test_results['test_cloze']) > 0):
+                cloze_results = test_results["test_cloze"]
+
+                for i in range(len(cloze_results)):
+                    cloze_questions = test_results["test_cloze"][i]['questions']
+                    for j in range(len(cloze_questions)):
+                        answer = results['results_cloze'][i]['answers'][j]['text']
+                        if answer is None:
+                            test_result = "Empty Answer!"
+                        else:
+                            test_result = answer
+                        test_infos["cloze #" + str(i + 1) + " q #" + str(j + 1)] = test_result
+
+                        if len(cloze_questions) < max_cloze_test:
+                            missing_num_cloze = max_cloze_test - len(cloze_questions)
+                            for k in range(missing_num_cloze):
+                                test_infos["cloze #" + str(j + k + 1)]: " "
+            else:
+                for h in range(max_cloze_test):
+                    test_infos["cloze #" + str(h + 1)]: ""
+
+        if max_writing_test > 0:
+            if 'test_writing' in test_results and (len(test_results['test_writing']) > 0):
+                writing_results = test_results["test_writing"]
+                for i in range(max_writing_test):
+                    test_infos["writing # " + str(i + 1)] = 0
+
+                    if len(writing_results) < max_writing_test:
+                        missing_num_writing = max_writing_test - len(writing_results)
+                        for j in range(missing_num_writing):
+                            test_infos["writing # " + str(j + 1)] = " "
+            else:
+                for h in range(max_cloze_test):
+                    test_infos["writing # " + str(h + 1)] = " "
+
+        return test_infos
+
+    def test_session_summary_for_each_test_category(self):
+        sessions = TestSession.query.all()
+        records_list = []
+        for s in sessions:
+            records = {
+                "Id": s.id,
+                "Name": s.name,
+                "Test Id": s.test_id,
+                "Test Name": s.test.name,
+                "Student Id": s.user_id,
+                "Username": s.user.name,
+                "First Name": s.user.first_name,
+                "Last Name": s.user.last_name,
+                "Start Time": s.start_datetime.strftime("%A, %B %d, %Y %I %P"),
+                "End Time": s.end_datetime.strftime("%A, %B %d, %Y %I %P"),
+                "Created Time": s.created_datetime.strftime("%A, %B %d, %Y %I %P")}
+            t_s = TestSession.query.filter_by(id=s.id).first()
+            results = test_schema.dump(t_s)
+            #print(results)
+            test_time = testhelper.calculate_time_consumption(results['end_datetime'], results['start_datetime'])
+            records["Time Consumption"] = test_time
+            records['Vocabulary Grade'] = TestSessionExportProvider().vocabulary_test_grade(results)
+            records["Reading Comprehension Grade"] = TestSessionExportProvider().rc_test_grade(results)
+            records["Cloze Grade"] = TestSessionExportProvider().cloze_test_grade(results)
+            records["Writing Grade"] = TestSessionExportProvider().writing_test_grade(results)
+            records_list.append(records)
+
+        output = BytesIO()
+
+        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+            pd.DataFrame(records_list).to_excel(writer,
+                                                sheet_name="Test Session Summary",
+                                                index=False)
+            workbook = writer.book
+            worksheet = writer.sheets["Test Session Summary"]
+            format = workbook.add_format()
+            format.set_align('center')
+            format.set_align('vcenter')
+            worksheet.set_column('A:A', 13, format)
+            worksheet.set_column('B:B', 45, format)
+            worksheet.set_column('C:C', 13, format)
+            worksheet.set_column('D:D', 20, format)
+            worksheet.set_column('E:E', 20, format)
+            worksheet.set_column('F:F', 20, format)
+            worksheet.set_column('G:H', 36, format)
+            worksheet.set_column('I:L', 45, format)
+            worksheet.set_column('M:P', 36, format)
+
+            max_voc_test = 0
+            max_rc_test = 0
+            max_cloze_test = 0
+            max_writing_test = 0
+            for i1 in range(len(sessions)):
+                t_s = TestSession.query.filter_by(id=i1 + 1).first()
+                result = test_schema.dump(t_s)
+                test_results = result['test']
+                if 'test_vocabulary' in test_results:
+                    voc_results = test_results["test_vocabulary"]
+                    if max_voc_test < len(voc_results):
+                        max_voc_test = len(voc_results)
+                if 'test_rc' in test_results:
+                    rc_results = test_results["test_rc"]
+                    if max_rc_test < len(rc_results):
+                        max_rc_test = len(rc_results)
+
+                if 'test_cloze' in test_results:
+                    cloze_results = test_results["test_cloze"]
+                    if max_cloze_test < len(cloze_results):
+                        max_cloze_test = len(cloze_results)
+                if 'test_writing' in test_results:
+                    writing_results = test_results["test_writing"]
+                    if max_writing_test < len(writing_results):
+                        max_writing_test = len(writing_results)
+
+            # for detailed test info
+            for i2 in range(len(sessions)):
+                t_s = TestSession.query.filter_by(id=i2 + 1).first()
+                result = test_schema.dump(t_s)
+                test_results = result['test']
+                if 'test_rc' in test_results:
+                    max_rc_counter = 0
+                    for irc in range(len(rc_results)):
+                        rc_questions = test_results["test_rc"][irc]['questions']
+                        for jrc in range(len(rc_questions)):
+                            max_rc_counter = max_rc_counter + 1
+                    if max_rc_test < max_rc_counter:
+                        max_rc_test = max_rc_counter
+                if 'test_cloze' in test_results:
+                    max_cloze_counter = 0
+                    for icloze in range(len(cloze_results)):
+                        cloze_questions = test_results["test_cloze"][icloze]['questions']
+                        for jcloze in range(len(cloze_questions)):
+                            max_cloze_counter = max_cloze_counter + 1
+                    if max_cloze_test < max_cloze_counter:
+                        max_cloze_test = max_cloze_counter
+            test_info = []
+            for i in range(len(sessions)):
+                t_s = TestSession.query.filter_by(id=i + 1).first()
+                result = test_schema.dump(t_s)
+
+                test_info.append(TestSessionExportProvider().test_session_user_answer_summary(result, max_voc_test,
+                                                                                        max_rc_test, max_cloze_test,
+                                                                                        max_writing_test))
+            pd.DataFrame(test_info).to_excel(writer,
+                                             sheet_name="Test Info",
+                                             index=False)
+            workbook = writer.book
+            format = workbook.add_format()
+            format.set_align('center')
+            format.set_align('vcenter')
+            worksheet = writer.sheets["Test Info"]
+            worksheet.set_column('A:A', 13, format)
+            worksheet.set_column('B:B', 45, format)
+            worksheet.set_column('C:E', 16, format)
+            worksheet.set_column('F:AD', 20, format)
             writer.save()
 
         output.seek(0)
