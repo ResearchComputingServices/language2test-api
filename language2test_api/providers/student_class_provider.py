@@ -32,8 +32,18 @@ class StudentClassProvider(BaseProvider):
             instructor = User.query.filter_by(name=instructor_name).first()
             if instructor:
                 data['instructor_id'] = instructor.id
+
         student_class.display = data.get('display')
         student_class.instructor_id = data.get('instructor_id')
+
+        if 'term' in data:
+            student_class.term = data.get('term')
+
+        if 'level' in data:
+            student_class.level = data.get('level')
+
+        if 'program' in data:
+            student_class.program = data.get('program')
 
         for student_student_class in data.get('student_student_class'):
             student = User.query.filter_by(name=student_student_class.get('name')).first()
