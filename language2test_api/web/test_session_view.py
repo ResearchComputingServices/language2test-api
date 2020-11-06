@@ -174,5 +174,20 @@ def get_test_sessions_for_test_assignation_count():
 
     return response
 
-
+@language2test_bp.route("instructor/test_sessions/export", methods=['GET'])
+@crossdomain(origin='*')
+@authentication
+def instructor_export_test_sessions():
+    test_assignation_id = request.args.get('test_assignation_id')
+    if test_assignation_id is not None:
+        try:
+            sessions = provider.get_test_sessions_for_test_assignation(test_assignation_id)
+            name = request.args.get('name')
+            return send_file(export_provider.write_results_into_file(sessions, name),attachment_filename='Test Details.zip',
+                            mimetype="application/zip",
+                            as_attachment=True, cache_timeout=-1)
+        except Exception as e:
+            error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
+            response = Response(json.dumps(error), 404, mimetype="application/json")
+            return response
 
