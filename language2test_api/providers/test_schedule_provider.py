@@ -37,11 +37,12 @@ class TestScheduleProvider(BaseProvider):
                     test_id = test_assignation.test_id
 
                     # We will query the test in test session to verify it is already taken.
-                    test_session = TestSession.query.filter_by(test_id=test_id, user_id=user_id).first()
+                    test_sessions = TestSession.query.filter_by(test_id=test_id, user_id=user_id, class_id=student_class_id).all()
                     taken = False
-                    if test_session:
-                        if test_session.created_datetime>=test_assignation.start_datetime and test_session.created_datetime<=test_assignation.end_datetime:
+                    for test_session in test_sessions:
+                        if (test_session.created_datetime>=test_assignation.start_datetime and test_session.created_datetime<=test_assignation.end_datetime):
                             taken = True
+                            break
 
                     info_schedule['student_class_id'] = student_class_id
                     info_schedule['student_class_name'] = student_class.display

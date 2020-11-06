@@ -109,6 +109,24 @@ def add_user():
         data = request.get_json()
         user = provider.add(data)
         if user:
+            result = user_schema.dump(user)
+            response = jsonify(result)
+        else:
+            response = Response(json.dumps(data), 500, mimetype="application/json")
+    except Exception as e:
+        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500, mimetype="application/json")
+
+    return response
+
+
+#This function will be merged with add_user: once adding a user to keycloak and to the DB
+#is transactional.
+def add_user_keycloak():
+    try:
+        data = request.get_json()
+        user = provider.add(data)
+        if user:
             user_dict = {}
             user_dict['User Name'] = user.name
             user_dict['First Name'] = user.first_name

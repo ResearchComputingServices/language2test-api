@@ -20,6 +20,7 @@ class TestSession(BaseModel):
     end_datetime = db.Column(db.DateTime())
     result_as_json = db.Column(db.String())
     test_id = db.Column(db.Integer(), ForeignKey('test.id'))
+    class_id = db.Column(db.Integer(), ForeignKey('student_class.id'))
     test = relationship("Test")
     grade = db.Column(db.Float())
     max_grade = db.Column(db.Float())
@@ -36,6 +37,7 @@ class TestSession(BaseModel):
         self.start_datetime = item.get('start_datetime')
         self.end_datetime = item.get('end_datetime')
         self.test_id = item.get('test_id')
+        self.class_id = item.get('class_id')
         self.grade = item.get('grade')
         self.max_grade = item.get('max_grade')
 
@@ -55,6 +57,7 @@ class TestSessionSchema(BaseModelSchema):
     end_datetime = fields.DateTime()
     test = fields.Nested(TestSchema)
     test_id = fields.Integer()
+    class_id =fields.Integer()
     grade = fields.Float()
     max_grade = fields.Float()
     results_vocabulary = fields.Nested(TestSessionResultsVocabularySchema, many=True)

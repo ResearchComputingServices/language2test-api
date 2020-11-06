@@ -33,6 +33,7 @@ class TestSessionProvider(TestSessionResultsVocabularyProvider,
         data = self.add_category_to_data(data)
         test_session.start_datetime = data.get('start_datetime')
         test_session.end_datetime = data.get('end_datetime')
+        test_session.class_id = data.get('class_id')
         test_session.result_as_json = data.get('result_as_json')
         data_test = data.get('test')
         test_session.test_id = data_test['id']
