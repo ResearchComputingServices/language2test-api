@@ -574,5 +574,113 @@ def get_instructor_student_class_count():
     return response
 
 
+@language2test_bp.route("/instructor/student_classes/upload", methods=['POST'])
+@crossdomain(origin='*')
+@authentication
+def instructor_student_class_upload():
+    raw_data = request.get_data()
+    data = pd.read_excel(raw_data, engine="openpyxl")
+    try:
+        current_user = user_provider.get_authenticated_user()
+        is_instructor = user_provider.has_role(current_user, 'Instructor')
+        if is_instructor:
+            instructor_id = current_user.id
+            token_kc = []
+            scs = {}
+            for _, row in data.iterrows():
+                d = dict(row)
+                if type(d['Class Name']) == str:
+                    exist_sc = StudentClass.query.filter_by(name=d["Class Name"]).first()
+                    sc = scs.get(d["Class Name"])
+                    if sc is None and exist_sc is None:
+                        sc_data = {}
+                        sc_data["name"] = d["Class Name"]
+                        sc_data["display"] = d["Class Name"]
+                        sc_data["id"] = provider.generate_id(field=StudentClass.id)
+                        if "Term" in d:
+                            sc_data["term"] = d["Term"]
+                        if "Level" in d:
+                            sc_data["level"] = d["Level"]
+                        if "Program" in d:
+                            sc_data["program"] = d["Program"]
+                        instructor = user_provider.get_authenticated_user()
+                        sc = StudentClass(sc_data)
+                        if "Administrator" in map(lambda e: e.name, instructor.roles) or "Instructor" in map(
+                                lambda e: e.name, instructor.roles) \
+                                or "Teacher" in map(lambda e: e.name, instructor.roles):
+                            sc.instructor_id = instructor.id
+                            sc.instructor = instructor
+                        scs[d["Class Name"]] = sc
+                    else:
+                        if exist_sc.instructor_id == instructor_id:
+                            user = User.query.filter_by(name=d["User Name"]).first()
+                            if user is None:
+                                user = __import_user_in_db(d)
+                                if user:
+                                    token_kc = __import_user_in_keycloak(d, token_kc)
+                            else:
+                                marked = {}
+                                for field in user.fields:
+                                    if field.name == "student_id" and "Student ID" in d:
+                                        marked["student_id"] = True
+                                        field.value = d["Student ID"]
+                                    elif field.name == "first_language" and "First Language" in d:
+                                        marked["first_language"] = True
+                                        field.value = d["First Language"]
+                                    elif field.name == "email" and "Email" in d:
+                                        marked["email"] = True
+                                        field.value = d["Email"]
+                                    elif field.name == "education" and "Education" in d:
+                                        marked["education"] = True
+                                        field.value = d["Education"]
+                                    elif field.name == "phone" and "Phone" in d:
+                                        marked["phone"] = True
+                                        field.value = d["Phone"]
+                                    elif field.name == "address" and "Address" in d:
+                                        marked["address"] = True
+                                        field.value = d["Address"]
+                                if not marked.get("student_id", False) and "Student ID" in d:
+                                    user.fields.append(UserField(
+                                        {"name": "student_id", "type": "text", "value": d["Student ID"], "user_id": user.id}))
+                                if not marked.get("first_language", False) and "First Language" in d:
+                                    user.fields.append(UserField(
+                                        {"name": "first_language", "type": "Language",
+                                         "value": d["First Language"], "user_id": user.id}))
+                                if not marked.get("email", False) and "Email" in d:
+                                    user.fields.append(UserField(
+                                        {"name": "email", "type": "text", "value": d["Email"], "user_id": user.id}))
+                                if not marked.get("education", False) and "Education" in d:
+                                    user.fields.append(UserField(
+                                        {"name": "education", "type": "University", "value": d["Education"],
+                                         "user_id": user.id}))
+                                if not marked.get("phone", False) and "Phone" in d:
+                                    user.fields.append(UserField(
+                                        {"name": "phone", "type": "text", "value": d["Phone"], "user_id": user.id}))
+                                if not marked.get("address", False) and "Address" in d:
+                                    user.fields.append(UserField(
+                                        {"name": "address", "type": "text", "value": d["Address"], "user_id": user.id}))
+                            if "Test Taker" in map(lambda e: e.name, user.roles) or "Administrator" in map(lambda e: e.name,
+                                                                                                           user.roles):
+                                if exist_sc is not None:
+                                    if user not in exist_sc.student_student_class:
+                                        exist_sc.student_student_class.append(user)
+                                else:
+                                    if user not in scs[d["Class Name"]].student_student_class:
+                                        scs[d["Class Name"]].student_student_class.append(user)
+                                response = Response(json.dumps({"success": True}), 200, mimetype="application/json")
+                        else:
+                            error = {"message": "The class doesn't associated with the instructor"}
+                            response = Response(json.dumps(error), 404, mimetype="application/json")
+                db.session.add_all(scs.values())
+                db.session.commit()
 
+        else:
+            error = {"message": "The user is not an instructor."}
+            response = Response(json.dumps(error), 403, mimetype="application/json")
 
+        return response
+    except Exception as e:
+        error = { "exception": str(e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500, mimetype="application/json")
+
+    return response
