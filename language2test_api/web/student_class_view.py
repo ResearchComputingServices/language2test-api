@@ -574,5 +574,77 @@ def get_instructor_student_class_count():
     return response
 
 
+@language2test_bp.route("/test_taker/student_classes", methods=['GET'])
+@crossdomain(origin='*')
+@authentication
+def get_test_taker_student_class():
+    try:
+        limit = request.args.get('limit')
+        offset = request.args.get('offset')
+
+        if 'column' in request.args:
+            column = request.args.get('column')
+        else:
+            column = 'id'
+
+        if 'order' in request.args:
+            order = request.args.get('order')
+        else:
+            order = 'asc'
+
+        #Retrieve user
+        user = user_provider.get_authenticated_user()
+        if user:
+            is_test_taker = user_provider.has_role(user, 'Test Taker')
+            if is_test_taker:
+                test_taker_id =user.id
+                if test_taker_id:
+                    properties = provider.get_test_taker_student_classes(test_taker_id,offset,limit,column,order)
+                    result = student_class_schema_many.dump(properties)
+                    return jsonify(result)
+                else:
+                    error = {"message": "No Id found for the user."}
+                    response = Response(json.dumps(error), 404, mimetype="application/json")
+            else:
+                error = {"message": "The user is not a test taker."}
+                response = Response(json.dumps(error), 403, mimetype="application/json")
+        else:
+            error = {"message": "User not found."}
+            response = Response(json.dumps(error), 404, mimetype="application/json")
+    except Exception as e:
+        error = { "exception": str(e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500, mimetype="application/json")
+
+    return response
+
+
+@language2test_bp.route("/test_taker/student_classes/count", methods=['GET'])
+@crossdomain(origin='*')
+@authentication
+def get_test_taker_student_class_count():
+    try:
+        # Retrieve user
+        user = user_provider.get_authenticated_user()
+        is_test_taker = user_provider.has_role(user, 'Test Taker')
+        if is_test_taker:
+            test_taker_id = user.id
+            if test_taker_id:
+                count = provider.get_test_taker_student_classes_count(test_taker_id)
+                response = Response(json.dumps(count), 200, mimetype="application/json")
+            else:
+                error = {"message": "No Id found for the user."}
+                response = Response(json.dumps(error), 404, mimetype="application/json")
+        else:
+            error = {"message": "The user is not a test taker."}
+            response = Response(json.dumps(error), 403, mimetype="application/json")
+
+        return response
+    except Exception as e:
+        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500, mimetype="application/json")
+
+    return response
+
+
 
 
