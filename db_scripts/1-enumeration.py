@@ -107,6 +107,26 @@ def populate(db, models, providers):
             db.session.add(value)
             enumeration.values.append(value)
 
+        # Creates Sex Enumeration
+    data = {
+        'id': 6,
+        'name': 'Yes/No',
+        'values': [],
+    }
+
+    enumeration = Enumeration(data)
+    db.session.add(enumeration)
+
+    # Add Sex Enumeration Values
+    with open('data/yes_no.txt') as file:
+        for line in file:
+            d = {}
+            d['text'] = line
+            d['enumeration_id'] = enumeration.id
+            value = EnumerationValue(d)
+            db.session.add(value)
+            enumeration.values.append(value)
+
 
 
 

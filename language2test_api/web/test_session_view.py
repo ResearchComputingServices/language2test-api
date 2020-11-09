@@ -121,7 +121,7 @@ def export_test_sessions():
                                 as_attachment=True, cache_timeout=-1)
         except Exception as e:
             error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-            response = Response(json.dumps(error), 404, mimetype="application/json")
+            response = Response(json.dumps(error), 500, mimetype="application/json")
             return response
 
 
@@ -153,7 +153,7 @@ def get_test_sessions_for_test_assignation():
             response = Response(json.dumps(error), 404, mimetype="application/json")
     except Exception as e:
         error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 404, mimetype="application/json")
+        response = Response(json.dumps(error), 500, mimetype="application/json")
 
     return response
 
@@ -173,7 +173,7 @@ def get_test_sessions_for_test_assignation_count():
         return response
     except Exception as e:
         error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 404, mimetype="application/json")
+        response = Response(json.dumps(error), 500, mimetype="application/json")
 
     return response
 
@@ -187,18 +187,18 @@ def instructor_export_test_sessions():
     # Check if the user is an instructor
     if is_instructor:
         instructor_id = current_user.id
-        instructor_assignation_list = test_assignation_provider.get_instructor_test_assignations_id_only(instructor_id)
+        instructor_assignation_list = test_assignation_provider.get_instructor_test_assignations(instructor_id)
         # Check if the test assignation is associated with the instructor
         if test_assignation_id in instructor_assignation_list:
             try:
-                sessions = provider.get_test_sessions_for_test_assignation(test_assignation_id)
+                sessions = provider.get_test_sessions_for_test_assignation_id_only(test_assignation_id)
                 name = request.args.get('name')
                 return send_file(export_provider.write_results_into_file(sessions, name),attachment_filename='Test Details.zip',
                                 mimetype="application/zip",
                                 as_attachment=True, cache_timeout=-1)
             except Exception as e:
                 error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-                response = Response(json.dumps(error), 404, mimetype="application/json")
+                response = Response(json.dumps(error), 500, mimetype="application/json")
                 return response
         else:
             error = {"message": "The test assignation is not associated with the instructor."}

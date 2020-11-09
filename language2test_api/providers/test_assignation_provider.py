@@ -65,7 +65,7 @@ class TestAssignationProvider(BaseProvider):
         db.session.commit()
 
 
-    def get_instructor_test_assignations_id_only(self, instructor_id):
+    def get_instructor_test_assignations(self, instructor_id):
         #1. Get all student classes for the instructor_id
         student_classes = StudentClass.query.filter_by(instructor_id=int(instructor_id)).all()
         test_assignation_id_list = []
