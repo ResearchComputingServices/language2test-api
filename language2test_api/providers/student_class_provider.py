@@ -107,3 +107,56 @@ class StudentClassProvider(BaseProvider):
         dict = {"count": len(instructor_classes)}
 
         return dict
+
+
+    def get_test_taker_student_classes(self, user_id,  offset, limit, column, order):
+
+        student_classes_ids = []
+        student_classes = []
+
+        # Retrieve all student classes of the user_id
+        proxy_student_classes = db.session.execute('SELECT * FROM student_student_class WHERE student_id = :val',
+                                                  {'val': user_id})
+
+
+        for item_sc in proxy_student_classes:
+            student_classes_ids.append(item_sc['student_class_id'])
+
+        p = column + ' ' + order
+
+        if limit and offset:
+            limit = int(limit)
+            offset = int(offset)
+            page = int(offset / limit) + 1
+            # 4. Filter query to match only the uers ids
+            student_classes= StudentClass.query.filter(StudentClass.id.in_(student_classes_ids)).order_by(text(p)).paginate(page=page,
+                                                                                                   per_page=limit,
+                                                                                                   error_out=False).items
+        else:
+            student_classes = StudentClass.query.filter(StudentClass.id.in_(student_classes_ids)).order_by(text(p)).all()
+
+        return student_classes
+
+
+    def get_test_taker_student_classes_count(self, user_id):
+
+        student_classes_ids = []
+        student_classes = []
+
+        # Retrieve all student classes of the user_id
+        proxy_student_classes = db.session.execute('SELECT * FROM student_student_class WHERE student_id = :val',
+                                                  {'val': user_id})
+
+
+        for item_sc in proxy_student_classes:
+            student_classes_ids.append(item_sc['student_class_id'])
+
+        dict = {"count": len(student_classes_ids)}
+
+        return dict
+
+
+
+        return student_classes
+
+
