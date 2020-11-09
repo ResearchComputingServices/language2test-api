@@ -159,7 +159,7 @@ class TestSessionProvider(TestSessionResultsVocabularyProvider,
 
         return dict
 
-    def get_test_sessions_for_test_assignation(self, test_assignation_id):
+    def get_test_sessions_for_test_assignation_id_only(self, test_assignation_id):
 
         test_sessions = []
         test_sessions_ids = []
