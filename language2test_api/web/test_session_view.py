@@ -10,12 +10,15 @@ import pandas as pd
 from io import BytesIO
 from language2test_api.models.test_session import TestSession, TestSessionSchema
 from language2test_api.providers.test_session_export_provider import TestSessionExportProvider
-
+from language2test_api.providers.test_assignation_provider import TestAssignationProvider
+from language2test_api.providers.user_provider import UserProvider
+from language2test_api.models.student_class import StudentClass, StudentClassSchema
 test_schema = TestSessionSchema(many=False)
 test_schema_many = TestSessionSchema(many=True)
 provider = TestSessionProvider()
 export_provider = TestSessionExportProvider()
-
+user_provider = UserProvider()
+test_assignation_provider = TestAssignationProvider()
 @language2test_bp.route("/test_sessions/count", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
@@ -174,5 +177,34 @@ def get_test_sessions_for_test_assignation_count():
 
     return response
 
-
-
+@language2test_bp.route("instructor/test_sessions/export", methods=['GET'])
+@crossdomain(origin='*')
+@authentication
+def instructor_export_test_sessions():
+    test_assignation_id = request.args.get('test_assignation_id')
+    current_user = user_provider.get_authenticated_user()
+    is_instructor = user_provider.has_role(current_user, 'Instructor')
+    # Check if the user is an instructor
+    if is_instructor:
+        instructor_id = current_user.id
+        instructor_assignation_list = test_assignation_provider.get_instructor_test_assignations(instructor_id)
+        # Check if the test assignation is associated with the instructor
+        if test_assignation_id in instructor_assignation_list:
+            try:
+                sessions = provider.get_test_sessions_for_test_assignation(test_assignation_id)
+                name = request.args.get('name')
+                return send_file(export_provider.write_results_into_file(sessions, name),attachment_filename='Test Details.zip',
+                                mimetype="application/zip",
+                                as_attachment=True, cache_timeout=-1)
+            except Exception as e:
+                error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
+                response = Response(json.dumps(error), 404, mimetype="application/json")
+                return response
+        else:
+            error = {"message": "The test assignation is not associated with the instructor."}
+            response = Response(json.dumps(error), 403, mimetype="application/json")
+            return response
+    else:
+        error = {"message": "The user is not an instructor."}
+        response = Response(json.dumps(error), 403, mimetype="application/json")
+        return response
