@@ -10,6 +10,8 @@ from language2test_api.decorators.authentication import authentication
 from language2test_api.decorators.authorization import authorization
 from language2test_api.providers.user_provider import UserProvider
 from language2test_api.models.test_session import TestSession, TestSessionSchema
+from language2test_api.models.user_field import UserFieldSchema
+from language2test_api.models.user_field_category import UserFieldCategorySchema
 from language2test_api.web.user_keycloak import UserKeycloak
 from language2test_api.extensions import oidc
 import pandas as pd
@@ -20,6 +22,8 @@ test_schema = TestSessionSchema(many=False)
 test_schema_many = TestSessionSchema(many=True)
 user_schema = UserSchema(many=False)
 user_schema_many = UserSchema(many=True)
+user_field_schema_many = UserFieldSchema(many=True)
+user_field_category_schema_many = UserFieldCategorySchema(many=True)
 
 provider = UserProvider()
 keycloak = UserKeycloak()
@@ -105,6 +109,24 @@ def get_user():
 @crossdomain(origin='*')
 @authentication
 def add_user():
+    try:
+        data = request.get_json()
+        user = provider.add(data)
+        if user:
+            result = user_schema.dump(user)
+            response = jsonify(result)
+        else:
+            response = Response(json.dumps(data), 500, mimetype="application/json")
+    except Exception as e:
+        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500, mimetype="application/json")
+
+    return response
+
+
+#This function will be merged with add_user: once adding a user to keycloak and to the DB
+#is transactional.
+def add_user_keycloak():
     try:
         data = request.get_json()
         user = provider.add(data)
@@ -572,6 +594,40 @@ def import_users():
         response = Response(json.dumps(error), 500, mimetype="application/json")
 
     return response
+
+
+@language2test_bp.route("/test_taker/demographic_questionnaires", methods=['GET'])
+@crossdomain(origin='*')
+@authentication
+def get_demographic_questionnaire():
+    try:
+        start_datetime_rq = request.args.get('start_datetime')
+        end_datetime_rq = request.args.get('end_datetime')
+
+        user = provider.get_authenticated_user()
+        if user:
+            is_test_taker = provider.has_role(user, 'Test Taker')
+            if is_test_taker:
+                test_taker_id =user.id
+                properties = provider.get_demographic_fields(test_taker_id, start_datetime_rq, end_datetime_rq)
+                #result = user_field_schema_many.dump(properties)
+                result = user_field_category_schema_many.dump(properties)
+                return jsonify(result)
+            else:
+                error = {"message": "No Id found for the user."}
+                response = Response(json.dumps(error), 404, mimetype="application/json")
+        else:
+            error = {"message": "User not found."}
+            response = Response(json.dumps(error), 404, mimetype="application/json")
+    except Exception as e:
+        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500, mimetype="application/json")
+
+    return response
+
+
+
+
 
 
 

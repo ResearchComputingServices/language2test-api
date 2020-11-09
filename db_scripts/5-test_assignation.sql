@@ -1,11 +1,11 @@
 INSERT INTO public."test_assignation"(id, test_id, start_datetime, end_datetime)
-VALUES (1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '2 hour');
+VALUES (1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '3 day');
 
 INSERT INTO public."test_assignation"(id, test_id, start_datetime, end_datetime)
-VALUES (2, 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '2 hour');
+VALUES (2, 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '3 day');
 
 INSERT INTO public."test_assignation"(id, test_id, start_datetime, end_datetime)
-VALUES (3, 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '2 hour');
+VALUES (3, 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '3 day');
 
 CREATE OR REPLACE  FUNCTION add_student_class_to_test_assignation (text, integer) RETURNS timestamp with time zone AS '
 DECLARE
