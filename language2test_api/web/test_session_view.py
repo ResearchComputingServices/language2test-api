@@ -187,7 +187,7 @@ def instructor_export_test_sessions():
     # Check if the user is an instructor
     if is_instructor:
         instructor_id = current_user.id
-        instructor_assignation_list = test_assignation_provider.get_instructor_test_assignations(instructor_id)
+        instructor_assignation_list = test_assignation_provider.get_instructor_test_assignations_id_only(instructor_id)
         # Check if the test assignation is associated with the instructor
         if test_assignation_id in instructor_assignation_list:
             try:
