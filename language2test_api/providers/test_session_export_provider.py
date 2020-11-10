@@ -265,8 +265,8 @@ class TestSessionExportProvider(RawSqlProvider):
             else:
                 zip_file.writestr("Test Details.xlsx", xlsx.getvalue())
             xlsx = BytesIO
-            zip_file.writestr("User Test Summary.xlsx", xlsx.getvalue(TestSessionExportProvider().test_session_summary()))
-            zip_file.writestr("Specific Test Summary.xlsx", xlsx.getvalue(TestSessionExportProvider().test_session_summary_for_each_test_category()))
+            zip_file.writestr("User Test Summary.xlsx", xlsx.getvalue(TestSessionExportProvider().test_session_summary(sessions)))
+            zip_file.writestr("Specific Test Summary.xlsx", xlsx.getvalue(TestSessionExportProvider().test_session_summary_for_each_test_category(sessions)))
 
         output.seek(0)
         return output
@@ -414,8 +414,8 @@ class TestSessionExportProvider(RawSqlProvider):
         else:
             return None
 
-    def test_session_summary(self):
-        sessions = TestSession.query.all()
+    def test_session_summary(self, sessions):
+
         records_list = []
         for s in sessions:
             records = {
@@ -625,8 +625,8 @@ class TestSessionExportProvider(RawSqlProvider):
 
         return test_infos
 
-    def test_session_summary_for_each_test_category(self):
-        sessions = TestSession.query.all()
+    def test_session_summary_for_each_test_category(self, sessions):
+
         records_list = []
         for s in sessions:
             records = {

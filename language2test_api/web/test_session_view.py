@@ -181,15 +181,18 @@ def get_test_sessions_for_test_assignation_count():
 @crossdomain(origin='*')
 @authentication
 def instructor_export_test_sessions():
-    test_assignation_id = request.args.get('test_assignation_id')
+    test_assignation_id = int(request.args.get('test_assignation_id'))
     current_user = user_provider.get_authenticated_user()
     is_instructor = user_provider.has_role(current_user, 'Instructor')
     # Check if the user is an instructor
     if is_instructor:
         instructor_id = current_user.id
         instructor_assignation_list = test_assignation_provider.get_instructor_test_assignations(instructor_id)
+        instructor_assignation_id_list = []
+        for each_instructor_assignation in instructor_assignation_list:
+            instructor_assignation_id_list.append(each_instructor_assignation.id)
         # Check if the test assignation is associated with the instructor
-        if test_assignation_id in instructor_assignation_list:
+        if test_assignation_id in instructor_assignation_id_list:
             try:
                 sessions = provider.get_test_sessions_for_test_assignation_id_only(test_assignation_id)
                 name = request.args.get('name')
