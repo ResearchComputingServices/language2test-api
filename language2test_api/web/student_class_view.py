@@ -577,7 +577,7 @@ def get_instructor_student_class_count():
 @language2test_bp.route("/test_taker/student_classes", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-def get_test_taker_student_class():
+def get_test_taker_student_classes():
     try:
         limit = request.args.get('limit')
         offset = request.args.get('offset')
@@ -621,7 +621,7 @@ def get_test_taker_student_class():
 @language2test_bp.route("/test_taker/student_classes/count", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-def get_test_taker_student_class_count():
+def get_test_taker_student_classes_count():
     try:
         # Retrieve user
         user = user_provider.get_authenticated_user()

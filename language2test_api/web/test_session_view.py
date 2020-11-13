@@ -130,22 +130,9 @@ def export_test_sessions():
 @authentication
 def get_test_sessions_for_test_assignation():
     try:
-        limit = request.args.get('limit')
-        offset = request.args.get('offset')
-
-        if 'column' in request.args:
-            column = request.args.get('column')
-        else:
-            column = 'id'
-
-        if 'order' in request.args:
-            order = request.args.get('order')
-        else:
-            order = 'asc'
-
         test_assignation_id = request.args.get('test_assignation_id')
         if test_assignation_id:
-            test_sessions = provider.get_test_sessions_for_test_assignation(test_assignation_id,offset, limit, column, order)
+            test_sessions = provider.get_test_sessions_for_test_assignation(test_assignation_id)
             result = test_schema_many.dump(test_sessions)
             return jsonify(result)
         else:
@@ -194,7 +181,7 @@ def instructor_export_test_sessions():
         # Check if the test assignation is associated with the instructor
         if test_assignation_id in instructor_assignation_id_list:
             try:
-                sessions = provider.get_test_sessions_for_test_assignation_id_only(test_assignation_id)
+                sessions = provider.get_test_sessions_for_test_assignation(test_assignation_id)
                 name = request.args.get('name')
                 return send_file(export_provider.write_results_into_file(sessions, name),attachment_filename='Test Details.zip',
                                 mimetype="application/zip",

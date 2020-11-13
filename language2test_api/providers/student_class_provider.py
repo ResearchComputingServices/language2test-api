@@ -5,6 +5,8 @@ from language2test_api.models.user import User, UserSchema
 from sqlalchemy.sql import text
 
 class StudentClassProvider(BaseProvider):
+
+
     def add(self, data):
         data['id'] = self.generate_id(field=StudentClass.id)
         data_instructor = data.get('instructor')
@@ -23,6 +25,9 @@ class StudentClassProvider(BaseProvider):
 
         db.session.add(student_class)
         return student_class
+
+
+
 
     def update(self, data, student_class):
         student_class.student_student_class = []
@@ -53,10 +58,7 @@ class StudentClassProvider(BaseProvider):
 
 
 
-
-
-    def get_instructor_students(self, instructor_id, offset, limit, column, order):
-
+    def __get_instructor_students_ids(self, instructor_id):
         # 1. Get all instructor classes
         instructor_classes = StudentClass.query.filter_by(instructor_id=instructor_id).all()
 
@@ -69,6 +71,15 @@ class StudentClassProvider(BaseProvider):
 
         # 3. Remove repeated/duplicated ids
         all_students_ids = list(set(all_students_ids))
+
+        return all_students_ids
+
+
+
+
+    def get_instructor_students(self, instructor_id, offset, limit, column, order):
+
+        all_students_ids = self.__get_instructor_students_ids(instructor_id)
 
         p = column + ' ' + order
 
@@ -88,17 +99,12 @@ class StudentClassProvider(BaseProvider):
 
     def get_instructor_students_count(self, instructor_id):
 
-        instructor_classes = StudentClass.query.filter_by(instructor_id=instructor_id).all()
-        all_students_ids = []
-
-        for _class in instructor_classes:
-            for _student in _class.student_student_class:
-                all_students_ids.append(_student.id)
-
-        all_students_ids = list(set(all_students_ids))
+        all_students_ids = self.__get_instructor_students_ids(instructor_id)
         dict = {"count": len(all_students_ids)}
 
         return dict
+
+
 
 
     def get_instructor_student_classes_count(self, instructor_id):
@@ -109,18 +115,30 @@ class StudentClassProvider(BaseProvider):
         return dict
 
 
-    def get_test_taker_student_classes(self, user_id,  offset, limit, column, order):
+
+    def __get_test_taker_sudent_classes_ids(self, test_taker_id):
 
         student_classes_ids = []
-        student_classes = []
 
         # Retrieve all student classes of the user_id
         proxy_student_classes = db.session.execute('SELECT * FROM student_student_class WHERE student_id = :val',
-                                                  {'val': user_id})
+                                                  {'val': test_taker_id})
 
 
         for item_sc in proxy_student_classes:
             student_classes_ids.append(item_sc['student_class_id'])
+
+
+        return student_classes_ids
+
+
+
+
+
+
+    def get_test_taker_student_classes(self, test_taker_id,  offset, limit, column, order):
+
+        student_classes_ids = self.__get_test_taker_sudent_classes_ids(test_taker_id)
 
         p = column + ' ' + order
 
@@ -138,18 +156,12 @@ class StudentClassProvider(BaseProvider):
         return student_classes
 
 
-    def get_test_taker_student_classes_count(self, user_id):
-
-        student_classes_ids = []
-        student_classes = []
-
-        # Retrieve all student classes of the user_id
-        proxy_student_classes = db.session.execute('SELECT * FROM student_student_class WHERE student_id = :val',
-                                                  {'val': user_id})
 
 
-        for item_sc in proxy_student_classes:
-            student_classes_ids.append(item_sc['student_class_id'])
+
+    def get_test_taker_student_classes_count(self, test_taker_id):
+
+        student_classes_ids = self.__get_test_taker_sudent_classes_ids(test_taker_id)
 
         dict = {"count": len(student_classes_ids)}
 
@@ -157,6 +169,6 @@ class StudentClassProvider(BaseProvider):
 
 
 
-        return student_classes
+
 
 
