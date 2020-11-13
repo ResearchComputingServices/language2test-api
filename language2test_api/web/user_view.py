@@ -104,29 +104,10 @@ def get_user():
 
     return response
 
-
 @language2test_bp.route("/users", methods=['POST'])
 @crossdomain(origin='*')
 @authentication
 def add_user():
-    try:
-        data = request.get_json()
-        user = provider.add(data)
-        if user:
-            result = user_schema.dump(user)
-            response = jsonify(result)
-        else:
-            response = Response(json.dumps(data), 500, mimetype="application/json")
-    except Exception as e:
-        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
-
-    return response
-
-
-#This function will be merged with add_user: once adding a user to keycloak and to the DB
-#is transactional.
-def add_user_keycloak():
     try:
         data = request.get_json()
         user = provider.add(data)
@@ -136,8 +117,20 @@ def add_user_keycloak():
             user_dict['First Name'] = user.first_name
             user_dict['Last Name'] = user.last_name
             __import_user_in_keycloak(user_dict, [])
-        result = user_schema.dump(user)
-        response = jsonify(result)
+            if (user_dict['kc_status_code']<200) or (user_dict['kc_status_code']>300):
+                #User couldn't be imported into keycloak
+                #Adding is transactional
+                #We'll revert the adding of user into a db.
+                user = provider.delete(data)
+                db.session.delete(user)
+                db.session.commit()
+                error = {"message": "User cannot be created on Keycloak"}
+                response = Response(json.dumps(error), user_dict['kc_status_code'], mimetype="application/json")
+            else:
+                result = user_schema.dump(user)
+                response = jsonify(result)
+        else:
+            response = Response(json.dumps(data), 500, mimetype="application/json")
     except Exception as e:
         error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
         response = Response(json.dumps(error), 500, mimetype="application/json")
@@ -149,23 +142,32 @@ def add_user_keycloak():
 @authentication
 def reset_user_keycloak_password():
     try:
-        data = request.get_json()
-        user = User.query.filter_by(id=data.get('id')).first()
-        if not user:
-            user = User.query.filter_by(name=data.get('name')).first()
-        if user:
-            status_code = keycloak.reset_user_password(user, data)
-            if status_code>=200 and status_code<=300:
-                result = user_schema.dump(user)
-                response = jsonify(result)
+        user_auth = provider.get_authenticated_user()
+        if user_auth:
+            is_admin = provider.has_role(user_auth, 'Administrator')
+            if is_admin:
+                data = request.get_json()
+                user = User.query.filter_by(id=data.get('id')).first()
+                if not user:
+                    user = User.query.filter_by(name=data.get('name')).first()
+                if user:
+                    status_code = keycloak.reset_user_password(user, data)
+                    if status_code>=200 and status_code<=300:
+                        result = user_schema.dump(user)
+                        response = jsonify(result)
+                    else:
+                        response = Response(json.dumps(data), status_code, mimetype="application/json")
+                else:
+                    response = Response(json.dumps(data), 404, mimetype="application/json")
             else:
-                response = Response(json.dumps(data), status_code, mimetype="application/json")
+                error = {"message": "Permission Denied"}
+                response = Response(json.dumps(error), 403, mimetype="application/json")
         else:
-            response = Response(json.dumps(data), 404, mimetype="application/json")
+            error = {"message": "User not found."}
+            response = Response(json.dumps(error), 404, mimetype="application/json")
     except Exception as e:
         error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
         response = Response(json.dumps(error), 500, mimetype="application/json")
-
     return response
 
 
@@ -614,8 +616,8 @@ def get_demographic_questionnaire():
                 result = user_field_category_schema_many.dump(properties)
                 return jsonify(result)
             else:
-                error = {"message": "No Id found for the user."}
-                response = Response(json.dumps(error), 404, mimetype="application/json")
+                error = {"message": "Permission Denied"}
+                response = Response(json.dumps(error), 403, mimetype="application/json")
         else:
             error = {"message": "User not found."}
             response = Response(json.dumps(error), 404, mimetype="application/json")

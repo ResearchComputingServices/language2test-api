@@ -117,6 +117,7 @@ class UserKeycloak():
         except Exception as e:
             user['kc_import'] = "Error: " + str(e)
 
+        user['kc_status_code'] = status_code
         return token
 
 

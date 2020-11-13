@@ -7,6 +7,7 @@ from language2test_api.models.test_session import TestSession, TestSessionSchema
 from language2test_api.models.test_assignation import TestAssignation
 from language2test_api.models.test import Test
 from sqlalchemy.sql import text
+from flask import request
 
 class TestSessionProvider(TestSessionResultsVocabularyProvider,
                           TestSessionResultsRCProvider,
@@ -59,66 +60,8 @@ class TestSessionProvider(TestSessionResultsVocabularyProvider,
         db.session.query(TestSession).filter(TestSession.id == data.get('id')).delete()
 
 
-    def get_test_sessions_for_test_assignation(self, test_assignation_id, offset, limit, column, order):
+    def get_test_sessions_ids(self, test_assignation_id):
 
-        test_sessions = []
-        test_sessions_ids = []
-
-        #Query test_assignation to retrieve test_id
-        test_assignation = TestAssignation.query.filter_by(id=test_assignation_id).first()
-
-        if test_assignation:
-            #Get all test_sessions that include the test_id
-            test_sessions_with_test_id = TestSession.query.filter_by(test_id=test_assignation.test_id).all()
-
-            #test_sessions_per_test_id_2    Use a joint?
-            #users = users.join(User.roles).filter(Role.id.in_(role.id for role in roles))
-
-            for test_session in test_sessions_with_test_id:
-
-                #Test session created_datetime should fall in test_assignation datetime period to take the test
-                if test_session.created_datetime>= test_assignation.start_datetime and test_session.created_datetime<= test_assignation.end_datetime:
-
-                    #Since the same test can be assigned to multiple test assignations
-                    #Check if the user that created the test session is in at least one class assigned in the test assignation
-                    student_classes_with_user = db.session.execute('SELECT * FROM student_student_class WHERE student_id = :val', {'val': test_session.user_id})
-
-                    added = False
-                    for item_sc in student_classes_with_user:
-                        student_class_id = item_sc['student_class_id']
-
-                        for assignation_class in test_assignation.student_class:
-                            if student_class_id == assignation_class.id:
-                                 test_sessions_ids.append(test_session.id)
-                                 added = True
-                                 break
-
-                        if added:
-                           break
-
-            p = column + ' ' + order
-
-
-            # Keep this for now for debugging purposes (just to verify that is really filtering)
-            #query = TestSession.query.filter(TestSession.id.in_(test_sessions_ids))
-            #results1 = query.all()
-
-            #Query TestSession with the list of test sessions
-            #This query allow us to paginate and order a subset
-
-            if limit and offset:
-                limit = int(limit)
-                offset = int(offset)
-                page = int(offset / limit) + 1
-                test_sessions = TestSession.query.filter(TestSession.id.in_(test_sessions_ids)).order_by(text(p)).paginate(page=page,per_page=limit,error_out=False).items
-            else:
-                test_sessions = TestSession.query.filter(TestSession.id.in_(test_sessions_ids)).order_by(text(p)).all()
-
-        return test_sessions
-
-    def get_test_sessions_for_test_assignation_count(self, test_assignation_id):
-
-        test_sessions = []
         test_sessions_ids = []
 
         # Query test_assignation to retrieve test_id
@@ -154,10 +97,65 @@ class TestSessionProvider(TestSessionResultsVocabularyProvider,
                         if added:
                             break
 
-        test_sessions_ids = list(set(test_sessions_ids))
+        return list(set(test_sessions_ids))
+
+
+    def get_test_sessions_for_test_assignation(self, test_assignation_id):
+
+        limit = request.args.get('limit')
+        offset = request.args.get('offset')
+
+        if 'column' in request.args:
+            column = request.args.get('column')
+        else:
+            column = 'id'
+
+        if 'order' in request.args:
+            order = request.args.get('order')
+        else:
+            order = 'asc'
+
+
+        test_sessions_ids = self.get_test_sessions_ids(test_assignation_id)
+        p = column + ' ' + order
+
+        if limit and offset:
+            limit = int(limit)
+            offset = int(offset)
+            page = int(offset / limit) + 1
+            test_sessions = TestSession.query.filter(TestSession.id.in_(test_sessions_ids)).order_by(text(p)).paginate(page=page,per_page=limit,error_out=False).items
+        else:
+            test_sessions = TestSession.query.filter(TestSession.id.in_(test_sessions_ids)).order_by(text(p)).all()
+
+        return test_sessions
+
+
+
+    def get_test_sessions_for_test_assignation_count(self, test_assignation_id):
+
+        test_sessions_ids = self.get_test_sessions_ids(test_assignation_id)
         dict = {"count": len(test_sessions_ids)}
 
         return dict
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     def get_test_sessions_for_test_assignation_id_only(self, test_assignation_id):
 
