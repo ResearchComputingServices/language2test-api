@@ -38,7 +38,7 @@ class UserProvider(BaseProvider):
     def update(self, data, user):
         user.first_name = data.get('first_name')
         user.last_name = data.get('last_name')
-
+        user.agree_to_participate = data.get('agree_to_participate')
         if 'roles' in data and data.get('roles'):
             user.roles = []
             for role_item in data.get('roles'):

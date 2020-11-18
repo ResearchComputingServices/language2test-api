@@ -14,6 +14,7 @@ class User(BaseModel):
 
     first_name = db.Column(db.String())
     last_name = db.Column(db.String())
+    agree_to_participate = db.Column(db.Boolean)
     roles = relationship("Role", secondary=user_role)
     fields = relationship("UserField", back_populates="user")
 
@@ -21,7 +22,7 @@ class User(BaseModel):
         BaseModel.__init__(self, item)
         self.first_name = item.get('first_name')
         self.last_name = item.get('last_name')
-
+        self.agree_to_participate = item.get('agree_to_participate')
     def __repr__(self):
         return '<user %r>' % self.name
 
@@ -33,5 +34,6 @@ class UserSchema(BaseModelSchema):
 
     first_name = fields.String()
     last_name = fields.String()
+    agree_to_participate = fields.Boolean()
     roles = fields.Nested(RoleSchema, many=True)
     fields = fields.Nested(UserFieldSchema, many=True)
