@@ -629,7 +629,43 @@ def get_demographic_questionnaire():
 
 
 
+@language2test_bp.route("/admin/user_sessions", methods=['GET'])
+@crossdomain(origin='*')
+@authentication
+def get_user_sessions():
+    try:
+        offset = request.args.get('offset')
+        limit = request.args.get('limit')
+
+        user = provider.get_authenticated_user()
+        is_admin = provider.has_role(user, 'Administrator')
+        if is_admin:
+            response = jsonify(keycloak.get_user_sessions(oidc.client_secrets['realm'],offset,limit))
+        else:
+            error = {"message": "Access Denied"}
+            response = Response(json.dumps(error), 403, mimetype="application/json")
 
 
+    except Exception as e:
+        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500, mimetype="application/json")
+    return response
 
+
+@language2test_bp.route("/admin/user_sessions/count", methods=['GET'])
+@crossdomain(origin='*')
+@authentication
+def get_user_sessions_count():
+    try:
+        user = provider.get_authenticated_user()
+        is_admin = provider.has_role(user, 'Administrator')
+        if is_admin:
+            response = keycloak.get_user_sessions_count(oidc.client_secrets['realm'])
+        else:
+            error = {"message": "Access Denied"}
+            response = Response(json.dumps(error), 403, mimetype="application/json")
+    except Exception as e:
+        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500, mimetype="application/json")
+    return response
 

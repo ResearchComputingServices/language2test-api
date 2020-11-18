@@ -511,7 +511,7 @@ def get_instructor_students():
                 error = {"message": "No Id found for the user."}
                 response = Response(json.dumps(error), 404, mimetype="application/json")
         else:
-            error = {"message": "The user is not an instructor."}
+            error = {"message": "Access Denied"}
             response = Response(json.dumps(error), 403, mimetype="application/json")
     except Exception as e:
         error = { "exception": str(e), "message": "Exception has occurred. Check the format of the request."}
@@ -536,7 +536,7 @@ def get_instructor_students_count():
                 error = {"message": "No Id found for the user."}
                 response = Response(json.dumps(error), 404, mimetype="application/json")
         else:
-            error = {"message": "The user is not an instructor."}
+            error = {"message": "Access Denied"}
             response = Response(json.dumps(error), 403, mimetype="application/json")
         return response
     except Exception as e:
@@ -563,7 +563,7 @@ def get_instructor_student_class_count():
                 error = {"message": "No Id found for the user."}
                 response = Response(json.dumps(error), 404, mimetype="application/json")
         else:
-            error = {"message": "The user is not an instructor."}
+            error = {"message": "Access Denied"}
             response = Response(json.dumps(error), 403, mimetype="application/json")
 
         return response
@@ -606,7 +606,7 @@ def get_test_taker_student_classes():
                     error = {"message": "No Id found for the user."}
                     response = Response(json.dumps(error), 404, mimetype="application/json")
             else:
-                error = {"message": "The user is not a test taker."}
+                error = {"message": "Access Denied"}
                 response = Response(json.dumps(error), 403, mimetype="application/json")
         else:
             error = {"message": "User not found."}

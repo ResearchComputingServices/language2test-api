@@ -1,7 +1,10 @@
 from language2test_api.extensions import oidc
 import requests
 from flask import json, jsonify, Response
+from language2test_api.models.user import User, UserSchema
+import datetime
 
+user_schema = UserSchema(many=False)
 
 class UserKeycloak():
 
@@ -152,3 +155,88 @@ class UserKeycloak():
 
         return status_code
 
+
+    def get_client_id(self, realm):
+
+        id = ''
+        url = oidc.client_secrets["keycloak_uri_language2test_base"] + '/clients/'
+
+        token = self.obtain_keycloak_token()
+
+        if token:
+            bearer_token = 'Bearer ' + token['access_token']
+            headers = {'Authorization': bearer_token}
+            response = requests.get(url, headers=headers)
+
+            if response.status_code>=200 and response.status_code<=300:
+                response_json = response.json()
+
+                for data in response_json:
+                    if data['clientId']==realm:
+                        id=data['id']
+                        break
+
+        return id
+
+    def user_session_response(self, data):
+        user_sessions = []
+
+        for d in data:
+            user_db = User.query.filter_by(name=d.get('username')).first()
+            user= user_schema.dump(user_db)
+            sdt = datetime.datetime.fromtimestamp(float(d["start"]) / 1000.0)  #Convert from ms to datetime
+            user["start_datetime"] = sdt.strftime('%Y-%m-%dT%H:%M:%S.%f')
+            ladt = datetime.datetime.fromtimestamp(float(d["lastAccess"]) / 1000.0)
+            user["last_access_datetime"] = ladt.strftime('%Y-%m-%dT%H:%M:%S.%f')
+            user_sessions.append(user)
+
+        return user_sessions
+
+
+    def get_user_sessions(self, realm, first, max):
+
+        user_sessions=''
+        #Get id for client_id (id <> client_id)
+        id = self.get_client_id(realm)
+
+        if len(id)>0:
+            if first and max:
+                url = oidc.client_secrets["keycloak_uri_language2test_base"] + '/clients/' + id + '/user-sessions?first='+str(first)+'&max='+str(max)
+            else:
+                url = oidc.client_secrets["keycloak_uri_language2test_base"] + '/clients/' + id + '/user-sessions'
+
+            #Get token
+            token = self.obtain_keycloak_token()
+
+            if token:
+                bearer_token = 'Bearer ' + token['access_token']
+                headers = {'Authorization': bearer_token}
+
+                response = requests.get(url, headers=headers)
+                if response.status_code >= 200 and response.status_code <= 300:
+                    response_json = response.json()
+                    user_sessions = self.user_session_response(response_json)
+
+        return user_sessions
+
+
+    def get_user_sessions_count(self, realm):
+        count = ''
+        # Get id for client_id (id <> client_id)
+        id = self.get_client_id(realm)
+
+        if len(id) > 0:
+            url = oidc.client_secrets["keycloak_uri_language2test_base"] + '/clients/' + id + '/session-count'
+
+            # Get token
+            token = self.obtain_keycloak_token()
+
+            if token:
+                bearer_token = 'Bearer ' + token['access_token']
+                headers = {'Authorization': bearer_token}
+
+                response = requests.get(url, headers=headers)
+                if response.status_code>=200 and response.status_code<=300:
+                    count = response.json()
+
+        return count
