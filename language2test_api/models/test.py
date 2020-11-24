@@ -8,6 +8,7 @@ from language2test_api.models.user_field_category import UserFieldCategory, User
 from language2test_api.models.student_class import StudentClass, StudentClassSchema
 from language2test_api.models.writing import Writing, WritingSchema
 from language2test_api.models.base_model import BaseModel, BaseModelSchema
+from sqlalchemy import func, ForeignKey, Sequence
 
 
 from language2test_api.models.mutable_list import MutableList
@@ -58,12 +59,19 @@ class Test(BaseModel):
     mandatory_test_user_field_category = relationship("UserFieldCategory", secondary=mandatory_test_user_field_category)
     immutable = db.Column(db.Boolean, default=False)
     unremovable = db.Column(db.Boolean, default=False)
+    cloned_from_id = db.Column(db.Integer(), ForeignKey('test.id'))
+    created_by_user_id = db.Column(db.Integer(), ForeignKey('user.id'))
+    created_by_user = relationship("User")
 
     def __init__(self, item):
         BaseModel.__init__(self, item)
+        self.created_by_user_id = item.get('created_by_user_id')
+        self.cloned_from_id = item.get('cloned_from_id')
 
     def __repr__(self):
         return '<test %r>' % self.id
+
+from language2test_api.models.user import UserSchema
 
 class TestSchema(BaseModelSchema):
     class Meta:
@@ -78,6 +86,9 @@ class TestSchema(BaseModelSchema):
     mandatory_test_user_field_category = fields.Nested(UserFieldCategorySchema, many=True)
     immutable = fields.Boolean()
     unremovable = fields.Boolean()
+    cloned_from_id = fields.Integer()
+    created_by_user_id = fields.Integer()
+    created_by_user = fields.Nested(UserSchema)
 
 
 

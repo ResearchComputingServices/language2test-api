@@ -26,16 +26,13 @@ INSERT INTO public."user_field_category"(id, name, display, user_field_type_id)
 VALUES (9, 'grew_up', 'Where did you grow up?', 11);
 
 INSERT INTO public."user_field_category"(id, name, display, user_field_type_id)
-VALUES (10, 'consent_to_participate', 'Consent to Participate', 15);
+VALUES (10, 'learning_language', 'In which language are you the most comfortable learning in at school (reading, writing, listening, speaking)?', 10);
 
 INSERT INTO public."user_field_category"(id, name, display, user_field_type_id)
-VALUES (11, 'learning_language', 'In which language are you the most comfortable learning in at school (reading, writing, listening, speaking)?', 10);
+VALUES (11, 'number_languages', 'How many languages do you speak, including English and your first language?', 3);
 
 INSERT INTO public."user_field_category"(id, name, display, user_field_type_id)
-VALUES (12, 'number_languages', 'How many languages do you speak, including English and your first language?', 3);
-
-INSERT INTO public."user_field_category"(id, name, display, user_field_type_id)
-VALUES (13, 'additional_languages', 'Which of your additional languages (not including your first language) do you speak best?', 10);
+VALUES (12, 'additional_languages', 'Which of your additional languages (not including your first language) do you speak best?', 10);
 
 
 
