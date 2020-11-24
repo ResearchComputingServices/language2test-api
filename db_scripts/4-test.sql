@@ -1,11 +1,11 @@
-INSERT INTO public."test"(id, name, immutable, unremovable)
-VALUES (1, 'Beginner', False, True);
+INSERT INTO public."test"(id, name, immutable, unremovable, created_datetime, created_by_user_id)
+VALUES (1, 'Beginner', False, True, CURRENT_TIMESTAMP, 1);
 
-INSERT INTO public."test"(id, name, immutable, unremovable)
-VALUES (2, 'Intermediate', False, True);
+INSERT INTO public."test"(id, name, immutable, unremovable, created_datetime, created_by_user_id)
+VALUES (2, 'Intermediate', False, True, CURRENT_TIMESTAMP, 2);
 
-INSERT INTO public."test"(id, name, immutable, unremovable)
-VALUES (3, 'Advanced', False, True);
+INSERT INTO public."test"(id, name, immutable, unremovable, created_datetime, created_by_user_id)
+VALUES (3, 'Advanced', False, True, CURRENT_TIMESTAMP, 3);
 
 CREATE OR REPLACE  FUNCTION add_test_vocabulary (text, text) RETURNS timestamp with time zone AS '
 DECLARE

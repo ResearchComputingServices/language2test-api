@@ -6,6 +6,14 @@ from language2test_api.models.cloze import Cloze, ClozeSchema
 from language2test_api.models.writing import Writing, WritingSchema
 from language2test_api.models.vocabulary import Vocabulary, VocabularySchema, VocabularyOption, VocabularyOptionSchema
 from language2test_api.models.user_field_category import UserFieldCategory, UserFieldCategorySchema
+from language2test_api.providers.user_provider import UserProvider
+from language2test_api.models.test_session import TestSession
+from language2test_api.models.test_assignation import TestAssignation
+from sqlalchemy.sql import text
+from datetime import datetime
+
+user_provider = UserProvider()
+
 
 class TestProvider(BaseProvider):
     def exist(self, text, test_id, cloze_id, cloze_question_id):
@@ -25,7 +33,9 @@ class TestProvider(BaseProvider):
         return found
 
     def add(self, data):
+        user_authenticated = user_provider.get_authenticated_user()
         data['id'] = self.generate_id(field=Test.id)
+        data['created_by_user_id'] = user_authenticated.id
         test = Test(data)
         test.order = []
         for test_rc in data.get('test_rc'):
@@ -65,6 +75,11 @@ class TestProvider(BaseProvider):
 
         for order in data.get('order'):
             test.order.append(order)
+
+        if test.cloned_from_id is not None:
+            test_clone = Test.query.filter_by(id=test.cloned_from_id).first()
+            if test_clone:
+                test_clone.unremovable = True
 
         db.session.add(test)
 
@@ -142,6 +157,137 @@ class TestProvider(BaseProvider):
         for writing in test_writing:
             writing.unremovable = value
 
+
+
+    def query_test_with_sessions(self, limit,offset,column,order):
+
+        p = 'test_' + column + ' ' + order
+        #p = 'test_created_datetime' + ' ' + 'desc'
+
+        if limit and offset:
+            limit = int(limit)
+            offset = int(offset)
+            page = int(offset / limit) + 1
+            tests = db.session.query(Test).join(TestSession).filter(Test.id == TestSession.test_id).order_by(text(p)).paginate(page=page, per_page=limit, error_out=False).items
+        else:
+            tests = db.session.query(Test).join(TestSession).filter(Test.id == TestSession.test_id).order_by(text(p)).all()
+
+        return tests
+
+
+    def query_test_with_sessions_count(self):
+
+        tests = db.session.query(Test).join(TestSession).filter(Test.id == TestSession.test_id).all()
+        dict = {"count": len(tests)}
+
+        return dict
+
+
+    def query_upcoming_tests(self, start_datetime, limit,offset,column,order):
+
+        p = 'test_' + column + ' ' + order
+        #p = 'test_created_datetime' + ' ' + 'desc'
+
+        if limit and offset:
+            limit = int(limit)
+            offset = int(offset)
+            page = int(offset / limit) + 1
+
+            tests = db.session.query(Test).join(TestAssignation).filter(Test.id == TestAssignation.test_id, start_datetime<=TestAssignation.end_datetime).order_by(text(p)).paginate(page=page,per_page=limit,error_out=False).items
+        else:
+            tests = db.session.query(Test).join(TestAssignation).filter(Test.id == TestAssignation.test_id,
+                                                                        start_datetime <= TestAssignation.end_datetime).order_by(text(p)).all()
+
+        return tests
+
+
+    def query_upcoming_tests_count(self, start_datetime):
+
+        if not start_datetime:
+            start_datetime = datetime.datetime.utcnow()
+
+        tests = db.session.query(Test).join(TestAssignation).filter(Test.id == TestAssignation.test_id,start_datetime<=TestAssignation.end_datetime).all()
+
+        dict = {"count": len(tests)}
+
+        return dict
+
+
+    def query_tests_not_in_use(self, limit,offset,column,order):
+        p = 'test_' + column + ' ' + order
+
+        tests_in_use =[]
+        #Query tests with sessions
+        test_sessions = TestSession.query.all()
+        for session in test_sessions:
+            if session.test_id not in tests_in_use:
+                tests_in_use.append(session.test_id)
+
+
+        test_assignations = TestAssignation.query.all()
+        for assignation in test_assignations:
+            if assignation.test_id not in tests_in_use:
+                tests_in_use.append(assignation.test_id)
+
+        if limit and offset:
+            limit = int(limit)
+            offset = int(offset)
+            page = int(offset / limit) + 1
+
+            tests_not_in_use = db.session.query(Test).filter(~Test.id.in_(tests_in_use)).order_by(text(p)).paginate(page=page, per_page=limit, error_out=False).items
+        else:
+            tests_not_in_use = db.session.query(Test).filter(~Test.id.in_(tests_in_use)).all()
+
+        return tests_not_in_use
+
+
+    def query_tests_not_in_use_count(self):
+
+        tests_in_use = []
+
+        # Query tests with sessions
+        test_sessions =TestSession.query.all()
+        for session in test_sessions:
+            if session.test_id not in tests_in_use:
+                tests_in_use.append(session.test_id)
+
+        test_assignations = TestAssignation.query.all()
+        for assignation in test_assignations:
+            if assignation.test_id not in tests_in_use:
+                tests_in_use.append(assignation.test_id)
+
+        tests_not_in_use = db.session.query(Test).filter(~Test.id.in_(tests_in_use)).all()
+
+        dict = {"count": len(tests_not_in_use)}
+
+        return dict
+
+
+
+    def query_cloned_tests(self, limit, offset, column, order):
+
+        p = 'test_' + column + ' ' + order
+        # p = 'test_created_datetime' + ' ' + 'desc'
+
+        if limit and offset:
+            limit = int(limit)
+            offset = int(offset)
+            page = int(offset / limit) + 1
+
+            tests = db.session.query(Test).filter(Test.cloned_from_id != None).order_by(text(p)).paginate(page=page, per_page=limit, error_out=False).items
+        else:
+            tests = db.session.query(Test).filter(Test.cloned_from_id != None).order_by(text(p)).all()
+
+        return tests
+
+
+    def query_cloned_tests_count(self):
+
+        tests = db.session.query(Test).filter(Test.cloned_from_id != None).all()
+
+        dict = {"count": len(tests)}
+
+        return dict
 
 
 

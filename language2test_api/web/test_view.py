@@ -9,13 +9,17 @@ from language2test_api.decorators.crossorigin import crossdomain
 from language2test_api.decorators.authentication import authentication
 from language2test_api.providers.test_provider import TestProvider
 from language2test_api.providers.test_export_provider import TestExportProvider
+from language2test_api.providers.user_provider import UserProvider
 import pandas as pd
+import datetime
 from io import BytesIO
+
 
 test_schema = TestSchema(many=False)
 test_schema_many = TestSchema(many=True)
 
 provider = TestProvider()
+user_provider = UserProvider()
 
 @language2test_bp.route("/test/count", methods=['GET'])
 @crossdomain(origin='*')
@@ -230,3 +234,262 @@ def export_test():
             error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
             response = Response(json.dumps(error), 404, mimetype="application/json")
             return response
+
+
+
+@language2test_bp.route("/test_developer/test_with_sessions", methods=['GET'])
+@crossdomain(origin='*')
+@authentication
+def get_tests_with_sessions():
+    try:
+        # Retrieve user
+        user = user_provider.get_authenticated_user()
+        is_test_developer = user_provider.has_role(user, 'Test Developer')
+
+        if is_test_developer:
+            limit = request.args.get('limit')
+            offset = request.args.get('offset')
+
+            if 'column' in request.args:
+                column = request.args.get('column')
+            else:
+                column = 'created_datetime'
+
+            if 'order' in request.args:
+                order = request.args.get('order')
+            else:
+                order = 'desc'
+
+            properties = provider.query_test_with_sessions(limit,offset,column,order)
+            result = test_schema_many.dump(properties)
+            return jsonify(result)
+        else:
+            error = {"message": "Access Denied"}
+            response = Response(json.dumps(error), 403, mimetype="application/json")
+
+    except Exception as e:
+        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 404, mimetype="application/json")
+
+    return response
+
+
+@language2test_bp.route("/test_developer/test_with_sessions/count", methods=['GET'])
+@crossdomain(origin='*')
+@authentication
+def get_tests_with_sessions_count():
+    try:
+        # Retrieve user
+        user = user_provider.get_authenticated_user()
+        is_test_developer = user_provider.has_role(user, 'Test Developer')
+
+        if is_test_developer:
+            count = provider.query_test_with_sessions_count()
+            response = Response(json.dumps(count), 200, mimetype="application/json")
+        else:
+            error = {"message": "Access Denied"}
+            response = Response(json.dumps(error), 403, mimetype="application/json")
+        return response
+    except Exception as e:
+        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500, mimetype="application/json")
+
+    return response
+
+
+@language2test_bp.route("/test_developer/upcoming_tests", methods=['GET'])
+@crossdomain(origin='*')
+@authentication
+def get_upcoming_tests():
+    try:
+        # Retrieve user
+        user = user_provider.get_authenticated_user()
+        is_test_developer = user_provider.has_role(user, 'Test Developer')
+
+        if is_test_developer:
+            start_datetime = request.args.get('start_datetime')
+            if not start_datetime:
+                start_datetime = datetime.datetime.utcnow()
+
+            limit = request.args.get('limit')
+            offset = request.args.get('offset')
+
+
+            if 'column' in request.args:
+                column = request.args.get('column')
+            else:
+                column = 'id'
+
+            if 'order' in request.args:
+                order = request.args.get('order')
+            else:
+                order = 'asc'
+
+            properties = provider.query_upcoming_tests(start_datetime,limit,offset,column,order)
+            result = test_schema_many.dump(properties)
+            return jsonify(result)
+        else:
+            error = {"message": "Access Denied"}
+            response = Response(json.dumps(error), 403, mimetype="application/json")
+
+    except Exception as e:
+        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 404, mimetype="application/json")
+
+    return response
+
+
+
+
+@language2test_bp.route("/test_developer/upcoming_tests/count", methods=['GET'])
+@crossdomain(origin='*')
+@authentication
+def get_upcoming_tests_with_count():
+    try:
+        # Retrieve user
+        user = user_provider.get_authenticated_user()
+        is_test_developer = user_provider.has_role(user, 'Test Developer')
+
+        if is_test_developer:
+            start_datetime = request.args.get('start_datetime')
+            if not start_datetime:
+                start_datetime = datetime.datetime.utcnow()
+            
+            count = provider.query_upcoming_tests_count(start_datetime)
+            response = Response(json.dumps(count), 200, mimetype="application/json")
+        else:
+            error = {"message": "Access Denied"}
+            response = Response(json.dumps(error), 403, mimetype="application/json")
+        return response
+    except Exception as e:
+        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500, mimetype="application/json")
+
+    return response
+
+
+
+
+
+
+@language2test_bp.route("/test_developer/test_not_in_use/count", methods=['GET'])
+@crossdomain(origin='*')
+@authentication
+def get_tests_not_in_use_count():
+    try:
+        # Retrieve user
+        user = user_provider.get_authenticated_user()
+        is_test_developer = user_provider.has_role(user, 'Test Developer')
+
+        if is_test_developer:
+            count = provider.query_tests_not_in_use_count()
+            response = Response(json.dumps(count), 200, mimetype="application/json")
+        else:
+            error = {"message": "Access Denied"}
+            response = Response(json.dumps(error), 403, mimetype="application/json")
+        return response
+    except Exception as e:
+        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500, mimetype="application/json")
+
+    return response
+
+
+@language2test_bp.route("/test_developer/test_not_in_use", methods=['GET'])
+@crossdomain(origin='*')
+@authentication
+def get_tests_not_in_use():
+    try:
+        # Retrieve user
+        user = user_provider.get_authenticated_user()
+        is_test_developer = user_provider.has_role(user, 'Test Developer')
+
+        if is_test_developer:
+
+            limit = request.args.get('limit')
+            offset = request.args.get('offset')
+
+
+            if 'column' in request.args:
+                column = request.args.get('column')
+            else:
+                column = 'id'
+
+            if 'order' in request.args:
+                order = request.args.get('order')
+            else:
+                order = 'asc'
+
+            properties = provider.query_tests_not_in_use(limit,offset,column,order)
+            result = test_schema_many.dump(properties)
+            return jsonify(result)
+        else:
+            error = {"message": "Access Denied"}
+            response = Response(json.dumps(error), 403, mimetype="application/json")
+
+    except Exception as e:
+        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 404, mimetype="application/json")
+
+    return response
+
+
+@language2test_bp.route("/test_developer/cloned_tests", methods=['GET'])
+@crossdomain(origin='*')
+@authentication
+def get_cloned_tests():
+    try:
+        # Retrieve user
+        user = user_provider.get_authenticated_user()
+        is_test_developer = user_provider.has_role(user, 'Test Developer')
+
+        if is_test_developer:
+            limit = request.args.get('limit')
+            offset = request.args.get('offset')
+
+
+            if 'column' in request.args:
+                column = request.args.get('column')
+            else:
+                column = 'id'
+
+            if 'order' in request.args:
+                order = request.args.get('order')
+            else:
+                order = 'asc'
+
+            properties = provider.query_cloned_tests(limit,offset,column,order)
+            result = test_schema_many.dump(properties)
+            return jsonify(result)
+        else:
+            error = {"message": "Access Denied"}
+            response = Response(json.dumps(error), 403, mimetype="application/json")
+
+    except Exception as e:
+        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 404, mimetype="application/json")
+
+    return response
+
+@language2test_bp.route("/test_developer/cloned_tests/count", methods=['GET'])
+@crossdomain(origin='*')
+@authentication
+def get_cloned_tests_count():
+    try:
+        # Retrieve user
+        user = user_provider.get_authenticated_user()
+        is_test_developer = user_provider.has_role(user, 'Test Developer')
+
+        if is_test_developer:
+            count = provider.query_cloned_tests_count()
+            response = Response(json.dumps(count), 200, mimetype="application/json")
+        else:
+            error = {"message": "Access Denied"}
+            response = Response(json.dumps(error), 403, mimetype="application/json")
+        return response
+    except Exception as e:
+        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500, mimetype="application/json")
+
+    return response
+
