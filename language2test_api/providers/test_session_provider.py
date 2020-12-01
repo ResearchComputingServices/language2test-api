@@ -140,23 +140,6 @@ class TestSessionProvider(TestSessionResultsVocabularyProvider,
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     def get_test_sessions_for_test_assignation_id_only(self, test_assignation_id):
 
         test_sessions = []
@@ -203,3 +186,27 @@ class TestSessionProvider(TestSessionResultsVocabularyProvider,
             # Do the export here
 
         return test_sessions
+
+
+    def get_test_sessions_for_test(self, test_id, limit,offset,column,order):
+
+        p = 'test_' + column + ' ' + order
+        #p = 'test_created_datetime' + ' ' + 'desc'
+
+        if limit and offset:
+            limit = int(limit)
+            offset = int(offset)
+            page = int(offset / limit) + 1
+            test_sessions = db.session.query(TestSession).filter(TestSession.test_id == test_id).order_by(text(p)).paginate(page=page, per_page=limit, error_out=False).items
+        else:
+            test_sessions = db.session.query(TestSession).filter(TestSession.test_id == test_id).order_by(text(p)).all()
+
+        return test_sessions
+
+
+    def get_test_sessions_for_test_count(self, test_id):
+
+        tests = db.session.query(TestSession).filter(TestSession.test_id == test_id).all()
+        dict = {"count": len(tests)}
+
+        return dict

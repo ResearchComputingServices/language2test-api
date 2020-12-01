@@ -13,12 +13,14 @@ from language2test_api.providers.test_session_export_provider import TestSession
 from language2test_api.providers.test_assignation_provider import TestAssignationProvider
 from language2test_api.providers.user_provider import UserProvider
 from language2test_api.models.student_class import StudentClass, StudentClassSchema
+
 test_schema = TestSessionSchema(many=False)
 test_schema_many = TestSessionSchema(many=True)
 provider = TestSessionProvider()
 export_provider = TestSessionExportProvider()
 user_provider = UserProvider()
 test_assignation_provider = TestAssignationProvider()
+
 @language2test_bp.route("/test_sessions/count", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
@@ -198,3 +200,64 @@ def instructor_export_test_sessions():
         error = {"message": "The user is not an instructor."}
         response = Response(json.dumps(error), 403, mimetype="application/json")
         return response
+
+
+@language2test_bp.route("/test_developer/test_sessions_for_test", methods=['GET'])
+@crossdomain(origin='*')
+@authentication
+def get_test_sessions_for_tests():
+    try:
+        # Retrieve user
+        test_id = request.args.get('test_id')
+        user = user_provider.get_authenticated_user()
+        is_test_developer = user_provider.has_role(user, 'Test Developer')
+        if is_test_developer:
+            limit = request.args.get('limit')
+            offset = request.args.get('offset')
+
+
+            if 'column' in request.args:
+                column = request.args.get('column')
+            else:
+                column = 'id'
+
+            if 'order' in request.args:
+                order = request.args.get('order')
+            else:
+                order = 'asc'
+
+            properties = provider.get_test_sessions_for_test(test_id,limit,offset,column,order)
+            result = test_schema_many.dump(properties)
+            return jsonify(result)
+        else:
+            error = {"message": "Access Denied"}
+            response = Response(json.dumps(error), 403, mimetype="application/json")
+
+    except Exception as e:
+        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 404, mimetype="application/json")
+
+    return response
+
+@language2test_bp.route("/test_developer/test_sessions_for_test/count", methods=['GET'])
+@crossdomain(origin='*')
+@authentication
+def get_test_sessions_for_test_count():
+    try:
+        test_id = request.args.get('test_id')
+        # Retrieve user
+        user = user_provider.get_authenticated_user()
+        is_test_developer = user_provider.has_role(user, 'Test Developer')
+
+        if is_test_developer:
+            count = provider.get_test_sessions_for_test_count(test_id)
+            response = Response(json.dumps(count), 200, mimetype="application/json")
+        else:
+            error = {"message": "Access Denied"}
+            response = Response(json.dumps(error), 403, mimetype="application/json")
+        return response
+    except Exception as e:
+        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500, mimetype="application/json")
+
+    return response

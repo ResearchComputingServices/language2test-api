@@ -150,6 +150,8 @@ class UserKeycloak():
                                'Content-Type': 'application/json'}
                         response = requests.put(url, headers=headers, data=payload)
                         status_code = response.status_code
+                    else:
+                        status_code = 404
         except Exception as e:
              status_code = 400
 
