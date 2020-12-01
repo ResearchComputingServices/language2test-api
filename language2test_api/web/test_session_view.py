@@ -202,7 +202,7 @@ def instructor_export_test_sessions():
         return response
 
 
-@language2test_bp.route("/test_developer/test_sessions_for_test", methods=['GET'])
+@language2test_bp.route("/test_developer/test_sessions", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
 def get_test_sessions_for_tests():
@@ -239,7 +239,7 @@ def get_test_sessions_for_tests():
 
     return response
 
-@language2test_bp.route("/test_developer/test_sessions_for_test/count", methods=['GET'])
+@language2test_bp.route("/test_developer/test_sessions/count", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
 def get_test_sessions_for_test_count():
