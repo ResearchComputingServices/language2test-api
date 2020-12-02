@@ -271,45 +271,44 @@ def __import_user_in_db(d):
             user = User.query.filter_by(name=d["User Name"]).first()
             if user is not None:
                 marked = {}
-
                 for field in user.fields:
                     if field.name == "student_id" and "Student ID" in d:
                         marked["student_id"] = True
-                        field.value = d["Student ID"]
+                        field.value = str(d["Student ID"]).replace(".0", "") if not math.isnan(d["Student ID"]) else None
                     elif field.name == "first_language" and "First Language" in d:
                         marked["first_language"] = True
-                        field.value = d["First Language"]
+                        field.value = d["First Language"] if type(d["First Language"]) != float else None
                     elif field.name == "email" and "Email" in d:
                         marked["email"] = True
-                        field.value = d["Email"]
+                        field.value = d["Email"] if type(d["Email"]) != float else None
                     elif field.name == "education" and "Education" in d:
                         marked["education"] = True
-                        field.value = d["Education"]
+                        field.value = d["Education"] if type(d["Education"]) != float else None
                     elif field.name == "phone" and "Phone" in d:
                         marked["phone"] = True
-                        field.value = d["Phone"]
+                        field.value = str(d["Phone"]).replace(".0", "") if not math.isnan(d["Phone"]) else None
                     elif field.name == "address" and "Address" in d:
                         marked["address"] = True
-                        field.value = d["Address"]
+                        field.value = d["Address"] if type(d["Address"]) != float else None
                 if not marked.get("student_id", False) and "Student ID" in d:
                     user.fields.append(UserField(
-                        {"name": "student_id", "type": "text", "value": d["Student ID"], "user_id": user.id}))
+                        {"name": "student_id", "type": "text", "value": str(d["Student ID"]).replace(".0", "") if not math.isnan(d["Student ID"]) else None, "user_id": user.id}))
                 if not marked.get("first_language", False) and "First Language" in d:
                     user.fields.append(UserField(
                         {"name": "first_language", "type": "Language",
-                         "value": d["First Language"], "user_id": user.id}))
+                         "value": d["First Language"] if type(d["First Language"]) != float else None, "user_id": user.id}))
                 if not marked.get("email", False) and "Email" in d:
                     user.fields.append(UserField(
-                        {"name": "email", "type": "text", "value": d["Email"], "user_id": user.id}))
+                        {"name": "email", "type": "text", "value": d["Email"] if type(d["Email"]) != float else None, "user_id": user.id}))
                 if not marked.get("education", False) and "Education" in d:
                     user.fields.append(UserField(
-                        {"name": "education", "type": "University", "value": d["Education"], "user_id": user.id}))
+                        {"name": "education", "type": "University", "value": d["Education"] if type(d["Education"]) != float else None, "user_id": user.id}))
                 if not marked.get("phone", False) and "Phone" in d:
                     user.fields.append(UserField(
-                        {"name": "phone", "type": "text", "value": d["Phone"], "user_id": user.id}))
+                        {"name": "phone", "type": "text", "value": str(d["Phone"]).replace(".0", "") if not math.isnan(d["Phone"]) else None, "user_id": user.id}))
                 if not marked.get("address", False) and "Address" in d:
                     user.fields.append(UserField(
-                        {"name": "address", "type": "text", "value": d["Address"], "user_id": user.id}))
+                        {"name": "address", "type": "text", "value": d["Address"] if type(d["Address"]) != float else None, "user_id": user.id}))
                 d['db_import'] = 'Updated'
             else:
                 user_data = {}
@@ -322,23 +321,23 @@ def __import_user_in_db(d):
                 user.roles.append(role)
                 if "Student ID" in d:
                     user.fields.append(UserField(
-                        {"name": "student_id", "type": "text", "value": d["Student ID"], "user_id": user.id}))
+                        {"name": "student_id", "type": "text", "value": str(d["Student ID"]).replace(".0", "") if not math.isnan(d["Student ID"]) else None, "user_id": user.id}))
                 if "First Language" in d:
                     user.fields.append(UserField(
                         {"name": "first_language", "type": "Language",
-                         "value": d["First Language"], "user_id": user.id}))
+                         "value": d["First Language"] if type(d["First Language"]) != float else None, "user_id": user.id}))
                 if "Email" in d:
                     user.fields.append(UserField(
-                        {"name": "email", "type": "text", "value": d["Email"], "user_id": user.id}))
+                        {"name": "email", "type": "text", "value": d["Email"] if type(d["Email"]) != float else None, "user_id": user.id}))
                 if "Education" in d:
                     user.fields.append(UserField(
-                        {"name": "education", "type": "University", "value": d["Education"], "user_id": user.id}))
+                        {"name": "education", "type": "University", "value": d["Education"] if type(d["Education"]) != float else None, "user_id": user.id}))
                 if "Phone" in d:
                     user.fields.append(UserField(
-                        {"name": "phone", "type": "text", "value": d["Phone"], "user_id": user.id}))
+                        {"name": "phone", "type": "text", "value": str(d["Phone"]).replace(".0", "") if not math.isnan(d["Phone"]) else None, "user_id": user.id}))
                 if "Address" in d:
                     user.fields.append(UserField(
-                        {"name": "address", "type": "text", "value": d["Address"], "user_id": user.id}))
+                        {"name": "address", "type": "text", "value": d["Address"] if type(d["Address"]) != float else None, "user_id": user.id}))
                 d['db_import'] = 'Imported'
             db.session.add(user)
             db.session.commit()
@@ -400,41 +399,41 @@ def upload_student_class():
                     for field in user.fields:
                         if field.name == "student_id" and "Student ID" in d:
                             marked["student_id"] = True
-                            field.value = d["Student ID"]
+                            field.value = str(d["Student ID"]).replace(".0", "") if not math.isnan(d["Student ID"]) else None
                         elif field.name == "first_language" and "First Language" in d:
                             marked["first_language"] = True
-                            field.value = d["First Language"]
+                            field.value = d["First Language"] if type(d["First Language"]) != float else None
                         elif field.name == "email" and "Email" in d:
                             marked["email"] = True
-                            field.value = d["Email"]
+                            field.value = d["Email"] if type(d["Email"]) != float else None
                         elif field.name == "education" and "Education" in d:
                             marked["education"] = True
-                            field.value = d["Education"]
+                            field.value = d["Education"] if type(d["Education"]) != float else None
                         elif field.name == "phone" and "Phone" in d:
                             marked["phone"] = True
-                            field.value = d["Phone"]
+                            field.value = str(d["Phone"]).replace(".0", "") if not math.isnan(d["Phone"]) else None
                         elif field.name == "address" and "Address" in d:
                             marked["address"] = True
-                            field.value = d["Address"]
+                            field.value = d["Address"] if type(d["Address"]) != float else None
                     if not marked.get("student_id", False) and "Student ID" in d:
                         user.fields.append(UserField(
-                            {"name": "student_id", "type": "text", "value": d["Student ID"], "user_id": user.id}))
+                            {"name": "student_id", "type": "text", "value": str(d["Student ID"]).replace(".0", "") if not math.isnan(d["Student ID"]) else None, "user_id": user.id}))
                     if not marked.get("first_language", False) and "First Language" in d:
                         user.fields.append(UserField(
                             {"name": "first_language", "type": "Language",
-                             "value": d["First Language"], "user_id": user.id}))
+                             "value": d["First Language"] if type(d["First Language"]) != float else None, "user_id": user.id}))
                     if not marked.get("email", False) and "Email" in d:
                         user.fields.append(UserField(
-                            {"name": "email", "type": "text", "value": d["Email"], "user_id": user.id}))
+                            {"name": "email", "type": "text", "value": d["Email"] if type(d["Email"]) != float else None, "user_id": user.id}))
                     if not marked.get("education", False) and "Education" in d:
                         user.fields.append(UserField(
-                            {"name": "education", "type": "University", "value": d["Education"], "user_id": user.id}))
+                            {"name": "education", "type": "University", "value": d["Education"] if type(d["Education"]) != float else None, "user_id": user.id}))
                     if not marked.get("phone", False) and "Phone" in d:
                         user.fields.append(UserField(
-                            {"name": "phone", "type": "text", "value": d["Phone"], "user_id": user.id}))
+                            {"name": "phone", "type": "text", "value": str(d["Phone"]).replace(".0", "") if not math.isnan(d["Phone"]) else None, "user_id": user.id}))
                     if not marked.get("address", False) and "Address" in d:
                         user.fields.append(UserField(
-                            {"name": "address", "type": "text", "value": d["Address"], "user_id": user.id}))
+                            {"name": "address", "type": "text", "value": d["Address"] if type(d["Address"]) != float else None, "user_id": user.id}))
                 if "Test Taker" in map(lambda e: e.name, user.roles) or "Administrator" in map(lambda e: e.name, user.roles):
                     if exist_sc is not None:
                         if user not in exist_sc.student_student_class:
