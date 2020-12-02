@@ -21,6 +21,15 @@ export_provider = TestSessionExportProvider()
 user_provider = UserProvider()
 test_assignation_provider = TestAssignationProvider()
 
+def _anonymize(session):
+    session.name=''
+    session.user_id = None
+    session.user = None
+
+def anonymize_sessions(test_sessions):
+    for session in test_sessions:
+        _anonymize(session)
+
 @language2test_bp.route("/test_sessions/count", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
@@ -34,6 +43,10 @@ def get_test_session():
     id = request.args.get('id')
     if id:
         properties = TestSession.query.filter_by(id=int(id)).first()
+        user_authenticated = user_provider.get_authenticated_user()
+        is_test_developer = user_provider.has_role(user_authenticated, 'Test Developer')
+        if is_test_developer:
+            _anonymize(properties)
         result = test_schema.dump(properties)
         return jsonify(result)
 
@@ -41,6 +54,10 @@ def get_test_session():
     if name:
         properties = TestSession.query.filter_by(name=name).first()
         result = test_schema.dump(properties)
+        user_authenticated = user_provider.get_authenticated_user()
+        is_test_developer = user_provider.has_role(user_authenticated, 'Test Developer')
+        if is_test_developer:
+            _anonymize(properties)
         return jsonify(result)
 
     properties = provider.query_all(TestSession)
@@ -202,6 +219,9 @@ def instructor_export_test_sessions():
         return response
 
 
+
+
+
 @language2test_bp.route("/test_developer/test_sessions", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
@@ -226,8 +246,9 @@ def get_test_sessions_for_tests():
             else:
                 order = 'asc'
 
-            properties = provider.get_test_sessions_for_test(test_id,limit,offset,column,order)
-            result = test_schema_many.dump(properties)
+            test_sessions = provider.get_test_sessions_for_test(test_id,limit,offset,column,order)
+            anonymize_sessions(test_sessions)
+            result = test_schema_many.dump(test_sessions)
             return jsonify(result)
         else:
             error = {"message": "Access Denied"}
