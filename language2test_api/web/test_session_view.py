@@ -261,3 +261,88 @@ def get_test_sessions_for_test_count():
         response = Response(json.dumps(error), 500, mimetype="application/json")
 
     return response
+
+
+@language2test_bp.route("/test_sessions/filter", methods=['GET'])
+@crossdomain(origin='*')
+@authentication
+def filter_test_sessions():
+    try:
+
+        limit = request.args.get('limit')
+        offset = request.args.get('offset')
+
+        if 'column' in request.args:
+            column = request.args.get('column')
+        else:
+            column = 'id'
+
+        if 'order' in request.args:
+            order = request.args.get('order')
+        else:
+            order = 'asc'
+
+        start_date = request.args.get('start_datetime')
+        end_date = request.args.get('end_datetime')
+        class_id = request.args.get('class_id')
+        student_id = request.args.get('student_id')
+        test_id = request.args.get('test_id')
+        instructor_id = request.args.get('instructor_id')
+
+        properties = provider.filter_test_sessions(column, order, limit, offset, start_date,end_date,class_id,student_id,test_id,instructor_id)
+        result = test_schema_many.dump(properties)
+        return jsonify(result)
+
+        response = Response(json.dumps(count), 200, mimetype="application/json")
+
+
+    except Exception as e:
+        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 404, mimetype="application/json")
+
+    return response
+
+
+@language2test_bp.route("/test_sessions/filter/count", methods=['GET'])
+@crossdomain(origin='*')
+@authentication
+def filter_test_sessions_count():
+    try:
+
+        limit = request.args.get('limit')
+        offset = request.args.get('offset')
+
+        if 'column' in request.args:
+            column = request.args.get('column')
+        else:
+            column = 'id'
+
+        if 'order' in request.args:
+            order = request.args.get('order')
+        else:
+            order = 'asc'
+
+        start_date = request.args.get('start_datetime')
+        end_date = request.args.get('end_datetime')
+        class_id = request.args.get('class_id')
+        student_id = request.args.get('student_id')
+        test_id = request.args.get('test_id')
+        instructor_id = request.args.get('instructor_id')
+
+        count = provider.filter_test_sessions_count(column, order, limit, offset, start_date,end_date,class_id,student_id,test_id,instructor_id)
+        response = Response(json.dumps(count), 200, mimetype="application/json")
+
+
+    except Exception as e:
+        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 404, mimetype="application/json")
+
+    return response
+
+
+
+
+
+
+
+
