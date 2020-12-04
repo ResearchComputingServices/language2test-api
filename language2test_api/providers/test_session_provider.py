@@ -174,6 +174,7 @@ class TestSessionProvider(TestSessionResultsVocabularyProvider,
     def filter_test_sessions(self, column, order, limit=None, offset=None, start_datetime_rq=None, end_datetime_rq=None, class_id=None, student_id=None, test_id=None, instructor_id=None):
 
         filters_list = []
+
         if start_datetime_rq:
             start_datetime = datetime.strptime(start_datetime_rq, '%Y-%m-%dT%H:%M:%S.%fZ')
             filters_list.append(TestSession.created_datetime >= start_datetime)
