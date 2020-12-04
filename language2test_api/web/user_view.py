@@ -481,41 +481,41 @@ def __import_user_in_db(d):
                 for field in user.fields:
                     if field.name == "student_id":
                         marked["student_id"] = True
-                        field.value = d["Student ID"]
+                        field.value = str(d["Student ID"]).replace(".0", "") if not math.isnan(d["Student ID"]) else None
                     elif field.name == "first_language":
                         marked["first_language"] = True
-                        field.value = d["First Language"]
+                        field.value = d["First Language"] if type(d["First Language"]) != float else None
                     elif field.name == "email":
                         marked["email"] = True
-                        field.value = d["Email"]
+                        field.value = d["Email"] if type(d["Email"]) != float else None
                     elif field.name == "education":
                         marked["education"] = True
-                        field.value = d["Education"]
+                        field.value = d["Education"] if type(d["Education"]) != float else None
                     elif field.name == "phone":
                         marked["phone"] = True
-                        field.value = d["Phone"]
+                        field.value = str(d["Phone"]).replace(".0", "") if not math.isnan(d["Phone"]) else None
                     elif field.name == "address":
                         marked["address"] = True
-                        field.value = d["Address"]
+                        field.value = d["Address"] if type(d["Address"]) != float else None
                 if not marked.get("student_id", False):
                     user.fields.append(UserField(
-                        {"name": "student_id", "type": "text", "value": d["Student ID"], "user_id": user.id}))
+                        {"name": "student_id", "type": "text", "value": str(d["Student ID"]).replace(".0", "") if not math.isnan(d["Student ID"]) else None, "user_id": user.id}))
                 if not marked.get("first_language", False):
                     user.fields.append(UserField(
                         {"name": "first_language", "type": "Language",
-                         "value": d["First Language"], "user_id": user.id}))
+                         "value": d["First Language"] if type(d["First Language"]) != float else None, "user_id": user.id}))
                 if not marked.get("email", False):
                     user.fields.append(UserField(
-                        {"name": "email", "type": "text", "value": d["Email"], "user_id": user.id}))
+                        {"name": "email", "type": "text", "value": d["Email"] if type(d["Email"]) != float else None, "user_id": user.id}))
                 if not marked.get("education", False):
                     user.fields.append(UserField(
-                        {"name": "education", "type": "University", "value": d["Education"], "user_id": user.id}))
+                        {"name": "education", "type": "University", "value": d["Education"] if type(d["Education"]) != float else None, "user_id": user.id}))
                 if not marked.get("phone", False):
                     user.fields.append(UserField(
-                        {"name": "phone", "type": "text", "value": d["Phone"], "user_id": user.id}))
+                        {"name": "phone", "type": "text", "value": str(d["Phone"]).replace(".0", "") if not math.isnan(d["Phone"]) else None, "user_id": user.id}))
                 if not marked.get("address", False):
                     user.fields.append(UserField(
-                        {"name": "address", "type": "text", "value": d["Address"], "user_id": user.id}))
+                        {"name": "address", "type": "text", "value": d["Address"] if type(d["Address"]) != float else None, "user_id": user.id}))
                 d['db_import'] = 'Updated'
             else:
                 user_data = {}
@@ -527,18 +527,18 @@ def __import_user_in_db(d):
                 role = Role.query.filter_by(name="Test Taker").first()
                 user.roles.append(role)
                 user.fields.append(UserField(
-                    {"name": "student_id", "type": "text", "value": d["Student ID"], "user_id": user.id}))
+                    {"name": "student_id", "type": "text", "value": str(d["Student ID"]).replace(".0", "") if not math.isnan(d["Student ID"]) else None, "user_id": user.id}))
                 user.fields.append(UserField(
                     {"name": "first_language", "type": "Language",
-                     "value": d["First Language"], "user_id": user.id}))
+                     "value": d["First Language"] if type(d["First Language"]) != float else None, "user_id": user.id}))
                 user.fields.append(UserField(
-                    {"name": "email", "type": "text", "value": d["Email"], "user_id": user.id}))
+                    {"name": "email", "type": "text", "value": d["Email"] if type(d["Email"]) != float else None, "user_id": user.id}))
                 user.fields.append(UserField(
-                    {"name": "education", "type": "University", "value": d["Education"], "user_id": user.id}))
+                    {"name": "education", "type": "University", "value": d["Education"] if type(d["Education"]) != float else None, "user_id": user.id}))
                 user.fields.append(UserField(
-                    {"name": "phone", "type": "text", "value": d["Phone"], "user_id": user.id}))
+                    {"name": "phone", "type": "text", "value": str(d["Phone"]).replace(".0", "") if not math.isnan(d["Phone"]) else None, "user_id": user.id}))
                 user.fields.append(UserField(
-                    {"name": "address", "type": "text", "value": d["Address"], "user_id": user.id}))
+                    {"name": "address", "type": "text", "value": d["Address"] if type(d["Address"]) != float else None, "user_id": user.id}))
                 d['db_import'] = 'Imported'
             db.session.add(user)
             db.session.commit()
