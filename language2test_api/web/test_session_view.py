@@ -21,32 +21,6 @@ export_provider = TestSessionExportProvider()
 user_provider = UserProvider()
 test_assignation_provider = TestAssignationProvider()
 
-@language2test_bp.route("/test_sessions/count", methods=['GET'])
-@crossdomain(origin='*')
-@authentication
-def get_test_sessions_count():
-    return provider.get_count(TestSession)
-
-@language2test_bp.route("/test_sessions", methods=['GET'])
-@crossdomain(origin='*')
-@authentication
-def get_test_session():
-    id = request.args.get('id')
-    if id:
-        properties = TestSession.query.filter_by(id=int(id)).first()
-        result = test_schema.dump(properties)
-        return jsonify(result)
-
-    name = request.args.get('name')
-    if name:
-        properties = TestSession.query.filter_by(name=name).first()
-        result = test_schema.dump(properties)
-        return jsonify(result)
-
-    properties = provider.query_all(TestSession)
-    result = test_schema_many.dump(properties)
-    return jsonify(result)
-
 @language2test_bp.route("/test_sessions", methods=['POST'])
 @crossdomain(origin='*')
 @authentication
@@ -202,6 +176,9 @@ def instructor_export_test_sessions():
         return response
 
 
+
+
+
 @language2test_bp.route("/test_developer/test_sessions", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
@@ -226,8 +203,8 @@ def get_test_sessions_for_tests():
             else:
                 order = 'asc'
 
-            properties = provider.get_test_sessions_for_test(test_id,limit,offset,column,order)
-            result = test_schema_many.dump(properties)
+            test_sessions = provider.get_test_sessions_for_test(test_id,limit,offset,column,order)
+            result = test_schema_many.dump(test_sessions)
             return jsonify(result)
         else:
             error = {"message": "Access Denied"}
@@ -263,38 +240,114 @@ def get_test_sessions_for_test_count():
     return response
 
 
-@language2test_bp.route("/test_sessions/filter", methods=['GET'])
+@language2test_bp.route("/test_sessions", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-def filter_test_sessions():
+def get_test_session():
     try:
+        # Retrieve user
+        user = user_provider.get_authenticated_user()
+        is_test_taker = user_provider.has_role(user, 'Test Taker')
+        if not is_test_taker:
+            #Specific Test Session by id
+            #Notice that id and name will return a TestSession and .dump returns a dictionary
+            #The rest of the paremters will return a list of TestSessions and .dump a list of dictionaries
+            id = request.args.get('id')
+            if id:
+                properties = TestSession.query.filter_by(id=int(id)).first()
+                result = test_schema.dump(properties)
+                return jsonify(result)
 
-        limit = request.args.get('limit')
-        offset = request.args.get('offset')
+            #Specific Test Session by name
+            name = request.args.get('name')
+            if name:
+                properties = TestSession.query.filter_by(name=name).first()
+                result = test_schema.dump(properties)
+                return jsonify(result)
 
-        if 'column' in request.args:
-            column = request.args.get('column')
+            #Get filtering parameters
+            start_date = request.args.get('start_datetime')
+            end_date = request.args.get('end_datetime')
+            class_id = request.args.get('class_id')
+            student_id = request.args.get('student_id')
+            test_id = request.args.get('test_id')
+            instructor_id = request.args.get('instructor_id')
+
+            if not(start_date or end_date or class_id or student_id or test_id or instructor_id):
+                #If not filters are provided, query all the Test sessions
+                properties = provider.query_all(TestSession)
+                result = test_schema_many.dump(properties)
+                return jsonify(result)
+            else:
+                #Query by Test Session filters
+                limit = request.args.get('limit')
+                offset = request.args.get('offset')
+
+                if 'column' in request.args:
+                    column = request.args.get('column')
+                else:
+                    column = 'id'
+
+                if 'order' in request.args:
+                    order = request.args.get('order')
+                else:
+                    order = 'asc'
+
+                properties = provider.filter_test_sessions(column, order, limit, offset, start_date,end_date,class_id,student_id,test_id,instructor_id)
+                #This returns a list of Test Session and .dump a list of dictionaries
+                result = test_schema_many.dump(properties)
+                return jsonify(result)
         else:
-            column = 'id'
+            error = {"message": "Access Denied"}
+            response = Response(json.dumps(error), 403, mimetype="application/json")
+            return response
+    except Exception as e:
+        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 404, mimetype="application/json")
+    return response
 
-        if 'order' in request.args:
-            order = request.args.get('order')
+
+
+@language2test_bp.route("/test_sessions/count", methods=['GET'])
+@crossdomain(origin='*')
+@authentication
+def get_test_session_count():
+    try:
+        # Retrieve user
+        user = user_provider.get_authenticated_user()
+        is_test_taker = user_provider.has_role(user, 'Test Taker')
+        if not is_test_taker:
+            # Get filtering parameters
+            start_date = request.args.get('start_datetime')
+            end_date = request.args.get('end_datetime')
+            class_id = request.args.get('class_id')
+            student_id = request.args.get('student_id')
+            test_id = request.args.get('test_id')
+            instructor_id = request.args.get('instructor_id')
+
+            if not (start_date or end_date or class_id or student_id or test_id or instructor_id):
+            #If not filters are provided, count all the Test sessions
+                return provider.get_count(TestSession)
+            else:
+                limit = request.args.get('limit')
+                offset = request.args.get('offset')
+
+                if 'column' in request.args:
+                    column = request.args.get('column')
+                else:
+                    column = 'id'
+
+                if 'order' in request.args:
+                    order = request.args.get('order')
+                else:
+                    order = 'asc'
+
+                count = provider.filter_test_sessions_count(column, order, limit, offset, start_date,end_date,class_id,student_id,test_id,instructor_id)
+                response = Response(json.dumps(count), 200, mimetype="application/json")
         else:
-            order = 'asc'
-
-        start_date = request.args.get('start_datetime')
-        end_date = request.args.get('end_datetime')
-        class_id = request.args.get('class_id')
-        student_id = request.args.get('student_id')
-        test_id = request.args.get('test_id')
-        instructor_id = request.args.get('instructor_id')
-
-        properties = provider.filter_test_sessions(column, order, limit, offset, start_date,end_date,class_id,student_id,test_id,instructor_id)
-        result = test_schema_many.dump(properties)
-        return jsonify(result)
-
-        response = Response(json.dumps(count), 200, mimetype="application/json")
-
+            error = {"message": "Access Denied"}
+            response = Response(json.dumps(error), 403, mimetype="application/json")
+            return response
 
     except Exception as e:
         error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
@@ -303,41 +356,9 @@ def filter_test_sessions():
     return response
 
 
-@language2test_bp.route("/test_sessions/filter/count", methods=['GET'])
-@crossdomain(origin='*')
-@authentication
-def filter_test_sessions_count():
-    try:
-
-        limit = request.args.get('limit')
-        offset = request.args.get('offset')
-
-        if 'column' in request.args:
-            column = request.args.get('column')
-        else:
-            column = 'id'
-
-        if 'order' in request.args:
-            order = request.args.get('order')
-        else:
-            order = 'asc'
-
-        start_date = request.args.get('start_datetime')
-        end_date = request.args.get('end_datetime')
-        class_id = request.args.get('class_id')
-        student_id = request.args.get('student_id')
-        test_id = request.args.get('test_id')
-        instructor_id = request.args.get('instructor_id')
-
-        count = provider.filter_test_sessions_count(column, order, limit, offset, start_date,end_date,class_id,student_id,test_id,instructor_id)
-        response = Response(json.dumps(count), 200, mimetype="application/json")
 
 
-    except Exception as e:
-        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 404, mimetype="application/json")
 
-    return response
 
 
 
