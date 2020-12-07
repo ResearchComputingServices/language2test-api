@@ -23,7 +23,6 @@ class TestExportProvider(RawSqlProvider):
         test_infos = {
             "Id": result['id'],
             "name": result['name'],
-            "Student Classes": result['test_student_class'][0]['display'],
             "Demographic Fields": ', '.join(demographic_fields_list),
             "Mandatory Demographic Fields": ', '.join(mandatory_field_list)
         }
@@ -108,7 +107,7 @@ class TestExportProvider(RawSqlProvider):
             worksheet = writer.sheets["Test Basic info"]
             worksheet.set_column('A:A', 18, format)
             worksheet.set_column('B:B', 18, format)
-            worksheet.set_column('C:C', 25, format)
+            worksheet.set_column('C:C', 55, format)
             worksheet.set_column('D:E', 55, format)
 
             if ("test_vocabulary" in result) & (result["test_vocabulary"] != []):
