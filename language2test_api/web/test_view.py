@@ -2,6 +2,8 @@ import random
 import re
 from flask import request, send_file
 from flask import json, jsonify, Response
+
+from language2test_api.models import TestAssignation
 from language2test_api.models.test import Test, TestSchema
 from language2test_api.extensions import db, ma
 from language2test_api.web.common_view import language2test_bp
@@ -10,6 +12,7 @@ from language2test_api.decorators.authentication import authentication
 from language2test_api.providers.test_provider import TestProvider
 from language2test_api.providers.test_export_provider import TestExportProvider
 from language2test_api.providers.user_provider import UserProvider
+from language2test_api.models.test_session import TestSession
 import pandas as pd
 import datetime
 from io import BytesIO
@@ -493,3 +496,330 @@ def get_cloned_tests_count():
 
     return response
 
+@language2test_bp.route("/test_developer/test/export", methods=['GET'])
+@crossdomain(origin='*')
+@authentication
+def test_developer_export_test():
+    user = user_provider.get_authenticated_user()
+    is_test_developer = user_provider.has_role(user, 'Test Developer')
+    if is_test_developer:
+        specific_id = request.args.get('id')
+        if specific_id is None:
+            try:
+                records = []
+                tests = Test.query.all()
+                for test in tests:
+                    records.append({
+                        "id": test.id,
+                        "name": test.name})
+
+                output = BytesIO()
+                with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+                    pd.DataFrame(records).to_excel(writer,
+                                                   sheet_name="{} summary".format("test"),
+                                                   index=False)
+                    workbook = writer.book
+                    worksheet = writer.sheets["{} summary".format("test")]
+                    format = workbook.add_format()
+                    format.set_align('center')
+                    format.set_align('vcenter')
+                    worksheet.set_column('A:A', 16, format)
+                    worksheet.set_column('B:B', 18, format)
+                    writer.save()
+
+                output.seek(0)
+                return send_file(output,
+                                 attachment_filename="Test" + '.xlsx',
+                                 mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                 as_attachment=True, cache_timeout=-1)
+            except Exception as e:
+                error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
+                response = Response(json.dumps(error), 404, mimetype="application/json")
+                return response
+        if specific_id is not None:
+            try:
+                name = request.args.get('name')
+                test_id = request.args.get('id')
+                if name is None:
+                    tests = Test.query.filter_by(id=test_id).first()
+                    name = tests.name
+                if name is not None:
+                    return send_file(TestExportProvider.write_results_into_file(test_id),
+                                     attachment_filename=name+ ' test information' + '.xlsx',
+                                     mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                     as_attachment=True, cache_timeout=-1)
+
+            except Exception as e:
+                error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
+                response = Response(json.dumps(error), 404, mimetype="application/json")
+                return response
+
+    else:
+        error = {"message": "Access Denied"}
+        response = Response(json.dumps(error), 403, mimetype="application/json")
+
+    return response
+
+
+@language2test_bp.route("/test_developer/upcoming_tests/export", methods=['GET'])
+@crossdomain(origin='*')
+@authentication
+def upcoming_tests_developer_export_test():
+    user = user_provider.get_authenticated_user()
+    is_test_developer = user_provider.has_role(user, 'Test Developer')
+    if is_test_developer:
+        specific_id = request.args.get('id')
+        start_datetime = datetime.datetime.utcnow()
+        if specific_id is None:
+            try:
+                records = []
+                tests = db.session.query(Test).join(TestAssignation).filter(Test.id == TestAssignation.test_id,
+                                                                        start_datetime <= TestAssignation.end_datetime).all()
+
+
+                for test in tests:
+                    records.append({
+                        "id": test.id,
+                        "name": test.name})
+
+                output = BytesIO()
+                with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+                    pd.DataFrame(records).to_excel(writer,
+                                                   sheet_name="{} summary".format("test"),
+                                                   index=False)
+                    workbook = writer.book
+                    worksheet = writer.sheets["{} summary".format("test")]
+                    format = workbook.add_format()
+                    format.set_align('center')
+                    format.set_align('vcenter')
+                    worksheet.set_column('A:A', 16, format)
+                    worksheet.set_column('B:B', 18, format)
+                    writer.save()
+
+                output.seek(0)
+                return send_file(output,
+                                 attachment_filename="Test" + '.xlsx',
+                                 mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                 as_attachment=True, cache_timeout=-1)
+            except Exception as e:
+                error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
+                response = Response(json.dumps(error), 404, mimetype="application/json")
+                return response
+        if specific_id is not None:
+            try:
+                tests = db.session.query(Test).join(TestAssignation).filter(Test.id == TestAssignation.test_id,
+                                                                            start_datetime <= TestAssignation.end_datetime).all()
+                for test in tests:
+                    if test.id == int(specific_id):
+                        name = test.name
+                        return send_file(TestExportProvider.write_results_into_file(test.id),
+                                             attachment_filename=name+ ' test information' + '.xlsx',
+                                             mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                             as_attachment=True, cache_timeout=-1)
+
+            except Exception as e:
+                error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
+                response = Response(json.dumps(error), 404, mimetype="application/json")
+                return response
+
+    else:
+        error = {"message": "Access Denied"}
+        response = Response(json.dumps(error), 403, mimetype="application/json")
+
+    return response
+
+
+@language2test_bp.route("/test_developer/test_with_sessions/export", methods=['GET'])
+@crossdomain(origin='*')
+@authentication
+def test_with_sessions_developer_export_test():
+    user = user_provider.get_authenticated_user()
+    is_test_developer = user_provider.has_role(user, 'Test Developer')
+    if is_test_developer:
+        specific_id = request.args.get('id')
+        if specific_id is None:
+            try:
+                records = []
+                tests = db.session.query(Test).join(TestSession).filter(Test.id == TestSession.test_id).all()
+                for test in tests:
+                    records.append({
+                        "id": test.id,
+                        "name": test.name})
+
+                output = BytesIO()
+                with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+                    pd.DataFrame(records).to_excel(writer,
+                                                   sheet_name="{} summary".format("test"),
+                                                   index=False)
+                    workbook = writer.book
+                    worksheet = writer.sheets["{} summary".format("test")]
+                    format = workbook.add_format()
+                    format.set_align('center')
+                    format.set_align('vcenter')
+                    worksheet.set_column('A:A', 16, format)
+                    worksheet.set_column('B:B', 18, format)
+                    writer.save()
+
+                output.seek(0)
+                return send_file(output,
+                                 attachment_filename="Test" + '.xlsx',
+                                 mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                 as_attachment=True, cache_timeout=-1)
+            except Exception as e:
+                error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
+                response = Response(json.dumps(error), 404, mimetype="application/json")
+                return response
+        if specific_id is not None:
+            try:
+                tests = db.session.query(Test).join(TestSession).filter(Test.id == TestSession.test_id).all()
+                for test in tests:
+                    if test.id == int(specific_id):
+                        name = test.name
+                        return send_file(TestExportProvider.write_results_into_file(test.id),
+                                             attachment_filename=name+ ' test information' + '.xlsx',
+                                             mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                             as_attachment=True, cache_timeout=-1)
+
+            except Exception as e:
+                error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
+                response = Response(json.dumps(error), 404, mimetype="application/json")
+                return response
+
+    else:
+        error = {"message": "Access Denied"}
+        response = Response(json.dumps(error), 403, mimetype="application/json")
+
+    return response
+
+@language2test_bp.route("/test_developer/test_not_in_use/export", methods=['GET'])
+@crossdomain(origin='*')
+@authentication
+def test_not_in_use_developer_export_test():
+    user = user_provider.get_authenticated_user()
+    is_test_developer = user_provider.has_role(user, 'Test Developer')
+    if is_test_developer:
+        specific_id = request.args.get('id')
+        tests_in_use = []
+        test_sessions = TestSession.query.all()
+        for session in test_sessions:
+            if session.test_id not in tests_in_use:
+                tests_in_use.append(session.test_id)
+        test_assignations = TestAssignation.query.all()
+        for assignation in test_assignations:
+            if assignation.test_id not in tests_in_use:
+                tests_in_use.append(assignation.test_id)
+        if specific_id is None:
+            try:
+                records = []
+                tests = db.session.query(Test).filter(~Test.id.in_(tests_in_use)).all()
+                for test in tests:
+                    records.append({
+                        "id": test.id,
+                        "name": test.name})
+
+                output = BytesIO()
+                with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+                    pd.DataFrame(records).to_excel(writer,
+                                                   sheet_name="{} summary".format("test"),
+                                                   index=False)
+                    workbook = writer.book
+                    worksheet = writer.sheets["{} summary".format("test")]
+                    format = workbook.add_format()
+                    format.set_align('center')
+                    format.set_align('vcenter')
+                    worksheet.set_column('A:A', 16, format)
+                    worksheet.set_column('B:B', 18, format)
+                    writer.save()
+
+                output.seek(0)
+                return send_file(output,
+                                 attachment_filename="Test" + '.xlsx',
+                                 mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                 as_attachment=True, cache_timeout=-1)
+            except Exception as e:
+                error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
+                response = Response(json.dumps(error), 404, mimetype="application/json")
+                return response
+        if specific_id is not None:
+            try:
+                tests = db.session.query(Test).filter(~Test.id.in_(tests_in_use)).all()
+                for test in tests:
+                    if test.id == int(specific_id):
+                        name = test.name
+                        return send_file(TestExportProvider.write_results_into_file(test.id),
+                                             attachment_filename=name+ ' test information' + '.xlsx',
+                                             mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                             as_attachment=True, cache_timeout=-1)
+
+            except Exception as e:
+                error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
+                response = Response(json.dumps(error), 404, mimetype="application/json")
+                return response
+
+    else:
+        error = {"message": "Access Denied"}
+        response = Response(json.dumps(error), 403, mimetype="application/json")
+
+    return response
+
+@language2test_bp.route("/test_developer/cloned_tests/export", methods=['GET'])
+@crossdomain(origin='*')
+@authentication
+def cloned_tests_developer_export_test():
+    user = user_provider.get_authenticated_user()
+    is_test_developer = user_provider.has_role(user, 'Test Developer')
+    if is_test_developer:
+        specific_id = request.args.get('id')
+        if specific_id is None:
+            try:
+                records = []
+                tests = db.session.query(Test).filter(Test.cloned_from_id != None).all()
+                for test in tests:
+                    records.append({
+                        "id": test.id,
+                        "name": test.name})
+
+                output = BytesIO()
+                with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+                    pd.DataFrame(records).to_excel(writer,
+                                                   sheet_name="{} summary".format("test"),
+                                                   index=False)
+                    workbook = writer.book
+                    worksheet = writer.sheets["{} summary".format("test")]
+                    format = workbook.add_format()
+                    format.set_align('center')
+                    format.set_align('vcenter')
+                    worksheet.set_column('A:A', 16, format)
+                    worksheet.set_column('B:B', 18, format)
+                    writer.save()
+
+                output.seek(0)
+                return send_file(output,
+                                 attachment_filename="Test" + '.xlsx',
+                                 mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                 as_attachment=True, cache_timeout=-1)
+            except Exception as e:
+                error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
+                response = Response(json.dumps(error), 404, mimetype="application/json")
+                return response
+        if specific_id is not None:
+            try:
+                tests = db.session.query(Test).filter(Test.cloned_from_id != None).all()
+                for test in tests:
+                    if test.id == int(specific_id):
+                        name = test.name
+                        return send_file(TestExportProvider.write_results_into_file(test.id),
+                                             attachment_filename=name+ ' test information' + '.xlsx',
+                                             mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                             as_attachment=True, cache_timeout=-1)
+
+            except Exception as e:
+                error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
+                response = Response(json.dumps(error), 404, mimetype="application/json")
+                return response
+
+    else:
+        error = {"message": "Access Denied"}
+        response = Response(json.dumps(error), 403, mimetype="application/json")
+
+    return response
