@@ -93,10 +93,10 @@ def delete_user_field_type():
         response = Response(json.dumps(error), 500, mimetype="application/json")
     return response
 
-@language2test_bp.route("/user_field_type/export", methods=['GET'])
+@language2test_bp.route("/user_field_types/export", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
-def export_user_field_categories():
+def export_user_field_types():
     specific_id = request.args.get('id')
     if specific_id is None:
         try:

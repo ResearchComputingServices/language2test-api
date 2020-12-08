@@ -82,24 +82,6 @@ def delete_test_session():
 
     return response
 
-@language2test_bp.route("/test_sessions/export", methods=['GET'])
-@crossdomain(origin='*')
-@authentication
-def export_test_sessions():
-    specific_id = request.args.get('id')
-    if specific_id is None:
-        try:
-            name = request.args.get('name')
-            if name is None:
-                sessions = TestSession.query.all()
-                return send_file(export_provider.write_results_into_file(sessions, name),attachment_filename='Test Details.zip',
-                                mimetype="application/zip",
-                                as_attachment=True, cache_timeout=-1)
-        except Exception as e:
-            error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-            response = Response(json.dumps(error), 500, mimetype="application/json")
-            return response
-
 
 @language2test_bp.route("/instructor/test_sessions", methods=['GET'])
 @crossdomain(origin='*')
@@ -357,7 +339,7 @@ def get_test_session_count():
 
 
 
-@language2test_bp.route("/test_sessions/export_filter", methods=['GET'])
+@language2test_bp.route("/test_sessions/export", methods=['GET'])
 @crossdomain(origin='*')
 @authentication
 def export_test_sessions_filter():
