@@ -357,13 +357,103 @@ def get_test_session_count():
 
 
 
+@language2test_bp.route("/test_sessions/export_filter", methods=['GET'])
+@crossdomain(origin='*')
+@authentication
+def export_test_sessions_filter():
+    try:
+        # Get filtering parameters
+        start_date = request.args.get('start_datetime')
+        end_date = request.args.get('end_datetime')
+        class_id = request.args.get('class_id')
+        student_id = request.args.get('student_id')
+        test_id = request.args.get('test_id')
+        instructor_id = request.args.get('instructor_id')
+        if not (start_date or end_date or class_id or student_id or test_id or instructor_id):
+            # If not filters are provided, query all the Test sessions
+            sessions = TestSession.query.all()
+        else:
+            # Query by Test Session filters
+            limit = request.args.get('limit')
+            offset = request.args.get('offset')
 
+            if 'column' in request.args:
+                column = request.args.get('column')
+            else:
+                column = 'id'
 
+            if 'order' in request.args:
+                order = request.args.get('order')
+            else:
+                order = 'asc'
+            sessions = provider.filter_test_sessions(column, order, limit, offset, start_date, end_date, class_id, student_id, test_id, instructor_id)
+        name = request.args.get('name')
+        return send_file(export_provider.write_results_into_file(sessions, name), attachment_filename='Test Details.zip',
+                         mimetype="application/zip",
+                         as_attachment=True, cache_timeout=-1)
+    except Exception as e:
+        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500, mimetype="application/json")
+        return response
 
+@language2test_bp.route("instructor/test_sessions/export_filter", methods=['GET'])
+@crossdomain(origin='*')
+@authentication
+def instructor_export_test_sessions_filter():
+    test_assignation_id = int(request.args.get('test_assignation_id'))
+    current_user = user_provider.get_authenticated_user()
+    is_instructor = user_provider.has_role(current_user, 'Instructor')
+    # Check if the user is an instructor
+    if is_instructor:
+        instructor_id = current_user.id
+        instructor_assignation_list = test_assignation_provider.get_instructor_test_assignations(instructor_id)
+        instructor_assignation_id_list = []
+        for each_instructor_assignation in instructor_assignation_list:
+            instructor_assignation_id_list.append(each_instructor_assignation.id)
+        # Check if the test assignation is associated with the instructor
+        if test_assignation_id in instructor_assignation_id_list:
+            try:
+                sessions_test_assignation_id = provider.get_test_sessions_for_test_assignation(test_assignation_id)
+                # Get filtering parameters
+                start_date = request.args.get('start_datetime')
+                end_date = request.args.get('end_datetime')
+                class_id = request.args.get('class_id')
+                student_id = request.args.get('student_id')
+                test_id = request.args.get('test_id')
+                instructor_id = request.args.get('instructor_id')
+                if not (start_date or end_date or class_id or student_id or test_id or instructor_id):
+                    # If not filters are provided, query all the Test sessions
+                    sessions = TestSession.query.all()
+                else:
+                    # Query by Test Session filters
+                    limit = request.args.get('limit')
+                    offset = request.args.get('offset')
 
+                    if 'column' in request.args:
+                        column = request.args.get('column')
+                    else:
+                        column = 'id'
 
-
-
-
-
-
+                    if 'order' in request.args:
+                        order = request.args.get('order')
+                    else:
+                        order = 'asc'
+                    sessions = provider.filter_test_sessions(column, order, limit, offset, start_date, end_date,
+                                                             class_id, student_id, test_id, instructor_id)
+                sessions_with_filter_and_test_assignation_id = list(set(sessions_test_assignation_id).intersection(set(sessions)))
+                name = request.args.get('name')
+                return send_file(export_provider.write_results_into_file(sessions_with_filter_and_test_assignation_id, name),attachment_filename='Test Details.zip',
+                                mimetype="application/zip",
+                                as_attachment=True, cache_timeout=-1)
+            except Exception as e:
+                error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
+                response = Response(json.dumps(error), 500, mimetype="application/json")
+                return response
+        else:
+            error = {"message": "The test assignation is not associated with the instructor."}
+            response = Response(json.dumps(error), 403, mimetype="application/json")
+            return response
+    else:
+        error = {"message": "The user is not an instructor."}
+        response = Response(json.dumps(error), 403, mimetype="application/json")
+        return response
