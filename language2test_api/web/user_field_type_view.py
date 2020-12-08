@@ -1,4 +1,4 @@
-from flask import request
+from flask import request, send_file
 from flask import json, jsonify, Response
 from language2test_api.models.user_field_type import UserFieldType, UserFieldTypeSchema
 from language2test_api.extensions import db, ma
@@ -6,7 +6,8 @@ from language2test_api.web.common_view import language2test_bp
 from language2test_api.decorators.crossorigin import crossdomain
 from language2test_api.decorators.authentication import authentication
 from language2test_api.providers.user_field_type_provider import UserFieldTypeProvider
-
+import pandas as pd
+from io import BytesIO
 user_field_type_schema = UserFieldTypeSchema(many=False)
 user_field_type_schema_many = UserFieldTypeSchema(many=True)
 
@@ -91,3 +92,76 @@ def delete_user_field_type():
         error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
         response = Response(json.dumps(error), 500, mimetype="application/json")
     return response
+
+@language2test_bp.route("/user_field_type/export", methods=['GET'])
+@crossdomain(origin='*')
+@authentication
+def export_user_field_categories():
+    specific_id = request.args.get('id')
+    if specific_id is None:
+        try:
+            records = []
+            fields = UserFieldType.query.all()
+            for f in fields:
+                records.append({
+                    "Id": f.id,
+                    "Name": f.name,
+                    "Enumeration": f.enumeration.name if f.enumeration is not None else None})
+            output = BytesIO()
+            with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+                pd.DataFrame(records).to_excel(writer,
+                                               sheet_name="{} summary".format("user field type"),
+                                               index=False)
+                workbook = writer.book
+                worksheet = writer.sheets["{} summary".format("user field type")]
+                format = workbook.add_format()
+                format.set_align('center')
+                format.set_align('vcenter')
+                worksheet.set_column('A:C', 20, format)
+                writer.save()
+
+            output.seek(0)
+            return send_file(output,
+                             attachment_filename="User Field Type Summary" + '.xlsx',
+                             mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                             as_attachment=True, cache_timeout=-1)
+        except Exception as e:
+            error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
+            response = Response(json.dumps(error), 404, mimetype="application/json")
+            return response
+
+    if specific_id is not None:
+        try:
+            fields = UserFieldType.query.all()
+            for field in fields:
+                if field.id == int(specific_id):
+                    specific_type = field
+                    break
+            records = {
+                "Id": specific_type.id,
+                "Name": specific_type.name,
+                "Enumeration": specific_type.enumeration.name if specific_type.enumeration is not None else None
+            }
+
+            output = BytesIO()
+            with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+                pd.DataFrame([records]).to_excel(writer,
+                                               sheet_name="{} details".format("user field type"),
+                                               index=False)
+                workbook = writer.book
+                worksheet = writer.sheets["{} details".format("user field type")]
+                format = workbook.add_format()
+                format.set_align('center')
+                format.set_align('vcenter')
+                worksheet.set_column('A:C', 15, format)
+                writer.save()
+            output.seek(0)
+            return send_file(output,
+                             attachment_filename="User Field Type Details" + '.xlsx',
+                             mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                             as_attachment=True, cache_timeout=-1)
+        except Exception as e:
+            error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
+            response = Response(json.dumps(error), 404, mimetype="application/json")
+            return response
+
