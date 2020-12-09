@@ -212,29 +212,27 @@ class TestProvider(BaseProvider):
 
         return dict
 
-
-    def query_tests_not_in_use(self, limit,offset,column,order):
+    def query_tests_not_in_use(self, limit, offset, column, order):
         p = 'test_' + column + ' ' + order
 
-        tests_in_use =[]
-        #Query tests with sessions
+        tests_in_use = []
+        # Query tests with sessions
         test_sessions = TestSession.query.all()
         for session in test_sessions:
-            if session.test_id not in tests_in_use:
+            if session.test_id and session.test_id not in tests_in_use:
                 tests_in_use.append(session.test_id)
-
 
         test_assignations = TestAssignation.query.all()
         for assignation in test_assignations:
-            if assignation.test_id not in tests_in_use:
+            if assignation.test_id and assignation.test_id not in tests_in_use:
                 tests_in_use.append(assignation.test_id)
 
         if limit and offset:
             limit = int(limit)
             offset = int(offset)
             page = int(offset / limit) + 1
-
-            tests_not_in_use = db.session.query(Test).filter(~Test.id.in_(tests_in_use)).order_by(text(p)).paginate(page=page, per_page=limit, error_out=False).items
+            tests_not_in_use = db.session.query(Test).filter(~Test.id.in_(tests_in_use)).order_by(text(p)).paginate(
+                page=page, per_page=limit, error_out=False).items
         else:
             tests_not_in_use = db.session.query(Test).filter(~Test.id.in_(tests_in_use)).all()
 

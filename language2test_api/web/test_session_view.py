@@ -13,6 +13,10 @@ from language2test_api.providers.test_session_export_provider import TestSession
 from language2test_api.providers.test_assignation_provider import TestAssignationProvider
 from language2test_api.providers.user_provider import UserProvider
 from language2test_api.models.student_class import StudentClass, StudentClassSchema
+from language2test_api.permissions import permission
+
+from datetime import datetime
+
 
 test_schema = TestSessionSchema(many=False)
 test_schema_many = TestSessionSchema(many=True)
@@ -187,6 +191,7 @@ def get_test_sessions_for_tests():
 
             test_sessions = provider.get_test_sessions_for_test(test_id,limit,offset,column,order)
             result = test_schema_many.dump(test_sessions)
+            _anonymize_student_info_in_session_list(user, result)
             return jsonify(result)
         else:
             error = {"message": "Access Denied"}
@@ -222,32 +227,78 @@ def get_test_sessions_for_test_count():
     return response
 
 
-@language2test_bp.route("/test_sessions", methods=['GET'])
-@crossdomain(origin='*')
-@authentication
-def get_test_session():
+
+def _anonymize_student_info_in_session(user, test_session):
+
+    allow = permission.view_student_data(user)
+    if not allow:
+        test_session['name'] = ''
+        test_session['user_id'] = None
+        test_session['user'] = None
+
+
+def _anonymize_student_info_in_session_list(user, test_sessions):
+
+    allow = permission.view_student_data(user)
+    if not allow:
+        for session in test_sessions:
+            session['name'] = ''
+            session['user_id'] =''
+            session['user'] = ''
+
+
+def _validate_filters(user, start_datetime_rq, end_datetime_rq,student_id, instructor_id):
+
+    bad_request = False
+
+    if start_datetime_rq and end_datetime_rq:
+        start_datetime = datetime.strptime(start_datetime_rq, '%Y-%m-%dT%H:%M:%S.%fZ')
+        end_datetime = datetime.strptime(end_datetime_rq, '%Y-%m-%dT%H:%M:%S.%fZ')
+
+        if end_datetime<start_datetime:
+            bad_request = True
+            return bad_request, instructor_id
+
+    allow_student = permission.view_student_data(user)
+    if not allow_student and student_id:
+        bad_request = True
+        return bad_request, instructor_id
+
+    allow_classes = permission.view_student_classes(user)
+    if allow_classes == 'own':
+        instructor_id = user.id
+
+    return bad_request, instructor_id
+
+
+def get_a_test_session(id=None, name=None):
+    if id:
+        properties = TestSession.query.filter_by(id=int(id)).first()
+        result = test_schema.dump(properties)
+        return result
+
+    if name:
+        properties = TestSession.query.filter_by(name=name).first()
+        result = test_schema.dump(properties)
+        return result
+
+
+def get_test_session_v1():
     try:
         # Retrieve user
         user = user_provider.get_authenticated_user()
         is_test_taker = user_provider.has_role(user, 'Test Taker')
+
         if not is_test_taker:
-            #Specific Test Session by id
-            #Notice that id and name will return a TestSession and .dump returns a dictionary
-            #The rest of the paremters will return a list of TestSessions and .dump a list of dictionaries
+            # Specific Test Session by id or name
             id = request.args.get('id')
-            if id:
-                properties = TestSession.query.filter_by(id=int(id)).first()
-                result = test_schema.dump(properties)
-                return jsonify(result)
-
-            #Specific Test Session by name
             name = request.args.get('name')
-            if name:
-                properties = TestSession.query.filter_by(name=name).first()
-                result = test_schema.dump(properties)
+            if id or name:
+                result = get_a_test_session(id, name)
+                _anonymize_student_info_in_session(user, result)
                 return jsonify(result)
 
-            #Get filtering parameters
+            # Get filtering parameters
             start_date = request.args.get('start_datetime')
             end_date = request.args.get('end_datetime')
             class_id = request.args.get('class_id')
@@ -255,45 +306,54 @@ def get_test_session():
             test_id = request.args.get('test_id')
             instructor_id = request.args.get('instructor_id')
 
-            if not(start_date or end_date or class_id or student_id or test_id or instructor_id):
-                #If not filters are provided, query all the Test sessions
+            if not (start_date or end_date or class_id or student_id or test_id or instructor_id):
+
+                # If not filters are provided, query all the Test sessions
                 properties = provider.query_all(TestSession)
                 result = test_schema_many.dump(properties)
+                _anonymize_student_info_in_session_list(user, result)
                 return jsonify(result)
             else:
-                #Query by Test Session filters
-                limit = request.args.get('limit')
-                offset = request.args.get('offset')
-
-                if 'column' in request.args:
-                    column = request.args.get('column')
+                bad_request, instructor_id = _validate_filters(user, start_date, end_date, student_id, instructor_id)
+                if bad_request:
+                    error = {"message": "Check the format of the request"}
+                    response = Response(json.dumps(error), 403, mimetype="application/json")
+                    return response
                 else:
-                    column = 'id'
+                    # Query by Test Session filters
+                    limit = request.args.get('limit')
+                    offset = request.args.get('offset')
 
-                if 'order' in request.args:
-                    order = request.args.get('order')
-                else:
-                    order = 'asc'
+                    if 'column' in request.args:
+                        column = request.args.get('column')
+                    else:
+                        column = 'id'
 
-                properties = provider.filter_test_sessions(column, order, limit, offset, start_date,end_date,class_id,student_id,test_id,instructor_id)
-                #This returns a list of Test Session and .dump a list of dictionaries
-                result = test_schema_many.dump(properties)
-                return jsonify(result)
+                    if 'order' in request.args:
+                        order = request.args.get('order')
+                    else:
+                        order = 'asc'
+
+                    properties = provider.filter_test_sessions(column, order, limit, offset, start_date, end_date,
+                                                               class_id, student_id, test_id, instructor_id)
+                    # This returns a list of Test Session and .dump a list of dictionaries
+                    result = test_schema_many.dump(properties)
+                    _anonymize_student_info_in_session_list(user, result)
+                    return jsonify(result)
         else:
             error = {"message": "Access Denied"}
             response = Response(json.dumps(error), 403, mimetype="application/json")
             return response
     except Exception as e:
         error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 404, mimetype="application/json")
+        response = Response(json.dumps(error), 500, mimetype="application/json")
     return response
 
 
 
-@language2test_bp.route("/test_sessions/count", methods=['GET'])
-@crossdomain(origin='*')
-@authentication
-def get_test_session_count():
+
+
+def get_test_session_count_v1():
     try:
         # Retrieve user
         user = user_provider.get_authenticated_user()
@@ -326,6 +386,117 @@ def get_test_session_count():
 
                 count = provider.filter_test_sessions_count(column, order, limit, offset, start_date,end_date,class_id,student_id,test_id,instructor_id)
                 response = Response(json.dumps(count), 200, mimetype="application/json")
+        else:
+            error = {"message": "Access Denied"}
+            response = Response(json.dumps(error), 403, mimetype="application/json")
+            return response
+
+    except Exception as e:
+        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 404, mimetype="application/json")
+
+    return response
+
+
+@language2test_bp.route("/test_sessions", methods=['GET'])
+@crossdomain(origin='*')
+@authentication
+def get_test_session():
+    try:
+        # Retrieve user
+        user = user_provider.get_authenticated_user()
+        is_test_taker = user_provider.has_role(user, 'Test Taker')
+
+        if not is_test_taker:
+            #Specific Test Session by id or name
+            id = request.args.get('id')
+            name = request.args.get('name')
+            if id or name:
+                result = get_a_test_session(id,name)
+                _anonymize_student_info_in_session(user, result)
+                return jsonify(result)
+
+            #Get filtering parameters
+            start_date = request.args.get('start_datetime')
+            end_date = request.args.get('end_datetime')
+            class_id = request.args.get('class_id')
+            student_id = request.args.get('student_id')
+            test_id = request.args.get('test_id')
+            instructor_id = request.args.get('instructor_id')
+
+            bad_request, instructor_id = _validate_filters(user, start_date, end_date, student_id,instructor_id)
+            if bad_request:
+                error = {"message": "Check the format of the request"}
+                response = Response(json.dumps(error), 403, mimetype="application/json")
+                return response
+            else:
+                #Query by Test Session filters
+                limit = request.args.get('limit')
+                offset = request.args.get('offset')
+
+                if 'column' in request.args:
+                    column = request.args.get('column')
+                else:
+                    column = 'id'
+
+                if 'order' in request.args:
+                    order = request.args.get('order')
+                else:
+                    order = 'asc'
+
+                properties = provider.filter_test_sessions(column, order, limit, offset, start_date,end_date,class_id,student_id,test_id,instructor_id)
+                #This returns a list of Test Session and .dump a list of dictionaries
+                result = test_schema_many.dump(properties)
+                _anonymize_student_info_in_session_list(user, result)
+                return jsonify(result)
+        else:
+            error = {"message": "Access Denied"}
+            response = Response(json.dumps(error), 403, mimetype="application/json")
+            return response
+    except Exception as e:
+        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500, mimetype="application/json")
+    return response
+
+
+
+@language2test_bp.route("/test_sessions/count", methods=['GET'])
+@crossdomain(origin='*')
+@authentication
+def get_test_session_count():
+    try:
+        # Retrieve user
+        user = user_provider.get_authenticated_user()
+        is_test_taker = user_provider.has_role(user, 'Test Taker')
+        if not is_test_taker:
+            # Get filtering parameters
+            start_date = request.args.get('start_datetime')
+            end_date = request.args.get('end_datetime')
+            class_id = request.args.get('class_id')
+            student_id = request.args.get('student_id')
+            test_id = request.args.get('test_id')
+            instructor_id = request.args.get('instructor_id')
+            limit = request.args.get('limit')
+            offset = request.args.get('offset')
+
+            bad_request, instructor_id = _validate_filters(user, start_date, end_date, student_id,instructor_id)
+            if bad_request:
+                error = {"message": "Check the format of the request"}
+                response = Response(json.dumps(error), 403, mimetype="application/json")
+                return response
+
+            if 'column' in request.args:
+                column = request.args.get('column')
+            else:
+                column = 'id'
+
+            if 'order' in request.args:
+                order = request.args.get('order')
+            else:
+                order = 'asc'
+
+            count = provider.filter_test_sessions_count(column, order, limit, offset, start_date,end_date,class_id,student_id,test_id,instructor_id)
+            response = Response(json.dumps(count), 200, mimetype="application/json")
         else:
             error = {"message": "Access Denied"}
             response = Response(json.dumps(error), 403, mimetype="application/json")

@@ -11,6 +11,7 @@ from language2test_api.decorators.authentication import authentication
 from language2test_api.providers.student_class_provider import StudentClassProvider
 from language2test_api.providers.user_provider import UserProvider
 from language2test_api.web.user_keycloak import UserKeycloak
+from language2test_api.permissions import permission
 import pandas as pd
 import math
 from io import BytesIO
@@ -29,6 +30,48 @@ keycloak = UserKeycloak()
 @authentication
 def get_student_classes_count():
     return provider.get_count(StudentClass)
+
+
+
+def get_student_class_original():
+    id = request.args.get('id')
+    if id:
+        properties = StudentClass.query.filter_by(id=int(id)).first()
+        result = student_class_schema.dump(properties)
+        return jsonify(result)
+
+    name = request.args.get('name')
+    if name:
+        properties = StudentClass.query.filter_by(name=name)
+        result = student_class_schema.dump(properties)
+        return jsonify(result)
+
+    display = request.args.get('display')
+    if display:
+        properties = StudentClass.query.filter(StudentClass.display == display).first()
+        result = student_class_schema.dump(properties)
+        return jsonify(result)
+
+    properties = provider.query_all(StudentClass)
+    result = student_class_schema_many.dump(properties)
+    return jsonify(result)
+
+
+def query_all_classes():
+    # Retrieve user
+    user = user_provider.get_authenticated_user()
+    allow_classes = permission.view_student_classes(user)
+    if allow_classes == 'own':
+        instructor_id = user.id
+        filters = {'instructor_id': int(instructor_id)}
+        properties = provider.query_filter_by(StudentClass, filters)
+        result = student_class_schema_many.dump(properties)
+    else:
+        if allow_classes == 'all':
+            properties = provider.query_all(StudentClass)
+            result = student_class_schema_many.dump(properties)
+    return result
+
 
 @language2test_bp.route("/student_classes", methods=['GET'])
 @crossdomain(origin='*')
@@ -52,8 +95,7 @@ def get_student_class():
         result = student_class_schema.dump(properties)
         return jsonify(result)
 
-    properties = provider.query_all(StudentClass)
-    result = student_class_schema_many.dump(properties)
+    result = query_all_classes()
     return jsonify(result)
 
 

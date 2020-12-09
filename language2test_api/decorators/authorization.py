@@ -22,7 +22,7 @@ def authorization(params=None):
             #2 Retrieve user information
             user = User.query.filter_by(name=username).first()
 
-            #3 Retrieve authorizations for that user
+            #3 Retrieve permissions for that user
             authorizations_set = set()
             for role in user.roles:
                 for auth in role.authorizations:
