@@ -7,7 +7,7 @@ class RoleProvider(BaseProvider):
     def add(self, data):
         data['id'] = self.generate_id(field=Role.id)
         role = Role(data)
-        for authorization_item in data.get('permissions'):
+        for authorization_item in data.get('authorizations'):
             if 'id' in authorization_item:
                 authorization = Authorization.query.filter_by(id=authorization_item.get('id')).first()
             else:
@@ -21,7 +21,7 @@ class RoleProvider(BaseProvider):
 
     def update(self, data, role):
         role.authorizations = []
-        for authorization_item in data.get('permissions'):
+        for authorization_item in data.get('authorizations'):
             if 'id' in authorization_item:
                 authorization = Authorization.query.filter_by(id=authorization_item.get('id')).first()
             else:
