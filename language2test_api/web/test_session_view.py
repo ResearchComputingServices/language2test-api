@@ -541,7 +541,7 @@ def export_test_sessions_filter():
                 order = 'asc'
             sessions = provider.filter_test_sessions(column, order, limit, offset, start_date, end_date, class_id, student_id, test_id, instructor_id)
         name = request.args.get('name')
-        return send_file(export_provider.write_results_into_file(sessions, name), attachment_filename='Test Details.zip',
+        return send_file(export_provider.write_results_into_file_researcher_instructor(sessions, name), attachment_filename='Test Details.zip',
                          mimetype="application/zip",
                          as_attachment=True, cache_timeout=-1)
     except Exception as e:
@@ -595,7 +595,7 @@ def instructor_export_test_sessions_filter():
                                                              class_id, student_id, test_id, instructor_id)
                 sessions_with_filter_and_test_assignation_id = list(set(sessions_test_assignation_id).intersection(set(sessions)))
                 name = request.args.get('name')
-                return send_file(export_provider.write_results_into_file(sessions_with_filter_and_test_assignation_id, name),attachment_filename='Test Details.zip',
+                return send_file(export_provider.write_results_into_file_researcher_instructor(sessions_with_filter_and_test_assignation_id, name),attachment_filename='Test Details.zip',
                                 mimetype="application/zip",
                                 as_attachment=True, cache_timeout=-1)
             except Exception as e:
