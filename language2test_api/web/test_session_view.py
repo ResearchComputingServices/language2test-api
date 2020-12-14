@@ -512,7 +512,7 @@ def get_test_session_count():
 
 @language2test_bp.route("/test_sessions/export", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+#@authentication
 def export_test_sessions_filter():
     try:
         # Get filtering parameters

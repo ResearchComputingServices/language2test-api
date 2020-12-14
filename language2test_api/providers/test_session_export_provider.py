@@ -315,7 +315,7 @@ class TestSessionExportProvider(RawSqlProvider):
                     else:
                         test_result = 0
 
-                    test_infos["voc # " + str(i + 1) + " " + str(voc_questions_test[i])] = test_result
+                    test_infos["voc # " + str(i + 1) + ": " + str(voc_questions_test[i])] = test_result
 
                     if len(results['results_vocabulary'][0]['answers']) < max_voc_test:
                         missing_num_voc = max_voc_test - len(results['results_vocabulary'][0]['answers'])
@@ -344,7 +344,7 @@ class TestSessionExportProvider(RawSqlProvider):
                             test_result = 1
                         else:
                             test_result = 0
-                        test_infos["rc #" + str(j + 1) + " " + str(rc_questions_test[j])] = test_result
+                        test_infos["rc #" + str(j + 1) + ": " + str(rc_questions_test[j])] = test_result
 
                         if len(test_results["test_rc"][i]['questions']) < max_rc_test:
                             missing_num_rc = max_rc_test - len(test_results["test_rc"][i]['questions'])
@@ -370,7 +370,7 @@ class TestSessionExportProvider(RawSqlProvider):
                             test_result = 1
                         else:
                             test_result = 0
-                        test_infos["cloze #" + str(j + 1) + " " + str(cloze_questions_test[j])] = test_result
+                        test_infos["cloze #" + str(j + 1) + ": " + str(cloze_questions_test[j])] = test_result
 
                         if len(cloze_questions) < max_cloze_test:
                             missing_num_cloze = max_cloze_test - len(cloze_questions)
@@ -627,7 +627,7 @@ class TestSessionExportProvider(RawSqlProvider):
                     else:
                         test_result = answer
 
-                    test_infos["voc # " + str(i + 1) + " " + str(voc_questions_test[i])] = test_result
+                    test_infos["voc # " + str(i + 1) + ": " + str(voc_questions_test[i])] = test_result
 
                     if len(results['results_vocabulary'][0]['answers']) < max_voc_test:
                         missing_num_voc = max_voc_test - len(results['results_vocabulary'][0]['answers'])
@@ -652,7 +652,7 @@ class TestSessionExportProvider(RawSqlProvider):
                                                                 'seen'] is True else "Unseen!"
                         else:
                             test_result = answer
-                        test_infos["rc #" + str(j + 1) + " " + str(rc_questions_test[j])] = test_result
+                        test_infos["rc #" + str(j + 1) + ": " + str(rc_questions_test[j])] = test_result
 
                         if len(test_results["test_rc"][i]['questions']) < max_rc_test:
                             missing_num_rc = max_rc_test - len(test_results["test_rc"][i]['questions'])
@@ -676,7 +676,7 @@ class TestSessionExportProvider(RawSqlProvider):
                                                                 'seen'] is True else "Unseen!"
                         else:
                             test_result = answer
-                        test_infos["cloze #" + str(j + 1) + " " + str(cloze_questions_test[j])] = test_result
+                        test_infos["cloze #" + str(j + 1) + ": " + str(cloze_questions_test[j])] = test_result
 
                         if len(cloze_questions) < max_cloze_test:
                             missing_num_cloze = max_cloze_test - len(cloze_questions)
@@ -1139,7 +1139,7 @@ class TestSessionExportProvider(RawSqlProvider):
                 for i in range(len(results['results_vocabulary'][0]['answers'])):
 
                     answer = results['test']['test_vocabulary'][i]['word']
-                    test_infos["voc # " + str(i + 1) + " " + str(voc_questions_test[i])] = answer
+                    test_infos["voc # " + str(i + 1) + ": " + str(voc_questions_test[i])] = answer
 
                     if len(results['results_vocabulary'][0]['answers']) < max_voc_test:
                         missing_num_voc = max_voc_test - len(results['results_vocabulary'][0]['answers'])
@@ -1160,7 +1160,7 @@ class TestSessionExportProvider(RawSqlProvider):
                         correct_option = int(results['test']['test_rc'][i]['questions'][j]['correct'])
                         answer = results['test']['test_rc'][i]['questions'][j]['options'][correct_option-1]['text']
 
-                        test_infos["rc #" + str(j + 1) + " " + str(rc_questions_test[j])] = answer
+                        test_infos["rc #" + str(j + 1) + ": " + str(rc_questions_test[j])] = answer
 
                         if len(test_results["test_rc"][i]['questions']) < max_rc_test:
                             missing_num_rc = max_rc_test - len(test_results["test_rc"][i]['questions'])
@@ -1180,7 +1180,7 @@ class TestSessionExportProvider(RawSqlProvider):
                     for j in range(len(cloze_questions)):
                         answer = results['test']['test_cloze'][i]['questions'][j]['text']
 
-                        test_infos["cloze #" + str(j + 1) + " " + str(cloze_questions_test[j])] = answer
+                        test_infos["cloze #" + str(j + 1) + ": " + str(cloze_questions_test[j])] = answer
 
                         if len(cloze_questions) < max_cloze_test:
                             missing_num_cloze = max_cloze_test - len(cloze_questions)
