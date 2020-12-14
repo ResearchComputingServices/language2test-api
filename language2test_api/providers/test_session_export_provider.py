@@ -1137,8 +1137,8 @@ class TestSessionExportProvider(RawSqlProvider):
             if ('test_vocabulary' in test_results) and (len(test_results['test_vocabulary']) > 0):
                 voc_results = test_results["test_vocabulary"]
                 for i in range(len(results['results_vocabulary'][0]['answers'])):
-
-                    answer = results['test']['test_vocabulary'][i]['word']
+                    correct_option_voc = int(results['test']['test_vocabulary'][i]['correct'])
+                    answer = results['test']['test_vocabulary'][i]['options'][correct_option_voc-1]['text']
                     test_infos["voc # " + str(i + 1) + ": " + str(voc_questions_test[i])] = answer
 
                     if len(results['results_vocabulary'][0]['answers']) < max_voc_test:
