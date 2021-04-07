@@ -1,0 +1,242 @@
+[
+    {
+        "name": "sergiubuhatel",
+        "first_name": "Sergiu",
+        "last_name": "Buhatel",
+        "roles": [
+            {
+                "name": "Administrator"
+            }
+        ],
+        "fields": [
+            {
+                "name": "student_id",
+                "type": "number",
+                "value": 1234567
+            },
+            {
+                "name": "first_language",
+                "type": "text",
+                "value": "Romanian"
+            },
+            {
+                "name": "email",
+                "type": "text",
+                "value": "sergiu.buhatel@gmail.com"
+            },
+            {
+                "name": "phone",
+                "type": "phone",
+                "value": "(613) 724-8815"
+            }
+        ]
+    },
+    {
+        "name": "tanvirislam",
+        "first_name": "Tanvir",
+        "last_name": "Islam",
+        "roles": [
+            {
+                "name": "Administrator"
+            }
+        ],
+        "fields": [
+            {
+                "name": "student_id",
+                "type": "number",
+                "value": 1234871
+            },
+            {
+                "name": "first_language",
+                "type": "text",
+                "value": "English"
+            },
+            {
+                "name": "email",
+                "type": "text",
+                "value": "tanvir.islam@gmail.com"
+            },
+            {
+                "name": "phone",
+                "type": "phone",
+                "value": "(613) 231-1234"
+            }
+        ]
+    },
+    {
+        "name": "jazminromero",
+        "first_name": "Jazmin",
+        "last_name": "Romero",
+        "roles": [
+            {
+                "name": "Administrator"
+            }
+        ],
+        "fields": []
+    },
+    {
+        "name": "andrewschoenrock",
+        "first_name": "Andrew",
+        "last_name": "Schoenrock",
+        "roles": [
+            {
+                "name": "Administrator"
+            }
+        ],
+        "fields": []
+    },
+    {
+        "name": "admin",
+        "first_name": "Admin",
+        "last_name": "User",
+        "roles": [
+            {
+                "name": "Administrator"
+            }
+        ],
+        "fields": []
+    },
+    {
+        "name": "hanqingzhou",
+        "first_name": "Hanqing",
+        "last_name": "Zhou",
+        "roles": [
+            {
+                "name": "Administrator"
+            }
+        ],
+        "fields": []
+    },
+    {
+        "name": "geoffpinchbeck",
+        "first_name": "Geoff",
+        "last_name": "Pinchbeck",
+        "roles": [
+            {
+                "name": "Administrator"
+            }
+        ],
+        "fields": []
+    },
+    {
+        "name": "geoffpin",
+        "first_name": "Geoff",
+        "last_name": "Pinchbeck",
+        "roles": [
+            {
+                "name": "Administrator"
+            }
+        ],
+        "fields": []
+    },
+    {
+        "name": "testtaker1",
+        "first_name": "Test Taker 1",
+        "last_name": "User",
+        "roles": [
+            {
+                "name": "Test Taker"
+            }
+        ],
+        "fields": []
+    },
+        {
+        "name": "testtaker2",
+        "first_name": "Test Taker 2",
+        "last_name": "User",
+        "roles": [
+            {
+                "name": "Test Taker"
+            }
+        ],
+        "fields": []
+    },
+        {
+        "name": "testtaker3",
+        "first_name": "Test Taker 3",
+        "last_name": "User",
+        "roles": [
+            {
+                "name": "Test Taker"
+            }
+        ],
+        "fields": []
+    },
+    {
+        "name": "testtaker4",
+        "first_name": "Test Taker 4",
+        "last_name": "User",
+        "roles": [
+            {
+                "name": "Test Taker"
+            }
+        ],
+        "fields": []
+    },
+    {
+        "name": "testtaker5",
+        "first_name": "Test Taker 5",
+        "last_name": "User",
+        "roles": [
+            {
+                "name": "Test Taker"
+            }
+        ],
+        "fields": []
+    },
+    {
+        "name": "testtaker6",
+        "first_name": "Test Taker 6",
+        "last_name": "User",
+        "roles": [
+            {
+                "name": "Test Taker"
+            }
+        ],
+        "fields": []
+    },
+    {
+        "name": "testtaker7",
+        "first_name": "Test Taker 7",
+        "last_name": "User",
+        "roles": [
+            {
+                "name": "Test Taker"
+            }
+        ],
+        "fields": []
+    },
+    {
+        "name": "instructor1",
+        "first_name": "Instructor 1",
+        "last_name": "User",
+        "roles": [
+            {
+                "name": "Instructor"
+            }
+        ],
+        "fields": []
+    },
+    {
+        "name": "instructor2",
+        "first_name": "Instructor 2",
+        "last_name": "User",
+        "roles": [
+            {
+                "name": "Instructor"
+            }
+        ],
+        "fields": []
+    },
+    {
+        "name": "testdeveloper",
+        "first_name": "Test Developer",
+        "last_name": "User",
+        "roles": [
+            {
+                "name": "Test Developer"
+            }
+        ],
+        "fields": []
+    }
+]
