@@ -19,7 +19,7 @@ class TestSessionResultsClozeAnswers(TestSessionBaseResultsAnswers):
     def __repr__(self):
         return '<test_session_results_cloze_answers %r>' % self.id
 
-class TestSessionResultsClozeAnswersSchema(ma.ModelSchema):
+class TestSessionResultsClozeAnswersSchema(ma.SQLAlchemySchema):
     class Meta:
         model = TestSessionResultsClozeAnswers
 

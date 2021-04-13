@@ -23,7 +23,7 @@ class UserField(db.Model):
     def __repr__(self):
         return '<user_field %r>' % self.word
 
-class UserFieldSchema(ma.ModelSchema):
+class UserFieldSchema(ma.SQLAlchemySchema):
     class Meta:
         model = UserField
 

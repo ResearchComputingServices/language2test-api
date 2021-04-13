@@ -23,7 +23,7 @@ class TestCategory(db.Model):
     def __repr__(self):
         return '<test_category %s, %s>' % (self.user_id, str(self.created_datetime))
 
-class TestCategorySchema(ma.ModelSchema):
+class TestCategorySchema(ma.SQLAlchemySchema):
     class Meta:
         model = TestCategory
 

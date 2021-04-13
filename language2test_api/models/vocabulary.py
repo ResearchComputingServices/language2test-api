@@ -36,7 +36,7 @@ class Vocabulary(db.Model):
 
 from language2test_api.models.vocabulary_option import VocabularyOption, VocabularyOptionSchema
 
-class VocabularySchema(ma.ModelSchema):
+class VocabularySchema(ma.SQLAlchemySchema):
     class Meta:
         model = Vocabulary
 

@@ -16,7 +16,7 @@ class BaseTextModel(db.Model):
     def __repr__(self):
         return '<base_model %r>' % self.id
 
-class BaseTextModelSchema(ma.ModelSchema):
+class BaseTextModelSchema(ma.SQLAlchemySchema):
     id = fields.Integer(dump_only=True)
     text = fields.String()
 
