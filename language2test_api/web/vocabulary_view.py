@@ -24,15 +24,17 @@ vocabulary_schema_many = VocabularySchema(many=True)
 
 provider = VocabularyProvider()
 
+
 @language2test_bp.route("/vocabulary/count", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def get_vocabulary_count():
     return provider.get_count(Vocabulary)
 
+
 @language2test_bp.route("/vocabulary", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def get_vocabulary():
     id = request.args.get('id')
     if id:
@@ -50,9 +52,10 @@ def get_vocabulary():
     result = vocabulary_schema_many.dump(properties)
     return jsonify(result)
 
+
 @language2test_bp.route("/vocabulary", methods=['POST'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def add_vocabulary():
     try:
         data = request.get_json()
@@ -60,20 +63,24 @@ def add_vocabulary():
         result = vocabulary_schema.dump(vocabulary)
         response = jsonify(result)
     except Exception as e:
-        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
 
     return response
 
+
 @language2test_bp.route("/vocabulary", methods=['PUT'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def update_vocabulary():
     try:
         data = request.get_json()
         vocabulary = Vocabulary.query.filter_by(id=data.get('id')).first()
         if not vocabulary:
-            vocabulary = Vocabulary.query.filter_by(word=data.get('word')).first()
+            vocabulary = Vocabulary.query.filter_by(
+                word=data.get('word')).first()
         if vocabulary:
             if not vocabulary.immutable:
                 if data.get('id') is None:
@@ -82,39 +89,50 @@ def update_vocabulary():
                 result = vocabulary_schema.dump(vocabulary)
                 response = jsonify(result)
             else:
-                response = Response(json.dumps(data), 403, mimetype="application/json")
+                response = Response(json.dumps(data), 403,
+                                    mimetype="application/json")
         else:
-            response = Response(json.dumps(data), 404, mimetype="application/json")
+            response = Response(json.dumps(data), 404,
+                                mimetype="application/json")
     except Exception as e:
-        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
 
     return response
 
+
 @language2test_bp.route("/vocabulary", methods=['DELETE'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def delete_vocabulary():
     try:
         data = request.get_json()
         vocabulary = Vocabulary.query.filter_by(id=data.get('id')).first()
         if not vocabulary:
-            vocabulary = Vocabulary.query.filter_by(word=data.get('word')).first()
+            vocabulary = Vocabulary.query.filter_by(
+                word=data.get('word')).first()
         if vocabulary and not vocabulary.unremovable:
             provider.delete(data, vocabulary)
             db.session.commit()
-            response = Response(json.dumps(data), 200, mimetype="application/json")
+            response = Response(json.dumps(data), 200,
+                                mimetype="application/json")
         else:
-            response = Response(json.dumps(data), 404, mimetype="application/json")
+            response = Response(json.dumps(data), 404,
+                                mimetype="application/json")
     except Exception as e:
-        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
 
     return response
 
+
 @language2test_bp.route("/vocabulary/export", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def export_vocabulary():
     specific_id = request.args.get('id')
     if specific_id is None:
@@ -135,7 +153,8 @@ def export_vocabulary():
             output = BytesIO()
             with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
                 pd.DataFrame(records).to_excel(writer,
-                                               sheet_name="{} summary".format("Vocabulary"),
+                                               sheet_name="{} summary".format(
+                                                   "Vocabulary"),
                                                index=False)
                 workbook = writer.book
                 worksheet = writer.sheets["{} summary".format("Vocabulary")]
@@ -157,8 +176,10 @@ def export_vocabulary():
                              mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                              as_attachment=True, cache_timeout=-1)
         except Exception as e:
-            error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-            response = Response(json.dumps(error), 404, mimetype="application/json")
+            error = {"exception": str(
+                e), "message": "Exception has occurred. Check the format of the request."}
+            response = Response(json.dumps(error), 404,
+                                mimetype="application/json")
             return response
 
     if specific_id is not None:
@@ -183,7 +204,7 @@ def export_vocabulary():
             output = BytesIO()
             with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
                 pd.DataFrame([voc_test]).to_excel(writer,
-                                                    sheet_name="{} details".format(name), index=False)
+                                                  sheet_name="{} details".format(name), index=False)
                 workbook = writer.book
                 worksheet = writer.sheets["{} details".format(name)]
                 format = workbook.add_format()
@@ -200,18 +221,20 @@ def export_vocabulary():
 
             output.seek(0)
             return send_file(output,
-                             attachment_filename="Vocabulary " +name+ ' details'+'.xlsx',
+                             attachment_filename="Vocabulary " + name + ' details'+'.xlsx',
                              mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                              as_attachment=True, cache_timeout=-1)
         except Exception as e:
-            error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-            response = Response(json.dumps(error), 404, mimetype="application/json")
+            error = {"exception": str(
+                e), "message": "Exception has occurred. Check the format of the request."}
+            response = Response(json.dumps(error), 404,
+                                mimetype="application/json")
             return response
 
 
 @language2test_bp.route("/vocabulary/upload", methods=['POST'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def upload_vocabulary():
     raw_data = request.get_data()
     data = pd.read_excel(raw_data, engine="openpyxl")
@@ -219,7 +242,8 @@ def upload_vocabulary():
         for _, row in data.iterrows():
             d = dict(row)
             if d["4 Distractor"] != "nan":
-                ops = [d["2 Distractor"], d["Answer"], d["3 Distractor"], d["4 Distractor"]]
+                ops = [d["2 Distractor"], d["Answer"],
+                       d["3 Distractor"], d["4 Distractor"]]
             else:
                 ops = [d["2 Distractor"], d["Answer"], d["3 Distractor"]]
             random.shuffle(ops)
@@ -237,25 +261,25 @@ def upload_vocabulary():
                    }
             voc["id"] = provider.generate_id(field=Vocabulary.id)
 
-            test_category = TestCategory.query.filter_by(name="Default").first()
+            test_category = TestCategory.query.filter_by(
+                name="Default").first()
             voc["test_category_id"] = test_category.id
             vocabulary = Vocabulary(voc)
             vocabulary.test_category = test_category
 
             for op in ops:
-                option = VocabularyOption({"text": op, "vocabulary_id": vocabulary.id})
+                option = VocabularyOption(
+                    {"text": op, "vocabulary_id": vocabulary.id})
                 vocabulary.options.append(option)
 
             db.session.add(vocabulary)
         db.session.commit()
-        response = Response(json.dumps({"success": True}), 200, mimetype="application/json")
+        response = Response(json.dumps(
+            {"success": True}), 200, mimetype="application/json")
     except Exception as e:
-        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
 
     return response
-
-
-
-
-

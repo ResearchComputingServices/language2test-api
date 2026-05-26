@@ -24,15 +24,17 @@ provider.download_wordnet()
 cloze_schema = ClozeSchema(many=False)
 cloze_schema_many = ClozeSchema(many=True)
 
+
 @language2test_bp.route("/cloze/count", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def get_cloze_count():
     return provider.get_count(Cloze)
 
+
 @language2test_bp.route("/cloze", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def get_cloze():
     try:
         id = request.args.get('id')
@@ -54,15 +56,17 @@ def get_cloze():
         result = provider.get_correctly_typed_answers_all_clozes(result)
         return jsonify(result)
     except Exception as e:
-        error = { "exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
 
     return response
 
 
 @language2test_bp.route("/cloze", methods=['POST'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def add_cloze():
     try:
         data = request.get_json()
@@ -73,16 +77,20 @@ def add_cloze():
             response = jsonify(result)
         else:
             error = "message:" "Cloze name already exists."
-            response = Response(json.dumps(error), 403, mimetype="application/json")
+            response = Response(json.dumps(error), 403,
+                                mimetype="application/json")
     except Exception as e:
-        error = { "exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
 
     return response
 
+
 @language2test_bp.route("/cloze", methods=['PUT'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def update_cloze():
     try:
         data = request.get_json()
@@ -97,18 +105,23 @@ def update_cloze():
                 result = cloze_schema.dump(cloze)
                 response = jsonify(result)
             else:
-                response = Response(json.dumps(data), 403, mimetype="application/json")
+                response = Response(json.dumps(data), 403,
+                                    mimetype="application/json")
         else:
-            response = Response(json.dumps(data), 404, mimetype="application/json")
+            response = Response(json.dumps(data), 404,
+                                mimetype="application/json")
     except Exception as e:
-        error = { "exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
 
     return response
 
+
 @language2test_bp.route("/cloze", methods=['DELETE'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def delete_cloze():
     try:
         data = request.get_json()
@@ -119,20 +132,26 @@ def delete_cloze():
             if not cloze.unremovable:
                 provider.delete(data, cloze)
                 db.session.commit()
-                response = Response(json.dumps(data), 200, mimetype="application/json")
+                response = Response(json.dumps(data), 200,
+                                    mimetype="application/json")
             else:
-                response = Response(json.dumps(data), 403, mimetype="application/json")
+                response = Response(json.dumps(data), 403,
+                                    mimetype="application/json")
         else:
-            response = Response(json.dumps(data), 404, mimetype="application/json")
+            response = Response(json.dumps(data), 404,
+                                mimetype="application/json")
     except Exception as e:
-        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
 
     return response
 
+
 @language2test_bp.route("/cloze/generate", methods=['POST'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def generate():
     try:
         data = request.get_json()
@@ -142,12 +161,14 @@ def generate():
         else:
             return Response({}, 400, mimetype="application/json")
     except Exception as e:
-        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
         return Response(json.dumps(error), 500, mimetype="application/json")
+
 
 @language2test_bp.route("/cloze/export", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def export_cloze():
     specific_id = request.args.get('id')
     if specific_id is None:
@@ -166,7 +187,8 @@ def export_cloze():
             output = BytesIO()
             with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
                 pd.DataFrame(records).to_excel(writer,
-                                               sheet_name="{} summary".format('cloze test'),
+                                               sheet_name="{} summary".format(
+                                                   'cloze test'),
                                                index=False)
                 workbook = writer.book
                 worksheet = writer.sheets["{} summary".format('cloze test')]
@@ -182,8 +204,10 @@ def export_cloze():
                              mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                              as_attachment=True, cache_timeout=-1)
         except Exception as e:
-            error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-            response = Response(json.dumps(error), 404, mimetype="application/json")
+            error = {"exception": str(
+                e), "message": "Exception has occurred. Check the format of the request."}
+            response = Response(json.dumps(error), 404,
+                                mimetype="application/json")
             return response
     if specific_id is not None:
         try:
@@ -197,7 +221,6 @@ def export_cloze():
                 cloze = Cloze.query.filter_by(id=cloze_id).first()
                 result = cloze_schema.dump(cloze)
 
-
             cloze_infos = {
                 "Id": cloze.id,
                 "Name": cloze.name,
@@ -208,43 +231,47 @@ def export_cloze():
             }
             cloze_question = {"Question": result["text"]}
 
-
-
             output = BytesIO()
             with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
                 pd.DataFrame([cloze_infos]).to_excel(writer,
-                                               sheet_name="{} summary".format(name+' cloze test'),
-                                               index=False)
+                                                     sheet_name="{} summary".format(
+                                                         name+' cloze test'),
+                                                     index=False)
                 pd.DataFrame([cloze_question], index=["Reading"]).to_excel(writer, startrow=3,
-                                                                 sheet_name="{} summary".format(name+' cloze test'),
-                                                                 header=False)
+                                                                           sheet_name="{} summary".format(
+                                                                               name+' cloze test'),
+                                                                           header=False)
                 cloze_questions_specific_infos = {
-                    "Question id":'',
-                    "Option 1":'',
-                    "Option 2":'',
-                    "Option 3":'',
-                    "Option 4":'',
-                    "Answer":'',
+                    "Question id": '',
+                    "Option 1": '',
+                    "Option 2": '',
+                    "Option 3": '',
+                    "Option 4": '',
+                    "Answer": '',
 
                 }
 
                 pd.DataFrame([cloze_questions_specific_infos]).to_excel(writer, startrow=5,
-                                                                 sheet_name="{} summary".format(name+' cloze test'),
-                                                                 index=False)
+                                                                        sheet_name="{} summary".format(
+                                                                            name+' cloze test'),
+                                                                        index=False)
                 for i in range(len(result['questions'])):
                     correct_option = result['questions'][i]['correct']
                     cloze_question_infos = {}
 
                     for j in range(len(result['questions'][i]['options'])):
                         question_options = result['questions'][i]['options'][j]
-                        cloze_question_infos["options {}".format(j)] = question_options['text']
+                        cloze_question_infos["options {}".format(
+                            j)] = question_options['text']
                     cloze_question_infos["Answer"] = result['questions'][i]['options'][correct_option-1]['text']
 
                     pd.DataFrame([cloze_question_infos], index=["{}".format(i+1)]).to_excel(writer, startrow=i+6,
-                                                                                sheet_name="{} summary".format(name+' cloze test'),
-                                                                                header=False)
+                                                                                            sheet_name="{} summary".format(
+                                                                                                name+' cloze test'),
+                                                                                            header=False)
                 workbook = writer.book
-                worksheet = writer.sheets["{} summary".format(name+' cloze test')]
+                worksheet = writer.sheets["{} summary".format(
+                    name+' cloze test')]
                 format = workbook.add_format()
                 format.set_align('center')
                 format.set_align('vcenter')
@@ -254,17 +281,20 @@ def export_cloze():
 
             output.seek(0)
             return send_file(output,
-                             attachment_filename='clozes ' +name+ '.xlsx',
+                             attachment_filename='clozes ' + name + '.xlsx',
                              mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                              as_attachment=True, cache_timeout=-1)
         except Exception as e:
-            error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-            response = Response(json.dumps(error), 404, mimetype="application/json")
+            error = {"exception": str(
+                e), "message": "Exception has occurred. Check the format of the request."}
+            response = Response(json.dumps(error), 404,
+                                mimetype="application/json")
             return response
+
 
 @language2test_bp.route("/cloze/upload", methods=['POST'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def upload_cloze():
     file = request.files.get("file")
     if file is not None:
@@ -297,9 +327,11 @@ def upload_cloze():
                     "typed": provider.generate_questions(text)[i]['typed']
                 })
                 if "options" in provider.generate_questions(text)[i]:
-                    options = [option['text'].lstrip("\n") for option in provider.generate_questions(text)[i]['options']]
+                    options = [option['text'].lstrip(
+                        "\n") for option in provider.generate_questions(text)[i]['options']]
                 else:
-                    options = [option['text'].lstrip("\n") for option in provider.generate_questions(text)[i]['accepted_answers']]
+                    options = [option['text'].lstrip(
+                        "\n") for option in provider.generate_questions(text)[i]['accepted_answers']]
 
                 for op in options:
                     cloze_question_option = ClozeQuestionOption({
@@ -310,13 +342,17 @@ def upload_cloze():
                     cloze_question.options.append(cloze_question_option)
                     db.session.add(cloze_question)
             db.session.commit()
-            response = Response(json.dumps({"success": True}), 200, mimetype="application/json")
+            response = Response(json.dumps(
+                {"success": True}), 200, mimetype="application/json")
         except Exception as e:
-            error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-            response = Response(json.dumps(error), 500, mimetype="application/json")
+            error = {"exception": str(
+                e), "message": "Exception has occurred. Check the format of the request."}
+            response = Response(json.dumps(error), 500,
+                                mimetype="application/json")
 
     else:
         error = {"message": "file not found"}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
 
     return response

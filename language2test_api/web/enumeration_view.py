@@ -22,16 +22,17 @@ view_helper = ViewHelper()
 
 provider = EnumerationProvider()
 
+
 @language2test_bp.route("/enumerations/count", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def get_enumeration_count():
     return view_helper.get_count(Enumeration)
 
 
 @language2test_bp.route("/enumerations", methods=["GET"])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def get_enumeration():
     id = request.args.get('id')
     if id:
@@ -49,9 +50,10 @@ def get_enumeration():
     result = enumeration_schema_many.dump(properties)
     return jsonify(result)
 
+
 @language2test_bp.route("/enumerations", methods=['POST'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def add_enumeration():
     try:
         data = request.get_json()
@@ -59,57 +61,71 @@ def add_enumeration():
         result = enumeration_schema.dump(enumeration)
         response = jsonify(result)
     except Exception as e:
-        error ={"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype = "application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
     return response
+
 
 @language2test_bp.route("/enumerations", methods=['PUT'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def update_enumeration():
     try:
         data = request.get_json()
         enumeration = Enumeration.query.filter_by(id=data.get('id')).first()
         if not enumeration:
-            enumeration = Enumeration.query.filter_by(name=data.get('name')).first()
+            enumeration = Enumeration.query.filter_by(
+                name=data.get('name')).first()
         if enumeration:
             if data.get('id') is None:
                 data['id'] = enumeration.id
-            provider.update(data,enumeration)
+            provider.update(data, enumeration)
             result = enumeration_schema.dump(enumeration)
             response = jsonify(result)
         else:
-            response = Response(json.dumps(data), 404, mimetype = "application/json")
+            response = Response(json.dumps(data), 404,
+                                mimetype="application/json")
     except Exception as e:
-        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype = "application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
     return response
+
 
 @language2test_bp.route("/enumerations", methods=['DELETE'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def delete_enumeration():
     try:
         data = request.get_json()
         enumeration = Enumeration.query.filter_by(id=data.get('id')).first()
         if not enumeration:
-            enumeration = Enumeration.query.filter_by(name=data.get('name')).first()
+            enumeration = Enumeration.query.filter_by(
+                name=data.get('name')).first()
         if enumeration:
             if data.get('id') is None:
                 data['id'] = enumeration.id
-            provider.delete(data,enumeration)
+            provider.delete(data, enumeration)
             db.session.commit()
-            response = Response(json.dumps(data), 200, mimetype="application/json")
+            response = Response(json.dumps(data), 200,
+                                mimetype="application/json")
         else:
-            response = Response(json.dumps(data), 404, mimetype="application/json")
+            response = Response(json.dumps(data), 404,
+                                mimetype="application/json")
     except Exception as e:
-        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
     return response
+
 
 @language2test_bp.route("/enumerations/export", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def export_enumerations():
     specific_id = request.args.get('id')
     if specific_id is None:
@@ -123,7 +139,8 @@ def export_enumerations():
             output = BytesIO()
             with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
                 pd.DataFrame(records).to_excel(writer,
-                                               sheet_name="{} summary".format("Enumeration"),
+                                               sheet_name="{} summary".format(
+                                                   "Enumeration"),
                                                index=False)
                 workbook = writer.book
                 worksheet = writer.sheets["{} summary".format("Enumeration")]
@@ -138,8 +155,10 @@ def export_enumerations():
                              mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                              as_attachment=True, cache_timeout=-1)
         except Exception as e:
-            error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-            response = Response(json.dumps(error), 404, mimetype="application/json")
+            error = {"exception": str(
+                e), "message": "Exception has occurred. Check the format of the request."}
+            response = Response(json.dumps(error), 404,
+                                mimetype="application/json")
             return response
 
     if specific_id is not None:
@@ -156,15 +175,15 @@ def export_enumerations():
             enum_infos = []
             for enum_info in result['values']:
                 enum_infos.append({
-                    "Id":result['id'],
+                    "Id": result['id'],
                     "Enumeration Name": result['name'],
                     "Enumeration Value": enum_info['text']
                 })
             output = BytesIO()
             with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
                 pd.DataFrame(enum_infos).to_excel(writer,
-                                               sheet_name="Enumeration details",
-                                               index=False)
+                                                  sheet_name="Enumeration details",
+                                                  index=False)
                 workbook = writer.book
                 worksheet = writer.sheets["Enumeration details"]
                 format = workbook.add_format()
@@ -174,17 +193,21 @@ def export_enumerations():
                 writer.save()
             output.seek(0)
             return send_file(output,
-                             attachment_filename="Enumeration--{}".format(name) + '.xlsx',
+                             attachment_filename="Enumeration--{}".format(
+                                 name) + '.xlsx',
                              mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                              as_attachment=True, cache_timeout=-1)
         except Exception as e:
-            error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-            response = Response(json.dumps(error), 404, mimetype="application/json")
+            error = {"exception": str(
+                e), "message": "Exception has occurred. Check the format of the request."}
+            response = Response(json.dumps(error), 404,
+                                mimetype="application/json")
             return response
+
 
 @language2test_bp.route("/enumerations/upload", methods=['POST'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def upload_enumerations():
     raw_data = request.get_data()
     data = pd.read_excel(raw_data, engine="openpyxl")
@@ -194,7 +217,8 @@ def upload_enumerations():
         indicator = False
         for _, row in data.iterrows():
             d = dict(row)
-            exist_enum = Enumeration.query.filter_by(name=d["enumeration_name"]).first()
+            exist_enum = Enumeration.query.filter_by(
+                name=d["enumeration_name"]).first()
             enum = enums.get(d["enumeration_name"])
             if enum is None and exist_enum is None:
                 enum_data = {}
@@ -204,11 +228,13 @@ def upload_enumerations():
                 enums[d["enumeration_name"]] = enum
                 indicator = True
             if indicator:
-                enum_id = provider.generate_id(field=EnumerationValue.id) + count
+                enum_id = provider.generate_id(
+                    field=EnumerationValue.id) + count
                 count = count + 1
             else:
                 enum_id = provider.generate_id(field=EnumerationValue.id)
-            enum_value = EnumerationValue({"id": enum_id, "text":d["enumeration_value"]})
+            enum_value = EnumerationValue(
+                {"id": enum_id, "text": d["enumeration_value"]})
             if exist_enum is not None:
                 if enum_value not in exist_enum.values:
                     exist_enum.values.append(enum_value)
@@ -217,8 +243,11 @@ def upload_enumerations():
                     enums[d["enumeration_name"]].values.append(enum_value)
             db.session.add_all(enums.values())
             db.session.commit()
-        response = Response(json.dumps({"success": True}), 200, mimetype="application/json")
+        response = Response(json.dumps(
+            {"success": True}), 200, mimetype="application/json")
     except Exception as e:
-        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
     return response

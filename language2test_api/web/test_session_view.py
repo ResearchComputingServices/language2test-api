@@ -25,9 +25,10 @@ export_provider = TestSessionExportProvider()
 user_provider = UserProvider()
 test_assignation_provider = TestAssignationProvider()
 
+
 @language2test_bp.route("/test_sessions", methods=['POST'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def add_test_session():
     try:
         data = request.get_json()
@@ -37,147 +38,215 @@ def add_test_session():
         result = test_schema.dump(test_session)
         response = jsonify(result)
     except Exception as e:
-        error = { "exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
 
     return response
 
+
 @language2test_bp.route("/test_sessions", methods=['PUT'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def update_test_session():
     try:
         data = request.get_json()
         test_session = TestSession.query.filter_by(id=data.get('id')).first()
         if not test_session:
-            test_session = TestSession.query.filter_by(name=data.get('name')).first()
+            test_session = TestSession.query.filter_by(
+                name=data.get('name')).first()
         if test_session:
             if data.get('id') is None:
                 data['id'] = test_session.id
             provider.update(data, test_session)
-            response = Response(json.dumps(data), 200, mimetype="application/json")
+            response = Response(json.dumps(data), 200,
+                                mimetype="application/json")
         else:
-            response = Response(json.dumps(data), 404, mimetype="application/json")
+            response = Response(json.dumps(data), 404,
+                                mimetype="application/json")
 
     except Exception as e:
-        error = { "exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
 
     return response
 
+
 @language2test_bp.route("/test_sessions", methods=['DELETE'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def delete_test_session():
     try:
         data = request.get_json()
         test_session = TestSession.query.filter_by(id=data.get('id')).first()
         if not test_session:
-            test_session = TestSession.query.filter_by(name=data.get('name')).first()
+            test_session = TestSession.query.filter_by(
+                name=data.get('name')).first()
         if test_session:
             provider.delete(data, test_session)
             db.session.commit()
-            response = Response(json.dumps(data), 200, mimetype="application/json")
+            response = Response(json.dumps(data), 200,
+                                mimetype="application/json")
         else:
-            response = Response(json.dumps(data), 404, mimetype="application/json")
+            response = Response(json.dumps(data), 404,
+                                mimetype="application/json")
     except Exception as e:
-        error = { "exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
 
     return response
 
 
 @language2test_bp.route("/instructor/test_sessions", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def get_test_sessions_for_test_assignation():
     try:
         test_assignation_id = request.args.get('test_assignation_id')
         if test_assignation_id:
-            test_sessions = provider.get_test_sessions_for_test_assignation(test_assignation_id)
+            test_sessions = provider.get_test_sessions_for_test_assignation(
+                test_assignation_id)
             result = test_schema_many.dump(test_sessions)
             return jsonify(result)
         else:
-            error = {"message": "Test Assignation Id expected. Check the format of the request."}
-            response = Response(json.dumps(error), 404, mimetype="application/json")
+            error = {
+                "message": "Test Assignation Id expected. Check the format of the request."}
+            response = Response(json.dumps(error), 404,
+                                mimetype="application/json")
     except Exception as e:
-        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
 
     return response
 
 
 @language2test_bp.route("/instructor/test_sessions/count", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def get_test_sessions_for_test_assignation_count():
     try:
         test_assignation_id = request.args.get('test_assignation_id')
         if test_assignation_id:
-            count = provider.get_test_sessions_for_test_assignation_count(test_assignation_id)
-            response = Response(json.dumps(count), 200, mimetype="application/json")
+            count = provider.get_test_sessions_for_test_assignation_count(
+                test_assignation_id)
+            response = Response(json.dumps(count), 200,
+                                mimetype="application/json")
         else:
-            error = {"message": "Test Assignation Id expected. Check the format of the request."}
-            response = Response(json.dumps(error), 404, mimetype="application/json")
+            error = {
+                "message": "Test Assignation Id expected. Check the format of the request."}
+            response = Response(json.dumps(error), 404,
+                                mimetype="application/json")
         return response
     except Exception as e:
-        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
 
     return response
 
+
 @language2test_bp.route("instructor/test_sessions/export", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def instructor_export_test_sessions():
-    test_assignation_id = int(request.args.get('test_assignation_id'))
-    current_user = user_provider.get_authenticated_user()
-    is_instructor = user_provider.has_role(current_user, 'Instructor')
-    # Check if the user is an instructor
-    if is_instructor:
-        instructor_id = current_user.id
-        instructor_assignation_list = test_assignation_provider.get_instructor_test_assignations(instructor_id)
-        instructor_assignation_id_list = []
-        for each_instructor_assignation in instructor_assignation_list:
-            instructor_assignation_id_list.append(each_instructor_assignation.id)
-        # Check if the test assignation is associated with the instructor
-        if test_assignation_id in instructor_assignation_id_list:
-            try:
-                sessions = provider.get_test_sessions_for_test_assignation(test_assignation_id)
-                name = request.args.get('name')
-                return send_file(export_provider.write_results_into_file(sessions, name),attachment_filename='Test Details.zip',
-                                mimetype="application/zip",
-                                as_attachment=True, cache_timeout=-1)
-            except Exception as e:
-                error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-                response = Response(json.dumps(error), 500, mimetype="application/json")
+
+    try:
+        test_assignation_id = int(request.args.get('test_assignation_id'))
+
+        # Retrieve user
+        if 'username' in request.args:
+            username = request.args.get('username')
+        else:
+            username = None
+            # print("Username in get_user_sessions: ", username)
+            # input("Press Enter to continue...")
+
+        user = user_provider.get_authenticated_user(username=username)
+        if user is None:
+            error = {"message": "User not found."}
+            response = Response(json.dumps(error), 404,
+                                mimetype="application/json")
+            return response
+
+        current_user = user_provider.get_authenticated_user(username=username)
+        is_instructor = user_provider.has_role(current_user, 'Instructor')
+        # Check if the user is an instructor
+        if is_instructor:
+            instructor_id = current_user.id
+            instructor_assignation_list = test_assignation_provider.get_instructor_test_assignations(
+                instructor_id)
+            instructor_assignation_id_list = []
+            for each_instructor_assignation in instructor_assignation_list:
+                instructor_assignation_id_list.append(
+                    each_instructor_assignation.id)
+            # Check if the test assignation is associated with the instructor
+            if test_assignation_id in instructor_assignation_id_list:
+                try:
+                    sessions = provider.get_test_sessions_for_test_assignation(
+                        test_assignation_id)
+                    name = request.args.get('name')
+                    return send_file(export_provider.write_results_into_file(sessions, name), attachment_filename='Test Details.zip',
+                                     mimetype="application/zip",
+                                     as_attachment=True, cache_timeout=-1)
+                except Exception as e:
+                    error = {"exception": str(
+                        e), "message": "Exception has occurred. Check the format of the request."}
+                    response = Response(json.dumps(error), 500,
+                                        mimetype="application/json")
+                    return response
+            else:
+                error = {
+                    "message": "The test assignation is not associated with the instructor."}
+                response = Response(json.dumps(error), 403,
+                                    mimetype="application/json")
                 return response
         else:
-            error = {"message": "The test assignation is not associated with the instructor."}
-            response = Response(json.dumps(error), 403, mimetype="application/json")
+            error = {"message": "The user is not an instructor."}
+            response = Response(json.dumps(error), 403,
+                                mimetype="application/json")
             return response
-    else:
-        error = {"message": "The user is not an instructor."}
-        response = Response(json.dumps(error), 403, mimetype="application/json")
+    except Exception as e:
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
         return response
-
-
-
 
 
 @language2test_bp.route("/test_developer/test_sessions", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def get_test_sessions_for_tests():
     try:
         # Retrieve user
+        if 'username' in request.args:
+            username = request.args.get('username')
+        else:
+            username = None
+            # print("Username in get_user_sessions: ", username)
+            # input("Press Enter to continue...")
+
+        user = user_provider.get_authenticated_user(username=username)
+        if user is None:
+            error = {"message": "User not found."}
+            response = Response(json.dumps(error), 404,
+                                mimetype="application/json")
+            return response
+
         test_id = request.args.get('test_id')
-        user = user_provider.get_authenticated_user()
+
         is_test_developer = user_provider.has_role(user, 'Test Developer')
         if is_test_developer:
             limit = request.args.get('limit')
             offset = request.args.get('offset')
-
 
             if 'column' in request.args:
                 column = request.args.get('column')
@@ -189,43 +258,65 @@ def get_test_sessions_for_tests():
             else:
                 order = 'asc'
 
-            test_sessions = provider.get_test_sessions_for_test(test_id,limit,offset,column,order)
+            test_sessions = provider.get_test_sessions_for_test(
+                test_id, limit, offset, column, order)
             result = test_schema_many.dump(test_sessions)
             _anonymize_student_info_in_session_list(user, result)
             return jsonify(result)
         else:
             error = {"message": "Access Denied"}
-            response = Response(json.dumps(error), 403, mimetype="application/json")
+            response = Response(json.dumps(error), 403,
+                                mimetype="application/json")
 
     except Exception as e:
-        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 404, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 404,
+                            mimetype="application/json")
 
     return response
 
+
 @language2test_bp.route("/test_developer/test_sessions/count", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def get_test_sessions_for_test_count():
     try:
         test_id = request.args.get('test_id')
+
         # Retrieve user
-        user = user_provider.get_authenticated_user()
+        if 'username' in request.args:
+            username = request.args.get('username')
+        else:
+            username = None
+            # print("Username in get_user_sessions: ", username)
+            # input("Press Enter to continue...")
+
+        user = user_provider.get_authenticated_user(username=username)
+        if user is None:
+            error = {"message": "User not found."}
+            response = Response(json.dumps(error), 404,
+                                mimetype="application/json")
+            return response
+
         is_test_developer = user_provider.has_role(user, 'Test Developer')
 
         if is_test_developer:
             count = provider.get_test_sessions_for_test_count(test_id)
-            response = Response(json.dumps(count), 200, mimetype="application/json")
+            response = Response(json.dumps(count), 200,
+                                mimetype="application/json")
         else:
             error = {"message": "Access Denied"}
-            response = Response(json.dumps(error), 403, mimetype="application/json")
+            response = Response(json.dumps(error), 403,
+                                mimetype="application/json")
         return response
     except Exception as e:
-        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
 
     return response
-
 
 
 def _anonymize_student_info_in_session(user, test_session):
@@ -243,19 +334,21 @@ def _anonymize_student_info_in_session_list(user, test_sessions):
     if not allow:
         for session in test_sessions:
             session['name'] = ''
-            session['user_id'] =''
+            session['user_id'] = ''
             session['user'] = ''
 
 
-def _validate_filters(user, start_datetime_rq, end_datetime_rq,student_id, instructor_id):
+def _validate_filters(user, start_datetime_rq, end_datetime_rq, student_id, instructor_id):
 
     bad_request = False
 
     if start_datetime_rq and end_datetime_rq:
-        start_datetime = datetime.strptime(start_datetime_rq, '%Y-%m-%dT%H:%M:%S.%fZ')
-        end_datetime = datetime.strptime(end_datetime_rq, '%Y-%m-%dT%H:%M:%S.%fZ')
+        start_datetime = datetime.strptime(
+            start_datetime_rq, '%Y-%m-%dT%H:%M:%S.%fZ')
+        end_datetime = datetime.strptime(
+            end_datetime_rq, '%Y-%m-%dT%H:%M:%S.%fZ')
 
-        if end_datetime<start_datetime:
+        if end_datetime < start_datetime:
             bad_request = True
             return bad_request, instructor_id
 
@@ -286,7 +379,20 @@ def get_a_test_session(id=None, name=None):
 def get_test_session_v1():
     try:
         # Retrieve user
-        user = user_provider.get_authenticated_user()
+        if 'username' in request.args:
+            username = request.args.get('username')
+        else:
+            username = None
+            # print("Username in get_user_sessions: ", username)
+            # input("Press Enter to continue...")
+
+        user = user_provider.get_authenticated_user(username=username)
+        if user is None:
+            error = {"message": "User not found."}
+            response = Response(json.dumps(error), 404,
+                                mimetype="application/json")
+            return response
+
         is_test_taker = user_provider.has_role(user, 'Test Taker')
 
         if not is_test_taker:
@@ -314,10 +420,12 @@ def get_test_session_v1():
                 _anonymize_student_info_in_session_list(user, result)
                 return jsonify(result)
             else:
-                bad_request, instructor_id = _validate_filters(user, start_date, end_date, student_id, instructor_id)
+                bad_request, instructor_id = _validate_filters(
+                    user, start_date, end_date, student_id, instructor_id)
                 if bad_request:
                     error = {"message": "Check the format of the request"}
-                    response = Response(json.dumps(error), 403, mimetype="application/json")
+                    response = Response(json.dumps(
+                        error), 403, mimetype="application/json")
                     return response
                 else:
                     # Query by Test Session filters
@@ -342,15 +450,15 @@ def get_test_session_v1():
                     return jsonify(result)
         else:
             error = {"message": "Access Denied"}
-            response = Response(json.dumps(error), 403, mimetype="application/json")
+            response = Response(json.dumps(error), 403,
+                                mimetype="application/json")
             return response
     except Exception as e:
-        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
     return response
-
-
-
 
 
 def get_test_session_count_v1():
@@ -368,7 +476,7 @@ def get_test_session_count_v1():
             instructor_id = request.args.get('instructor_id')
 
             if not (start_date or end_date or class_id or student_id or test_id or instructor_id):
-            #If not filters are provided, count all the Test sessions
+                # If not filters are provided, count all the Test sessions
                 return provider.get_count(TestSession)
             else:
                 limit = request.args.get('limit')
@@ -384,39 +492,57 @@ def get_test_session_count_v1():
                 else:
                     order = 'asc'
 
-                count = provider.filter_test_sessions_count(column, order, limit, offset, start_date,end_date,class_id,student_id,test_id,instructor_id)
-                response = Response(json.dumps(count), 200, mimetype="application/json")
+                count = provider.filter_test_sessions_count(
+                    column, order, limit, offset, start_date, end_date, class_id, student_id, test_id, instructor_id)
+                response = Response(json.dumps(count), 200,
+                                    mimetype="application/json")
         else:
             error = {"message": "Access Denied"}
-            response = Response(json.dumps(error), 403, mimetype="application/json")
+            response = Response(json.dumps(error), 403,
+                                mimetype="application/json")
             return response
 
     except Exception as e:
-        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 404, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 404,
+                            mimetype="application/json")
 
     return response
 
 
 @language2test_bp.route("/test_sessions", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def get_test_session():
     try:
         # Retrieve user
-        user = user_provider.get_authenticated_user()
+        if 'username' in request.args:
+            username = request.args.get('username')
+        else:
+            username = None
+            # print("Username in get_user_sessions: ", username)
+            # input("Press Enter to continue...")
+
+        user = user_provider.get_authenticated_user(username=username)
+        if user is None:
+            error = {"message": "User not found."}
+            response = Response(json.dumps(error), 404,
+                                mimetype="application/json")
+            return response
+
         is_test_taker = user_provider.has_role(user, 'Test Taker')
 
         if not is_test_taker:
-            #Specific Test Session by id or name
+            # Specific Test Session by id or name
             id = request.args.get('id')
             name = request.args.get('name')
             if id or name:
-                result = get_a_test_session(id,name)
+                result = get_a_test_session(id, name)
                 _anonymize_student_info_in_session(user, result)
                 return jsonify(result)
 
-            #Get filtering parameters
+            # Get filtering parameters
             start_date = request.args.get('start_datetime')
             end_date = request.args.get('end_datetime')
             class_id = request.args.get('class_id')
@@ -424,13 +550,15 @@ def get_test_session():
             test_id = request.args.get('test_id')
             instructor_id = request.args.get('instructor_id')
 
-            bad_request, instructor_id = _validate_filters(user, start_date, end_date, student_id,instructor_id)
+            bad_request, instructor_id = _validate_filters(
+                user, start_date, end_date, student_id, instructor_id)
             if bad_request:
                 error = {"message": "Check the format of the request"}
-                response = Response(json.dumps(error), 403, mimetype="application/json")
+                response = Response(json.dumps(error), 403,
+                                    mimetype="application/json")
                 return response
             else:
-                #Query by Test Session filters
+                # Query by Test Session filters
                 limit = request.args.get('limit')
                 offset = request.args.get('offset')
 
@@ -444,29 +572,46 @@ def get_test_session():
                 else:
                     order = 'asc'
 
-                properties = provider.filter_test_sessions(column, order, limit, offset, start_date,end_date,class_id,student_id,test_id,instructor_id)
-                #This returns a list of Test Session and .dump a list of dictionaries
+                properties = provider.filter_test_sessions(
+                    column, order, limit, offset, start_date, end_date, class_id, student_id, test_id, instructor_id)
+                # This returns a list of Test Session and .dump a list of dictionaries
                 result = test_schema_many.dump(properties)
                 _anonymize_student_info_in_session_list(user, result)
                 return jsonify(result)
         else:
             error = {"message": "Access Denied"}
-            response = Response(json.dumps(error), 403, mimetype="application/json")
+            response = Response(json.dumps(error), 403,
+                                mimetype="application/json")
             return response
     except Exception as e:
-        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
     return response
-
 
 
 @language2test_bp.route("/test_sessions/count", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def get_test_session_count():
     try:
         # Retrieve user
-        user = user_provider.get_authenticated_user()
+        if 'username' in request.args:
+            username = request.args.get('username')
+        else:
+            username = None
+            # print("Username in get_user_sessions: ", username)
+            # input("Press Enter to continue...")
+
+        user = user_provider.get_authenticated_user(username=username)
+
+        if user is None:
+            error = {"message": "User not found."}
+            response = Response(json.dumps(error), 404,
+                                mimetype="application/json")
+            return response
+
         is_test_taker = user_provider.has_role(user, 'Test Taker')
         if not is_test_taker:
             # Get filtering parameters
@@ -479,10 +624,12 @@ def get_test_session_count():
             limit = request.args.get('limit')
             offset = request.args.get('offset')
 
-            bad_request, instructor_id = _validate_filters(user, start_date, end_date, student_id,instructor_id)
+            bad_request, instructor_id = _validate_filters(
+                user, start_date, end_date, student_id, instructor_id)
             if bad_request:
                 error = {"message": "Check the format of the request"}
-                response = Response(json.dumps(error), 403, mimetype="application/json")
+                response = Response(json.dumps(error), 403,
+                                    mimetype="application/json")
                 return response
 
             if 'column' in request.args:
@@ -495,24 +642,28 @@ def get_test_session_count():
             else:
                 order = 'asc'
 
-            count = provider.filter_test_sessions_count(column, order, limit, offset, start_date,end_date,class_id,student_id,test_id,instructor_id)
-            response = Response(json.dumps(count), 200, mimetype="application/json")
+            count = provider.filter_test_sessions_count(
+                column, order, limit, offset, start_date, end_date, class_id, student_id, test_id, instructor_id)
+            response = Response(json.dumps(count), 200,
+                                mimetype="application/json")
         else:
             error = {"message": "Access Denied"}
-            response = Response(json.dumps(error), 403, mimetype="application/json")
+            response = Response(json.dumps(error), 403,
+                                mimetype="application/json")
             return response
 
     except Exception as e:
-        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 404, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 404,
+                            mimetype="application/json")
 
     return response
 
 
-
 @language2test_bp.route("/test_sessions/export", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def export_test_sessions_filter():
     try:
         # Get filtering parameters
@@ -539,74 +690,110 @@ def export_test_sessions_filter():
                 order = request.args.get('order')
             else:
                 order = 'asc'
-            sessions = provider.filter_test_sessions(column, order, limit, offset, start_date, end_date, class_id, student_id, test_id, instructor_id)
+            sessions = provider.filter_test_sessions(
+                column, order, limit, offset, start_date, end_date, class_id, student_id, test_id, instructor_id)
         name = request.args.get('name')
         return send_file(export_provider.write_results_into_file_researcher_instructor(sessions, name), attachment_filename='Test Details.zip',
                          mimetype="application/zip",
                          as_attachment=True, cache_timeout=-1)
     except Exception as e:
-        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
         return response
+
 
 @language2test_bp.route("instructor/test_sessions/export_filter", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def instructor_export_test_sessions_filter():
-    test_assignation_id = int(request.args.get('test_assignation_id'))
-    current_user = user_provider.get_authenticated_user()
-    is_instructor = user_provider.has_role(current_user, 'Instructor')
-    # Check if the user is an instructor
-    if is_instructor:
-        instructor_id = current_user.id
-        instructor_assignation_list = test_assignation_provider.get_instructor_test_assignations(instructor_id)
-        instructor_assignation_id_list = []
-        for each_instructor_assignation in instructor_assignation_list:
-            instructor_assignation_id_list.append(each_instructor_assignation.id)
-        # Check if the test assignation is associated with the instructor
-        if test_assignation_id in instructor_assignation_id_list:
-            try:
-                sessions_test_assignation_id = provider.get_test_sessions_for_test_assignation(test_assignation_id)
-                # Get filtering parameters
-                start_date = request.args.get('start_datetime')
-                end_date = request.args.get('end_datetime')
-                class_id = request.args.get('class_id')
-                student_id = request.args.get('student_id')
-                test_id = request.args.get('test_id')
-                instructor_id = request.args.get('instructor_id')
-                if not (start_date or end_date or class_id or student_id or test_id or instructor_id):
-                    # If not filters are provided, query all the Test sessions
-                    sessions = TestSession.query.all()
-                else:
-                    # Query by Test Session filters
-                    limit = request.args.get('limit')
-                    offset = request.args.get('offset')
+    try:
+        test_assignation_id = int(request.args.get('test_assignation_id'))
 
-                    if 'column' in request.args:
-                        column = request.args.get('column')
-                    else:
-                        column = 'id'
+        current_user = user_provider.get_authenticated_user()
+        # Retrieve user
+        if 'username' in request.args:
+            username = request.args.get('username')
+        else:
+            username = None
+            # print("Username in get_user_sessions: ", username)
+            # input("Press Enter to continue...")
 
-                    if 'order' in request.args:
-                        order = request.args.get('order')
+        current_user = user_provider.get_authenticated_user(username=username)
+        if current_user is None:
+            error = {"message": "User not found."}
+            response = Response(json.dumps(error), 404,
+                                mimetype="application/json")
+            return response
+
+        is_instructor = user_provider.has_role(current_user, 'Instructor')
+        # Check if the user is an instructor
+        if is_instructor:
+            instructor_id = current_user.id
+            instructor_assignation_list = test_assignation_provider.get_instructor_test_assignations(
+                instructor_id)
+            instructor_assignation_id_list = []
+            for each_instructor_assignation in instructor_assignation_list:
+                instructor_assignation_id_list.append(
+                    each_instructor_assignation.id)
+            # Check if the test assignation is associated with the instructor
+            if test_assignation_id in instructor_assignation_id_list:
+                try:
+                    sessions_test_assignation_id = provider.get_test_sessions_for_test_assignation(
+                        test_assignation_id)
+                    # Get filtering parameters
+                    start_date = request.args.get('start_datetime')
+                    end_date = request.args.get('end_datetime')
+                    class_id = request.args.get('class_id')
+                    student_id = request.args.get('student_id')
+                    test_id = request.args.get('test_id')
+                    instructor_id = request.args.get('instructor_id')
+                    if not (start_date or end_date or class_id or student_id or test_id or instructor_id):
+                        # If not filters are provided, query all the Test sessions
+                        sessions = TestSession.query.all()
                     else:
-                        order = 'asc'
-                    sessions = provider.filter_test_sessions(column, order, limit, offset, start_date, end_date,
-                                                             class_id, student_id, test_id, instructor_id)
-                sessions_with_filter_and_test_assignation_id = list(set(sessions_test_assignation_id).intersection(set(sessions)))
-                name = request.args.get('name')
-                return send_file(export_provider.write_results_into_file_researcher_instructor(sessions_with_filter_and_test_assignation_id, name),attachment_filename='Test Details.zip',
-                                mimetype="application/zip",
-                                as_attachment=True, cache_timeout=-1)
-            except Exception as e:
-                error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-                response = Response(json.dumps(error), 500, mimetype="application/json")
+                        # Query by Test Session filters
+                        limit = request.args.get('limit')
+                        offset = request.args.get('offset')
+
+                        if 'column' in request.args:
+                            column = request.args.get('column')
+                        else:
+                            column = 'id'
+
+                        if 'order' in request.args:
+                            order = request.args.get('order')
+                        else:
+                            order = 'asc'
+                        sessions = provider.filter_test_sessions(column, order, limit, offset, start_date, end_date,
+                                                                 class_id, student_id, test_id, instructor_id)
+                    sessions_with_filter_and_test_assignation_id = list(
+                        set(sessions_test_assignation_id).intersection(set(sessions)))
+                    name = request.args.get('name')
+                    return send_file(export_provider.write_results_into_file_researcher_instructor(sessions_with_filter_and_test_assignation_id, name), attachment_filename='Test Details.zip',
+                                     mimetype="application/zip",
+                                     as_attachment=True, cache_timeout=-1)
+                except Exception as e:
+                    error = {"exception": str(
+                        e), "message": "Exception has occurred. Check the format of the request."}
+                    response = Response(json.dumps(error), 500,
+                                        mimetype="application/json")
+                    return response
+            else:
+                error = {
+                    "message": "The test assignation is not associated with the instructor."}
+                response = Response(json.dumps(error), 403,
+                                    mimetype="application/json")
                 return response
         else:
-            error = {"message": "The test assignation is not associated with the instructor."}
-            response = Response(json.dumps(error), 403, mimetype="application/json")
+            error = {"message": "The user is not an instructor."}
+            response = Response(json.dumps(error), 403,
+                                mimetype="application/json")
             return response
-    else:
-        error = {"message": "The user is not an instructor."}
-        response = Response(json.dumps(error), 403, mimetype="application/json")
+    except Exception as e:
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
         return response

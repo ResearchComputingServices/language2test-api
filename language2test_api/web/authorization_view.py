@@ -13,9 +13,10 @@ authorization_schema_many = AuthorizationSchema(many=True)
 
 provider = BaseProvider()
 
+
 @language2test_bp.route("/authorization/count", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 @authorization(['read-authorization'])
 def get_authorization_count():
     return provider.get_count(Authorization)
@@ -23,7 +24,7 @@ def get_authorization_count():
 
 @language2test_bp.route("/authorization", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 @authorization(['read-authorization'])
 def get_authorization():
     id = request.args.get('id')
@@ -52,43 +53,59 @@ def add_authorization():
         result = authorization_schema.dump(authorization)
         response = jsonify(result)
     except Exception as e:
-        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
 
     return response
+
 
 def update_authorization():
     try:
         data = request.get_json()
-        authorization = Authorization.query.filter_by(id=data.get('id')).first()
+        authorization = Authorization.query.filter_by(
+            id=data.get('id')).first()
         if not authorization:
-            authorization = Authorization.query.filter_by(name=data.get('name')).first()
+            authorization = Authorization.query.filter_by(
+                name=data.get('name')).first()
         if authorization:
             if 'text' in data:
                 authorization.text = data.get('text')
             db.session.commit()
-            response = Response(json.dumps(data), 200, mimetype="application/json")
+            response = Response(json.dumps(data), 200,
+                                mimetype="application/json")
         else:
-            response = Response(json.dumps(data), 404, mimetype="application/json")
+            response = Response(json.dumps(data), 404,
+                                mimetype="application/json")
     except Exception as e:
-        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
 
     return response
+
 
 def delete_authorization():
     try:
         data = request.get_json()
-        authorization = Authorization.query.filter_by(id=data.get('id')).first()
+        authorization = Authorization.query.filter_by(
+            id=data.get('id')).first()
         if not authorization:
-            authorization = Authorization.query.filter_by(name=data.get('name')).first()
+            authorization = Authorization.query.filter_by(
+                name=data.get('name')).first()
         if authorization:
             db.session.delete(authorization)
             db.session.commit()
-            response = Response(json.dumps(data), 200, mimetype="application/json")
+            response = Response(json.dumps(data), 200,
+                                mimetype="application/json")
         else:
-            response = Response(json.dumps(data), 404, mimetype="application/json")
+            response = Response(json.dumps(data), 404,
+                                mimetype="application/json")
     except Exception as e:
-        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
     return response

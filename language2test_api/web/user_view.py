@@ -29,11 +29,11 @@ provider = UserProvider()
 keycloak = UserKeycloak()
 
 
-@language2test_bp.route('/users/login', methods=['GET'])
+@language2test_bp.route('/users/login_original', methods=['GET'])
 @crossdomain(origin='*')
-@authentication
-def login():
-    error = { 'error': 'Permission Denied' }
+# @authentication
+def login_original():
+    error = {'error': 'Permission Denied'}
     auth = request.headers.get('Authorization')
     if not auth:
         return Response(json.dumps(error), 403, mimetype='application/json')
@@ -42,7 +42,8 @@ def login():
         return Response(json.dumps(error), 403, mimetype='application/json')
     token = auth_fragments[1]
     try:
-        user_info = oidc.user_getinfo(['preferred_username', 'given_name', 'family_name'], token)
+        user_info = oidc.user_getinfo(
+            ['preferred_username', 'given_name', 'family_name'], token)
         name = user_info['preferred_username']
         first_name = user_info['given_name']
         last_name = user_info['family_name']
@@ -52,7 +53,7 @@ def login():
                 'name': name,
                 'first_name': first_name,
                 'last_name': last_name,
-                'roles': [{ 'name': 'Test Taker'}],
+                'roles': [{'name': 'Test Taker'}],
                 'fields': []
             })
             return jsonify(user_schema.dump(user))
@@ -61,16 +62,54 @@ def login():
         return Response(json.dumps(error), 403, mimetype='application/json')
     return Response(error, 403, mimetype='application/json')
 
+
+@language2test_bp.route('/users/login', methods=['GET'])
+@crossdomain(origin='*')
+# @authentication
+def login():
+    error = {'error': 'Permission Denied'}
+    # auth = request.headers.get('Authorization')
+    # if not auth:
+    #    return Response(json.dumps(error), 403, mimetype='application/json')
+    # auth_fragments = auth.split(' ')
+    # if len(auth_fragments) < 2 or auth_fragments[0] != 'Bearer':
+    #    return Response(json.dumps(error), 403, mimetype='application/json')
+    # token = auth_fragments[1]
+    try:
+        # user_info = oidc.user_getinfo(
+        #    ['preferred_username', 'given_name', 'family_name'], token)
+        # name = user_info['preferred_username']
+        # first_name = user_info['given_name']
+        # last_name = user_info['family_name']
+        username = "myuser"
+        user = User.query.filter_by(name=username).first()
+        if not user:
+            return Response(json.dumps(error), 403, mimetype='application/json')
+            # user = provider.add({
+            #     'name': name,
+            #     'first_name': first_name,
+            #     'last_name': last_name,
+            #     'roles': [{'name': 'Test Taker'}],
+            #     'fields': []
+            # })
+            # return jsonify(user_schema.dump(user))
+        return jsonify(user_schema.dump(user))
+    except Exception as e:
+        return Response(json.dumps(error), 403, mimetype='application/json')
+    return Response(error, 403, mimetype='application/json')
+
+
 @language2test_bp.route("/users/count", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def get_user_count():
     roles_param = request.args.get('roles')
     users = User.query
     if roles_param:
         roles_param = tuple(roles_param.split(','))
         roles = Role.query.filter(Role.name.in_(roles_param)).all()
-        users = users.join(User.roles).filter(Role.id.in_(role.id for role in roles))
+        users = users.join(User.roles).filter(
+            Role.id.in_(role.id for role in roles))
     count = users.count()
     dict = {"count": count}
     response = Response(json.dumps(dict), 200, mimetype="application/json")
@@ -79,7 +118,7 @@ def get_user_count():
 
 @language2test_bp.route("/users", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def get_user():
     try:
         id = request.args.get('id')
@@ -89,24 +128,29 @@ def get_user():
         if roles_param:
             roles_param = tuple(roles_param.split(','))
             roles = Role.query.filter(Role.name.in_(roles_param)).all()
-            users = users.join(User.roles).filter(Role.id.in_(role.id for role in roles))
+            users = users.join(User.roles).filter(
+                Role.id.in_(role.id for role in roles))
         if id:
             properties = users.filter_by(id=id).first()
         elif name:
             properties = users.filter_by(name=name).first()
         else:
             properties = provider.query_all_by_subquery(users, 'user')
-        result = user_schema.dump(properties) if (type(properties) is User) else user_schema_many.dump(properties)
+        result = user_schema.dump(properties) if (
+            type(properties) is User) else user_schema_many.dump(properties)
         response = jsonify(result)
     except Exception as e:
-        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
 
     return response
 
+
 @language2test_bp.route("/users", methods=['POST'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def add_user():
     try:
         data = request.get_json()
@@ -117,32 +161,45 @@ def add_user():
             user_dict['First Name'] = user.first_name
             user_dict['Last Name'] = user.last_name
             __import_user_in_keycloak(user_dict, [])
-            if (user_dict['kc_status_code']<200) or (user_dict['kc_status_code']>300):
-                #User couldn't be imported into keycloak
-                #Adding is transactional
-                #We'll revert the adding of user into a db.
+            if (user_dict['kc_status_code'] < 200) or (user_dict['kc_status_code'] > 300):
+                # User couldn't be imported into keycloak
+                # Adding is transactional
+                # We'll revert the adding of user into a db.
                 user = provider.delete(data)
                 db.session.delete(user)
                 db.session.commit()
                 error = {"message": "User cannot be created on Keycloak"}
-                response = Response(json.dumps(error), user_dict['kc_status_code'], mimetype="application/json")
+                response = Response(json.dumps(
+                    error), user_dict['kc_status_code'], mimetype="application/json")
             else:
                 result = user_schema.dump(user)
                 response = jsonify(result)
         else:
-            response = Response(json.dumps(data), 500, mimetype="application/json")
+            response = Response(json.dumps(data), 500,
+                                mimetype="application/json")
     except Exception as e:
-        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
 
     return response
 
+
 @language2test_bp.route("/users/reset_keycloak_password", methods=['PUT'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def reset_user_keycloak_password():
     try:
-        user_auth = provider.get_authenticated_user()
+
+        if 'username' in request.args:
+            username = request.args.get('username')
+        else:
+            username = None
+        # print("Username in get_user_sessions: ", username)
+        # input("Press Enter to continue...")
+
+        user_auth = provider.get_authenticated_user(username=username)
         if user_auth:
             is_admin = provider.has_role(user_auth, 'Administrator')
             if is_admin:
@@ -152,55 +209,65 @@ def reset_user_keycloak_password():
                     user = User.query.filter_by(name=data.get('name')).first()
                 if user:
                     status_code = keycloak.reset_user_password(user, data)
-                    if status_code>=200 and status_code<=300:
+                    if status_code >= 200 and status_code <= 300:
                         result = user_schema.dump(user)
                         response = jsonify(result)
                     else:
-                        response = Response(json.dumps(data), status_code, mimetype="application/json")
+                        response = Response(json.dumps(
+                            data), status_code, mimetype="application/json")
                 else:
-                    response = Response(json.dumps(data), 404, mimetype="application/json")
+                    response = Response(json.dumps(
+                        data), 404, mimetype="application/json")
             else:
                 error = {"message": "Permission Denied"}
-                response = Response(json.dumps(error), 403, mimetype="application/json")
+                response = Response(json.dumps(error), 403,
+                                    mimetype="application/json")
         else:
             error = {"message": "User not found."}
-            response = Response(json.dumps(error), 404, mimetype="application/json")
+            response = Response(json.dumps(error), 404,
+                                mimetype="application/json")
     except Exception as e:
-        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
     return response
-
 
 
 @language2test_bp.route("/users/demographic_questionnaire", methods=['PUT'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def update_demographic_questionnaire():
- try:
-    data = request.get_json()
-    auth = request.headers.get('Authorization')
-    auth_fragments = auth.split(' ')
-    token = auth_fragments[1]
-    name = oidc.user_getfield('preferred_username', token)
-    user = User.query.filter_by(name=name).first()
-    if user:
-        if data.get('id') is None:
-            data['id'] = user.id
-        provider.update(data, user)
-        db.session.commit()
-        response = Response(json.dumps(data), 200, mimetype="application/json")
-    else:
-        response = Response(json.dumps(data), 404, mimetype="application/json")
- except Exception as e:
-    error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-    response = Response(json.dumps(error), 500, mimetype="application/json")
- return response
-
+    try:
+        data = request.get_json()
+        # auth = request.headers.get('Authorization')
+        # auth_fragments = auth.split(' ')
+        # token = auth_fragments[1]
+        # name = oidc.user_getfield('preferred_username', token)
+        # user = User.query.filter_by(name=name).first()
+        username = "myuser"
+        user = User.query.filter_by(name=username).first()
+        if user:
+            if data.get('id') is None:
+                data['id'] = user.id
+            provider.update(data, user)
+            db.session.commit()
+            response = Response(json.dumps(data), 200,
+                                mimetype="application/json")
+        else:
+            response = Response(json.dumps(data), 404,
+                                mimetype="application/json")
+    except Exception as e:
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
+    return response
 
 
 @language2test_bp.route("/users", methods=['PUT'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def update_user():
     try:
         data = request.get_json()
@@ -212,18 +279,23 @@ def update_user():
                 data['id'] = user.id
             provider.update(data, user)
             db.session.commit()
-            response = Response(json.dumps(data), 200, mimetype="application/json")
+            response = Response(json.dumps(data), 200,
+                                mimetype="application/json")
         else:
-            response = Response(json.dumps(data), 404, mimetype="application/json")
+            response = Response(json.dumps(data), 404,
+                                mimetype="application/json")
     except Exception as e:
-        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
 
     return response
 
+
 @language2test_bp.route("/users", methods=['DELETE'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def delete_user():
     try:
         data = request.get_json()
@@ -234,18 +306,23 @@ def delete_user():
             user = provider.delete(data)
             db.session.delete(user)
             db.session.commit()
-            response = Response(json.dumps(data), 200, mimetype="application/json")
+            response = Response(json.dumps(data), 200,
+                                mimetype="application/json")
         else:
-            response = Response(json.dumps(data), 404, mimetype="application/json")
+            response = Response(json.dumps(data), 404,
+                                mimetype="application/json")
     except Exception as e:
-        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
 
     return response
 
+
 @language2test_bp.route("/users/export", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def export_users():
     specific_id = request.args.get('id')
     if specific_id is None:
@@ -317,7 +394,8 @@ def export_users():
             output = BytesIO()
             with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
                 pd.DataFrame(records).to_excel(writer,
-                                               sheet_name="{} summary".format("User"),
+                                               sheet_name="{} summary".format(
+                                                   "User"),
                                                index=False)
                 workbook = writer.book
                 worksheet = writer.sheets["{} summary".format("User")]
@@ -332,12 +410,14 @@ def export_users():
                 writer.save()
             output.seek(0)
             return send_file(output,
-                             attachment_filename= "User list" + '.xlsx',
+                             attachment_filename="User list" + '.xlsx',
                              mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                              as_attachment=True, cache_timeout=-1)
         except Exception as e:
-            error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-            response = Response(json.dumps(error), 404, mimetype="application/json")
+            error = {"exception": str(
+                e), "message": "Exception has occurred. Check the format of the request."}
+            response = Response(json.dumps(error), 404,
+                                mimetype="application/json")
             return response
 
     if specific_id is not None:
@@ -408,13 +488,14 @@ def export_users():
                 "Phone": phone,
                 "Address": address,
                 "Education": education
-                }]
+            }]
 
             output = BytesIO()
             with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
                 pd.DataFrame(specific_user_info).to_excel(writer,
-                                               sheet_name="User {} summary".format(name),
-                                               index=False)
+                                                          sheet_name="User {} summary".format(
+                                                              name),
+                                                          index=False)
                 workbook = writer.book
                 worksheet = writer.sheets["User {} summary".format(name)]
                 format = workbook.add_format()
@@ -429,12 +510,14 @@ def export_users():
 
             output.seek(0)
             return send_file(output,
-                             attachment_filename= "User "+ name + '.xlsx',
+                             attachment_filename="User " + name + '.xlsx',
                              mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                              as_attachment=True, cache_timeout=-1)
         except Exception as e:
-            response = Response(json.dumps(e), 404, mimetype="application/json")
+            response = Response(json.dumps(e), 404,
+                                mimetype="application/json")
             return response
+
 
 def __import_report(users):
     try:
@@ -452,8 +535,9 @@ def __import_report(users):
         output = BytesIO()
         with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
             pd.DataFrame(records).to_excel(writer,
-                                               sheet_name="{} summary".format("User"),
-                                               index=False)
+                                           sheet_name="{} summary".format(
+                                               "User"),
+                                           index=False)
             workbook = writer.book
             worksheet = writer.sheets["{} summary".format("User")]
             format = workbook.add_format()
@@ -463,10 +547,12 @@ def __import_report(users):
             worksheet.set_column('E:E', 28, format)
             writer.save()
         output.seek(0)
-        return send_file(output,attachment_filename= "Import Result" + '.xlsx',mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",as_attachment=True, cache_timeout=-1)
+        return send_file(output, attachment_filename="Import Result" + '.xlsx', mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", as_attachment=True, cache_timeout=-1)
     except Exception as e:
-        error = {"exception": str(e), "message": "Exception has occurred when writing Excel report of Import Users action."}
-        response = Response(json.dumps(error), 404, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred when writing Excel report of Import Users action."}
+        response = Response(json.dumps(error), 404,
+                            mimetype="application/json")
         return response
 
 
@@ -481,22 +567,28 @@ def __import_user_in_db(d):
                 for field in user.fields:
                     if field.name == "student_id":
                         marked["student_id"] = True
-                        field.value = str(d["Student ID"]).replace(".0", "") if not math.isnan(d["Student ID"]) else None
+                        field.value = str(d["Student ID"]).replace(
+                            ".0", "") if not math.isnan(d["Student ID"]) else None
                     elif field.name == "first_language":
                         marked["first_language"] = True
-                        field.value = d["First Language"] if type(d["First Language"]) != float else None
+                        field.value = d["First Language"] if type(
+                            d["First Language"]) != float else None
                     elif field.name == "email":
                         marked["email"] = True
-                        field.value = d["Email"] if type(d["Email"]) != float else None
+                        field.value = d["Email"] if type(
+                            d["Email"]) != float else None
                     elif field.name == "education":
                         marked["education"] = True
-                        field.value = d["Education"] if type(d["Education"]) != float else None
+                        field.value = d["Education"] if type(
+                            d["Education"]) != float else None
                     elif field.name == "phone":
                         marked["phone"] = True
-                        field.value = str(d["Phone"]).replace(".0", "") if not math.isnan(d["Phone"]) else None
+                        field.value = str(d["Phone"]).replace(
+                            ".0", "") if not math.isnan(d["Phone"]) else None
                     elif field.name == "address":
                         marked["address"] = True
-                        field.value = d["Address"] if type(d["Address"]) != float else None
+                        field.value = d["Address"] if type(
+                            d["Address"]) != float else None
                 if not marked.get("student_id", False):
                     user.fields.append(UserField(
                         {"name": "student_id", "type": "text", "value": str(d["Student ID"]).replace(".0", "") if not math.isnan(d["Student ID"]) else None, "user_id": user.id}))
@@ -549,7 +641,7 @@ def __import_user_in_db(d):
     return user
 
 
-def  __import_user_in_keycloak(user_dict, token):
+def __import_user_in_keycloak(user_dict, token):
     # Password for keycloak import
     if ('Password' in user_dict):
         user_password = user_dict['Password']
@@ -568,7 +660,7 @@ def  __import_user_in_keycloak(user_dict, token):
 
 @language2test_bp.route("users/upload", methods=['POST'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def import_users():
     raw_data = request.get_data()
     data = pd.read_excel(raw_data, engine="openpyxl")
@@ -579,93 +671,125 @@ def import_users():
             d = dict(row)
             user = __import_user_in_db(d)
 
-            #User was sucessfully imported or updated in DB
-            if user :
+            # User was sucessfully imported or updated in DB
+            if user:
                 token_kc = __import_user_in_keycloak(d, token_kc)
             else:
                 d['kc_import'] = 'Import Cancelled'
 
             list_users.append(d)
 
-
         response = __import_report(list_users)
 
     except Exception as e:
 
-        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
 
     return response
 
 
 @language2test_bp.route("/test_taker/demographic_questionnaires", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def get_demographic_questionnaire():
     try:
         start_datetime_rq = request.args.get('start_datetime')
         end_datetime_rq = request.args.get('end_datetime')
 
-        user = provider.get_authenticated_user()
+        if 'username' in request.args:
+            username = request.args.get('username')
+        else:
+            username = None
+
+        user = provider.get_authenticated_user(username=username)
+
         if user:
             is_test_taker = provider.has_role(user, 'Test Taker')
             if is_test_taker:
-                test_taker_id =user.id
-                properties = provider.get_demographic_fields(test_taker_id, start_datetime_rq, end_datetime_rq)
-                #result = user_field_schema_many.dump(properties)
+                test_taker_id = user.id
+                properties = provider.get_demographic_fields(
+                    test_taker_id, start_datetime_rq, end_datetime_rq)
+                # result = user_field_schema_many.dump(properties)
                 result = user_field_category_schema_many.dump(properties)
                 return jsonify(result)
             else:
                 error = {"message": "Permission Denied"}
-                response = Response(json.dumps(error), 403, mimetype="application/json")
+                response = Response(json.dumps(error), 403,
+                                    mimetype="application/json")
         else:
             error = {"message": "User not found."}
-            response = Response(json.dumps(error), 404, mimetype="application/json")
+            response = Response(json.dumps(error), 404,
+                                mimetype="application/json")
     except Exception as e:
-        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
 
     return response
 
 
-
 @language2test_bp.route("/admin/user_sessions", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def get_user_sessions():
     try:
         offset = request.args.get('offset')
         limit = request.args.get('limit')
+        if 'username' in request.args:
+            username = request.args.get('username')
+        else:
+            username = None
+        # print("Username in get_user_sessions: ", username)
+        # input("Press Enter to continue...")
 
-        user = provider.get_authenticated_user()
+        user = provider.get_authenticated_user(username=username)
+
         is_admin = provider.has_role(user, 'Administrator')
         if is_admin:
-            response = jsonify(keycloak.get_user_sessions(oidc.client_secrets['realm'],offset,limit))
+            response = jsonify(keycloak.get_user_sessions(
+                oidc.client_secrets['realm'], offset, limit))
         else:
             error = {"message": "Access Denied"}
-            response = Response(json.dumps(error), 403, mimetype="application/json")
-
+            response = Response(json.dumps(error), 403,
+                                mimetype="application/json")
 
     except Exception as e:
-        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
     return response
 
 
 @language2test_bp.route("/admin/user_sessions/count", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def get_user_sessions_count():
     try:
-        user = provider.get_authenticated_user()
+        if 'username' in request.args:
+            username = request.args.get('username')
+        else:
+            username = None
+        # print("Username in get_user_sessions: ", username)
+        # input("Press Enter to continue...")
+
+        user = provider.get_authenticated_user(username=username)
+
         is_admin = provider.has_role(user, 'Administrator')
         if is_admin:
-            response = keycloak.get_user_sessions_count(oidc.client_secrets['realm'])
+            response = keycloak.get_user_sessions_count(
+                oidc.client_secrets['realm'])
         else:
             error = {"message": "Access Denied"}
-            response = Response(json.dumps(error), 403, mimetype="application/json")
+            response = Response(json.dumps(error), 403,
+                                mimetype="application/json")
     except Exception as e:
-        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
     return response
-

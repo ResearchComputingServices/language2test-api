@@ -19,15 +19,17 @@ provider = TestCategoryProvider()
 test_schema = TestSessionSchema(many=False)
 test_schema_many = TestSessionSchema(many=True)
 
+
 @language2test_bp.route("/test_categories/count", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def get_test_categories_count():
     return provider.get_count(TestCategory)
 
+
 @language2test_bp.route("/test_categories", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def get_test_category():
     id = request.args.get('id')
     if id:
@@ -45,14 +47,16 @@ def get_test_category():
     if name and type:
         type_properties = TestType.query.filter_by(name=type).first()
         test_type_id = type_properties.id
-        properties = TestCategory.query.filter(TestCategory.name == name).filter(TestCategory.test_type_id == test_type_id).first()
+        properties = TestCategory.query.filter(TestCategory.name == name).filter(
+            TestCategory.test_type_id == test_type_id).first()
         result = test_category_schema.dump(properties)
         return jsonify(result)
 
     if not name and type:
         type_properties = TestType.query.filter_by(name=type).first()
         test_type_id = type_properties.id
-        properties = TestCategory.query.filter(TestCategory.test_type_id == test_type_id)
+        properties = TestCategory.query.filter(
+            TestCategory.test_type_id == test_type_id)
         result = test_category_schema_many.dump(properties)
         return jsonify(result)
 
@@ -60,9 +64,10 @@ def get_test_category():
     result = test_category_schema_many.dump(properties)
     return jsonify(result)
 
+
 @language2test_bp.route("/test_categories", methods=['POST'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def add_test_category():
     try:
         data = request.get_json()
@@ -72,35 +77,44 @@ def add_test_category():
         result = test_category_schema.dump(test)
         response = jsonify(result)
     except Exception as e:
-        error = { "exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
 
     return response
 
+
 @language2test_bp.route("/test_categories", methods=['PUT'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def update_test_category():
     try:
         data = request.get_json()
         test_category = TestCategory.query.filter_by(id=data.get('id')).first()
         if not test_category:
-            test_category = TestCategory.query.filter_by(name=data.get('name')).first()
+            test_category = TestCategory.query.filter_by(
+                name=data.get('name')).first()
         if test_category:
             provider.update(data, test_category)
             db.session.commit()
-            response = Response(json.dumps(data), 200, mimetype="application/json")
+            response = Response(json.dumps(data), 200,
+                                mimetype="application/json")
         else:
-            response = Response(json.dumps(data), 404, mimetype="application/json")
+            response = Response(json.dumps(data), 404,
+                                mimetype="application/json")
     except Exception as e:
-        error = { "exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
 
     return response
 
+
 @language2test_bp.route("/test_categories", methods=['DELETE'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def delete_test_category():
     try:
         data = request.get_json()
@@ -110,19 +124,23 @@ def delete_test_category():
         if test:
             db.session.delete(test)
             db.session.commit()
-            response = Response(json.dumps(data), 200, mimetype="application/json")
+            response = Response(json.dumps(data), 200,
+                                mimetype="application/json")
         else:
-            response = Response(json.dumps(data), 404, mimetype="application/json")
+            response = Response(json.dumps(data), 404,
+                                mimetype="application/json")
     except Exception as e:
-        error = { "exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
 
     return response
 
 
 @language2test_bp.route("/test_categories/export", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def export_test_categories():
     specific_id = request.args.get('id')
     if specific_id is None:
@@ -138,7 +156,8 @@ def export_test_categories():
             output = BytesIO()
             with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
                 pd.DataFrame(records).to_excel(writer,
-                                               sheet_name="{} summary".format('test_category'),
+                                               sheet_name="{} summary".format(
+                                                   'test_category'),
                                                index=False)
                 workbook = writer.book
                 worksheet = writer.sheets["{} summary".format('test_category')]
@@ -154,8 +173,10 @@ def export_test_categories():
                              mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                              as_attachment=True, cache_timeout=-1)
         except Exception as e:
-            error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-            response = Response(json.dumps(error), 404, mimetype="application/json")
+            error = {"exception": str(
+                e), "message": "Exception has occurred. Check the format of the request."}
+            response = Response(json.dumps(error), 404,
+                                mimetype="application/json")
             return response
     if specific_id is not None:
         try:
@@ -177,8 +198,9 @@ def export_test_categories():
             output = BytesIO()
             with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
                 pd.DataFrame([tc_infos]).to_excel(writer,
-                                               sheet_name="{} details".format("Test Category"),
-                                               index=False)
+                                                  sheet_name="{} details".format(
+                                                      "Test Category"),
+                                                  index=False)
                 workbook = writer.book
                 worksheet = writer.sheets["{} details".format("Test Category")]
                 format = workbook.add_format()
@@ -192,7 +214,8 @@ def export_test_categories():
                              mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                              as_attachment=True, cache_timeout=-1)
         except Exception as e:
-            error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-            response = Response(json.dumps(error), 404, mimetype="application/json")
+            error = {"exception": str(
+                e), "message": "Exception has occurred. Check the format of the request."}
+            response = Response(json.dumps(error), 404,
+                                mimetype="application/json")
             return response
-

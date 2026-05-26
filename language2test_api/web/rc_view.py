@@ -21,15 +21,17 @@ provider = RCProvider()
 test_schema = TestSessionSchema(many=False)
 test_schema_many = TestSessionSchema(many=True)
 
+
 @language2test_bp.route("/rc/count", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def get_rc_count():
     return provider.get_count(RC)
 
+
 @language2test_bp.route("/rc", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def get_rc():
     id = request.args.get('id')
     if id:
@@ -47,9 +49,10 @@ def get_rc():
     result = rc_schema_many.dump(properties)
     return jsonify(result)
 
+
 @language2test_bp.route("/rc", methods=['POST'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def add_rc():
     try:
         data = request.get_json()
@@ -58,14 +61,17 @@ def add_rc():
         result = rc_schema.dump(rc)
         response = jsonify(result)
     except Exception as e:
-        error = { "exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
 
     return response
 
+
 @language2test_bp.route("/rc", methods=['PUT'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def update_rc():
     try:
         data = request.get_json()
@@ -80,18 +86,23 @@ def update_rc():
                 result = rc_schema.dump(rc)
                 response = jsonify(result)
             else:
-                response = Response(json.dumps(data), 403, mimetype="application/json")
+                response = Response(json.dumps(data), 403,
+                                    mimetype="application/json")
         else:
-            response = Response(json.dumps(data), 404, mimetype="application/json")
+            response = Response(json.dumps(data), 404,
+                                mimetype="application/json")
     except Exception as e:
-        error = { "exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
 
     return response
 
+
 @language2test_bp.route("/rc", methods=['DELETE'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def delete_rc():
     try:
         data = request.get_json()
@@ -102,20 +113,26 @@ def delete_rc():
             if not rc.unremovable:
                 provider.delete(data, rc)
                 db.session.commit()
-                response = Response(json.dumps(data), 200, mimetype="application/json")
+                response = Response(json.dumps(data), 200,
+                                    mimetype="application/json")
             else:
-                response = Response(json.dumps(data), 403, mimetype="application/json")
+                response = Response(json.dumps(data), 403,
+                                    mimetype="application/json")
         else:
-            response = Response(json.dumps(data), 404, mimetype="application/json")
+            response = Response(json.dumps(data), 404,
+                                mimetype="application/json")
     except Exception as e:
-        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
 
     return response
 
+
 @language2test_bp.route("/rc/export", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def export_rc():
     specific_id = request.args.get('id')
     if specific_id is None:
@@ -134,7 +151,8 @@ def export_rc():
             output = BytesIO()
             with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
                 pd.DataFrame(records).to_excel(writer,
-                                               sheet_name="{} summary".format("rc test"),
+                                               sheet_name="{} summary".format(
+                                                   "rc test"),
                                                index=False)
                 workbook = writer.book
                 worksheet = writer.sheets["{} summary".format("rc test")]
@@ -154,7 +172,8 @@ def export_rc():
                              mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                              as_attachment=True, cache_timeout=-1)
         except Exception as e:
-            response = Response(json.dumps(e), 404, mimetype="application/json")
+            response = Response(json.dumps(e), 404,
+                                mimetype="application/json")
             return response
 
     if specific_id is not None:
@@ -179,25 +198,28 @@ def export_rc():
             output = BytesIO()
             with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
                 pd.DataFrame([rc_infos]).to_excel(writer,
-                                               sheet_name="{} summary".format("rc test"),
-                                               index=False)
+                                                  sheet_name="{} summary".format(
+                                                      "rc test"),
+                                                  index=False)
 
                 pd.DataFrame([rc_reading_info], index=["Reading"]).to_excel(writer, startrow=3,
-                                                                 sheet_name="{} summary".format("rc test"),
-                                                                 header=False)
+                                                                            sheet_name="{} summary".format(
+                                                                                "rc test"),
+                                                                            header=False)
                 rc_questions_specific_infos = {
-                    "Question id":'',
-                    "Question":'',
-                    "Option 1":'',
-                    "Option 2":'',
-                    "Option 3":'',
-                    "Option 4":'',
-                    "Answer":'',
+                    "Question id": '',
+                    "Question": '',
+                    "Option 1": '',
+                    "Option 2": '',
+                    "Option 3": '',
+                    "Option 4": '',
+                    "Answer": '',
 
                 }
                 pd.DataFrame([rc_questions_specific_infos]).to_excel(writer, startrow=5,
-                                                                 sheet_name="{} summary".format("rc test"),
-                                                                 index=False)
+                                                                     sheet_name="{} summary".format(
+                                                                         "rc test"),
+                                                                     index=False)
                 for i in range(len(rc_result['questions'])):
                     correct_option = rc_result['questions'][i]['correct']
                     rc_question_infos = {
@@ -206,12 +228,14 @@ def export_rc():
 
                     for j in range(len(rc_result['questions'][i]['options'])):
                         question_options = rc_result['questions'][i]['options'][j]
-                        rc_question_infos["options {}".format(j)] = question_options['text']
+                        rc_question_infos["options {}".format(
+                            j)] = question_options['text']
                     rc_question_infos["Answer"] = rc_result['questions'][i]['options'][correct_option-1]['text']
 
                     pd.DataFrame([rc_question_infos], index=["{}".format(i+1)]).to_excel(writer, startrow=i+6,
-                                                                                sheet_name="{} summary".format("rc test"),
-                                                                                header=False)
+                                                                                         sheet_name="{} summary".format(
+                                                                                             "rc test"),
+                                                                                         header=False)
                 workbook = writer.book
                 worksheet = writer.sheets["{} summary".format("rc test")]
                 format = workbook.add_format()
@@ -228,24 +252,25 @@ def export_rc():
 
             output.seek(0)
             return send_file(output,
-                             attachment_filename='Reading Comprehension ' +name+ '.xlsx',
+                             attachment_filename='Reading Comprehension ' + name + '.xlsx',
                              mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                              as_attachment=True, cache_timeout=-1)
         except Exception as e:
-            response = Response(json.dumps(e), 404, mimetype="application/json")
+            response = Response(json.dumps(e), 404,
+                                mimetype="application/json")
             return response
-
 
 
 @language2test_bp.route("/rc/upload", methods=['POST'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def upload_rc():
     file = request.files.get("file")
     if file is not None:
         try:
             text = file.read().decode("utf8")
-            reading = re.findall(r"<reading>(.*?)</reading>", text, re.DOTALL)[0].strip()
+            reading = re.findall(r"<reading>(.*?)</reading>",
+                                 text, re.DOTALL)[0].strip()
             questions = list(map(lambda x: provider.gen_question(x),
                                  re.findall(r"<question>(.*?)</question>", text, re.DOTALL)))
             rc_data = {
@@ -275,13 +300,17 @@ def upload_rc():
                     db.session.add(rc_question)
 
             db.session.commit()
-            response = Response(json.dumps({"success": True}), 200, mimetype="application/json")
+            response = Response(json.dumps(
+                {"success": True}), 200, mimetype="application/json")
         except Exception as e:
-            error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-            response = Response(json.dumps(error), 500, mimetype="application/json")
+            error = {"exception": str(
+                e), "message": "Exception has occurred. Check the format of the request."}
+            response = Response(json.dumps(error), 500,
+                                mimetype="application/json")
 
     else:
         error = {"message": "file not found"}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
 
     return response

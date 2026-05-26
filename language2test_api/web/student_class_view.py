@@ -25,12 +25,12 @@ provider = StudentClassProvider()
 user_provider = UserProvider()
 keycloak = UserKeycloak()
 
+
 @language2test_bp.route("/student_classes/count", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def get_student_classes_count():
     return provider.get_count(StudentClass)
-
 
 
 def get_student_class_original():
@@ -48,7 +48,8 @@ def get_student_class_original():
 
     display = request.args.get('display')
     if display:
-        properties = StudentClass.query.filter(StudentClass.display == display).first()
+        properties = StudentClass.query.filter(
+            StudentClass.display == display).first()
         result = student_class_schema.dump(properties)
         return jsonify(result)
 
@@ -57,9 +58,9 @@ def get_student_class_original():
     return jsonify(result)
 
 
-def query_all_classes():
+def query_all_classes(username=None):
     # Retrieve user
-    user = user_provider.get_authenticated_user()
+    user = user_provider.get_authenticated_user(username=username)
     allow_classes = permission.view_student_classes(user)
     if allow_classes == 'own':
         instructor_id = user.id
@@ -75,36 +76,54 @@ def query_all_classes():
 
 @language2test_bp.route("/student_classes", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def get_student_class():
+
+    # Retrieve user
+    if 'username' in request.args:
+        username = request.args.get('username')
+    else:
+        username = None
+        # print("Username in get_user_sessions: ", username)
+        # input("Press Enter to continue...")
+
+        user = user_provider.get_authenticated_user(username=username)
+        if user is None:
+            error = {"message": "User not found."}
+            response = Response(json.dumps(error), 404,
+                                mimetype="application/json")
+            return response
+
     id = request.args.get('id')
     if id:
+        print("Id provided: {}".format(id))
         properties = StudentClass.query.filter_by(id=int(id)).first()
         result = student_class_schema.dump(properties)
         return jsonify(result)
 
     name = request.args.get('name')
     if name:
+        print("Name provided: {}".format(name))
         properties = StudentClass.query.filter_by(name=name)
         result = student_class_schema.dump(properties)
         return jsonify(result)
 
     display = request.args.get('display')
     if display:
-        properties = StudentClass.query.filter(StudentClass.display == display).first()
+        print("Display provided: {}".format(display))
+        properties = StudentClass.query.filter(
+            StudentClass.display == display).first()
         result = student_class_schema.dump(properties)
         return jsonify(result)
 
-    result = query_all_classes()
+    print("Querying all classes")
+    result = query_all_classes(username=username)
     return jsonify(result)
-
-
-
 
 
 @language2test_bp.route("/student_classes", methods=['POST'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def add_student_class():
     try:
         data = request.get_json()
@@ -113,35 +132,44 @@ def add_student_class():
         result = student_class_schema.dump(student_class)
         response = jsonify(result)
     except Exception as e:
-        error = { "exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
 
     return response
 
+
 @language2test_bp.route("/student_classes", methods=['PUT'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def update_student_class():
     try:
         data = request.get_json()
         student_class = StudentClass.query.filter_by(id=data.get('id')).first()
         if not student_class:
-            student_class = StudentClass.query.filter_by(name=data.get('name')).first()
+            student_class = StudentClass.query.filter_by(
+                name=data.get('name')).first()
         if student_class:
             provider.update(data, student_class)
             db.session.commit()
-            response = Response(json.dumps(data), 200, mimetype="application/json")
+            response = Response(json.dumps(data), 200,
+                                mimetype="application/json")
         else:
-            response = Response(json.dumps(data), 404, mimetype="application/json")
+            response = Response(json.dumps(data), 404,
+                                mimetype="application/json")
     except Exception as e:
-        error = { "exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
 
     return response
 
+
 @language2test_bp.route("/student_classes", methods=['DELETE'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def delete_student_class():
     try:
         data = request.get_json()
@@ -151,18 +179,23 @@ def delete_student_class():
         if test:
             db.session.delete(test)
             db.session.commit()
-            response = Response(json.dumps(data), 200, mimetype="application/json")
+            response = Response(json.dumps(data), 200,
+                                mimetype="application/json")
         else:
-            response = Response(json.dumps(data), 404, mimetype="application/json")
+            response = Response(json.dumps(data), 404,
+                                mimetype="application/json")
     except Exception as e:
-        error = { "exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
 
     return response
 
+
 @language2test_bp.route("/student_classes/export", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def export_student_class():
     specific_id = request.args.get('id')
     if specific_id is None:
@@ -196,8 +229,10 @@ def export_student_class():
                              mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                              as_attachment=True, cache_timeout=-1)
         except Exception as e:
-            error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-            response = Response(json.dumps(error), 404, mimetype="application/json")
+            error = {"exception": str(
+                e), "message": "Exception has occurred. Check the format of the request."}
+            response = Response(json.dumps(error), 404,
+                                mimetype="application/json")
             return response
 
     if specific_id is not None:
@@ -272,13 +307,13 @@ def export_student_class():
                     "Phone": phone,
                     "Address": address,
                     "Education": education
-                    })
+                })
 
             output = BytesIO()
 
             with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
                 pd.DataFrame(student_class_infos).to_excel(writer,
-                                                    sheet_name="{} summary".format(name), index=False)
+                                                           sheet_name="{} summary".format(name), index=False)
                 workbook = writer.book
                 worksheet = writer.sheets["{} summary".format(name)]
                 format = workbook.add_format()
@@ -298,13 +333,16 @@ def export_student_class():
 
             output.seek(0)
             return send_file(output,
-                                attachment_filename= name + '.xlsx',
-                                mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                                as_attachment=True, cache_timeout=-1)
+                             attachment_filename=name + '.xlsx',
+                             mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                             as_attachment=True, cache_timeout=-1)
         except Exception as e:
-            error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-            response = Response(json.dumps(error), 404, mimetype="application/json")
+            error = {"exception": str(
+                e), "message": "Exception has occurred. Check the format of the request."}
+            response = Response(json.dumps(error), 404,
+                                mimetype="application/json")
             return response
+
 
 def __import_user_in_db(d):
     try:
@@ -316,22 +354,28 @@ def __import_user_in_db(d):
                 for field in user.fields:
                     if field.name == "student_id" and "Student ID" in d:
                         marked["student_id"] = True
-                        field.value = str(d["Student ID"]).replace(".0", "") if not math.isnan(d["Student ID"]) else None
+                        field.value = str(d["Student ID"]).replace(
+                            ".0", "") if not math.isnan(d["Student ID"]) else None
                     elif field.name == "first_language" and "First Language" in d:
                         marked["first_language"] = True
-                        field.value = d["First Language"] if type(d["First Language"]) != float else None
+                        field.value = d["First Language"] if type(
+                            d["First Language"]) != float else None
                     elif field.name == "email" and "Email" in d:
                         marked["email"] = True
-                        field.value = d["Email"] if type(d["Email"]) != float else None
+                        field.value = d["Email"] if type(
+                            d["Email"]) != float else None
                     elif field.name == "education" and "Education" in d:
                         marked["education"] = True
-                        field.value = d["Education"] if type(d["Education"]) != float else None
+                        field.value = d["Education"] if type(
+                            d["Education"]) != float else None
                     elif field.name == "phone" and "Phone" in d:
                         marked["phone"] = True
-                        field.value = str(d["Phone"]).replace(".0", "") if not math.isnan(d["Phone"]) else None
+                        field.value = str(d["Phone"]).replace(
+                            ".0", "") if not math.isnan(d["Phone"]) else None
                     elif field.name == "address" and "Address" in d:
                         marked["address"] = True
-                        field.value = d["Address"] if type(d["Address"]) != float else None
+                        field.value = d["Address"] if type(
+                            d["Address"]) != float else None
                 if not marked.get("student_id", False) and "Student ID" in d:
                     user.fields.append(UserField(
                         {"name": "student_id", "type": "text", "value": str(d["Student ID"]).replace(".0", "") if not math.isnan(d["Student ID"]) else None, "user_id": user.id}))
@@ -389,7 +433,8 @@ def __import_user_in_db(d):
         d['db_import'] = 'Error: ' + str(e)
     return user
 
-def  __import_user_in_keycloak(user_dict, token):
+
+def __import_user_in_keycloak(user_dict, token):
     # Password for keycloak import
     if ('Password' in user_dict):
         user_password = user_dict['Password']
@@ -405,9 +450,10 @@ def  __import_user_in_keycloak(user_dict, token):
     token = keycloak.import_user(user_dict, token)
     return token
 
+
 @language2test_bp.route("/student_classes/upload", methods=['POST'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def upload_student_class():
     raw_data = request.get_data()
     data = pd.read_excel(raw_data, engine="openpyxl")
@@ -417,14 +463,16 @@ def upload_student_class():
         for _, row in data.iterrows():
             d = dict(row)
             if type(d['Class Name']) == str:
-                exist_sc = StudentClass.query.filter_by(name=d["Class Name"]).first()
+                exist_sc = StudentClass.query.filter_by(
+                    name=d["Class Name"]).first()
                 sc = scs.get(d["Class Name"])
                 if sc is None and exist_sc is None:
                     sc_data = {}
                     sc_data["name"] = d["Class Name"]
                     sc_data["display"] = "-".join(d["Class Name"].split("_"))
                     sc_data["id"] = provider.generate_id(field=StudentClass.id)
-                    instructor = User.query.filter_by(name=d["Instructor Name"]).first()
+                    instructor = User.query.filter_by(
+                        name=d["Instructor Name"]).first()
                     sc = StudentClass(sc_data)
                     if "Administrator" in map(lambda e: e.name, instructor.roles) or "Instructor" in map(lambda e: e.name, instructor.roles)\
                             or "Teacher" in map(lambda e: e.name, instructor.roles):
@@ -441,22 +489,28 @@ def upload_student_class():
                     for field in user.fields:
                         if field.name == "student_id" and "Student ID" in d:
                             marked["student_id"] = True
-                            field.value = str(d["Student ID"]).replace(".0", "") if not math.isnan(d["Student ID"]) else None
+                            field.value = str(d["Student ID"]).replace(
+                                ".0", "") if not math.isnan(d["Student ID"]) else None
                         elif field.name == "first_language" and "First Language" in d:
                             marked["first_language"] = True
-                            field.value = d["First Language"] if type(d["First Language"]) != float else None
+                            field.value = d["First Language"] if type(
+                                d["First Language"]) != float else None
                         elif field.name == "email" and "Email" in d:
                             marked["email"] = True
-                            field.value = d["Email"] if type(d["Email"]) != float else None
+                            field.value = d["Email"] if type(
+                                d["Email"]) != float else None
                         elif field.name == "education" and "Education" in d:
                             marked["education"] = True
-                            field.value = d["Education"] if type(d["Education"]) != float else None
+                            field.value = d["Education"] if type(
+                                d["Education"]) != float else None
                         elif field.name == "phone" and "Phone" in d:
                             marked["phone"] = True
-                            field.value = str(d["Phone"]).replace(".0", "") if not math.isnan(d["Phone"]) else None
+                            field.value = str(d["Phone"]).replace(
+                                ".0", "") if not math.isnan(d["Phone"]) else None
                         elif field.name == "address" and "Address" in d:
                             marked["address"] = True
-                            field.value = d["Address"] if type(d["Address"]) != float else None
+                            field.value = d["Address"] if type(
+                                d["Address"]) != float else None
                     if not marked.get("student_id", False) and "Student ID" in d:
                         user.fields.append(UserField(
                             {"name": "student_id", "type": "text", "value": str(d["Student ID"]).replace(".0", "") if not math.isnan(d["Student ID"]) else None, "user_id": user.id}))
@@ -482,27 +536,44 @@ def upload_student_class():
                             exist_sc.student_student_class.append(user)
                     else:
                         if user not in scs[d["Class Name"]].student_student_class:
-                            scs[d["Class Name"]].student_student_class.append(user)
+                            scs[d["Class Name"]
+                                ].student_student_class.append(user)
 
             db.session.add_all(scs.values())
             db.session.commit()
-        response = Response(json.dumps({"success": True}), 200, mimetype="application/json")
+        response = Response(json.dumps(
+            {"success": True}), 200, mimetype="application/json")
     except Exception as e:
-        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
     return response
 
 
 @language2test_bp.route("/instructor/student_classes", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def get_instructor_student_class():
     try:
-        #Retrieve user
-        user = user_provider.get_authenticated_user()
+        # Retrieve user
+        if 'username' in request.args:
+            username = request.args.get('username')
+        else:
+            username = None
+        # print("Username in get_user_sessions: ", username)
+        # input("Press Enter to continue...")
+
+        user = user_provider.get_authenticated_user(username=username)
+        if user is None:
+            error = {"message": "User not found."}
+            response = Response(json.dumps(error), 404,
+                                mimetype="application/json")
+            return response
+        # user = user_provider.get_authenticated_user()
         is_instructor = user_provider.has_role(user, 'Instructor')
         if is_instructor:
-            instructor_id =user.id
+            instructor_id = user.id
             if instructor_id:
                 filters = {'instructor_id': int(instructor_id)}
                 properties = provider.query_filter_by(StudentClass, filters)
@@ -510,20 +581,24 @@ def get_instructor_student_class():
                 return jsonify(result)
             else:
                 error = {"message": "No Id found for the user."}
-                response = Response(json.dumps(error), 404, mimetype="application/json")
+                response = Response(json.dumps(error), 404,
+                                    mimetype="application/json")
         else:
             error = {"message": "The user is not an instructor."}
-            response = Response(json.dumps(error), 403, mimetype="application/json")
+            response = Response(json.dumps(error), 403,
+                                mimetype="application/json")
     except Exception as e:
-        error = { "exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
 
     return response
 
 
 @language2test_bp.route("/instructor/students", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def get_instructor_students():
     try:
         limit = request.args.get('limit')
@@ -539,85 +614,147 @@ def get_instructor_students():
         else:
             order = 'asc'
 
-        #Retrieve user
-        user = user_provider.get_authenticated_user()
+        # Retrieve user
+        if 'username' in request.args:
+            username = request.args.get('username')
+        else:
+            username = None
+
+        # print("Username in get_user_sessions: ", username)
+        # input("Press Enter to continue...")
+
+        user = user_provider.get_authenticated_user(username=username)
+        if user is None:
+            error = {"message": "User not found."}
+            response = Response(json.dumps(error), 404,
+                                mimetype="application/json")
+            return response
+
+        # user = user_provider.get_authenticated_user()
         is_instructor = user_provider.has_role(user, 'Instructor')
         if is_instructor:
-            instructor_id =user.id
+            instructor_id = user.id
             if instructor_id:
-                properties = provider.get_instructor_students(instructor_id, offset, limit, column, order)
+                properties = provider.get_instructor_students(
+                    instructor_id, offset, limit, column, order)
                 result = user_schema_many.dump(properties)
                 return jsonify(result)
             else:
                 error = {"message": "No Id found for the user."}
-                response = Response(json.dumps(error), 404, mimetype="application/json")
+                response = Response(json.dumps(error), 404,
+                                    mimetype="application/json")
         else:
             error = {"message": "Access Denied"}
-            response = Response(json.dumps(error), 403, mimetype="application/json")
+            response = Response(json.dumps(error), 403,
+                                mimetype="application/json")
     except Exception as e:
-        error = { "exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
 
     return response
 
+
 @language2test_bp.route("/instructor/students/count", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def get_instructor_students_count():
     try:
         # Retrieve user
-        user = user_provider.get_authenticated_user()
+        if 'username' in request.args:
+            username = request.args.get('username')
+        else:
+            username = None
+
+        # print("Username in get_user_sessions: ", username)
+        # input("Press Enter to continue...")
+
+        user = user_provider.get_authenticated_user(username=username)
+        if user is None:
+            error = {"message": "User not found."}
+            response = Response(json.dumps(error), 404,
+                                mimetype="application/json")
+            return response
+
+        # user = user_provider.get_authenticated_user()
         is_instructor = user_provider.has_role(user, 'Instructor')
         if is_instructor:
             instructor_id = user.id
             if instructor_id:
                 count = provider.get_instructor_students_count(instructor_id)
-                response = Response(json.dumps(count), 200, mimetype="application/json")
+                response = Response(json.dumps(count), 200,
+                                    mimetype="application/json")
             else:
                 error = {"message": "No Id found for the user."}
-                response = Response(json.dumps(error), 404, mimetype="application/json")
+                response = Response(json.dumps(error), 404,
+                                    mimetype="application/json")
         else:
             error = {"message": "Access Denied"}
-            response = Response(json.dumps(error), 403, mimetype="application/json")
+            response = Response(json.dumps(error), 403,
+                                mimetype="application/json")
         return response
     except Exception as e:
-        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
 
     return response
 
 
 @language2test_bp.route("/instructor/student_classes/count", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def get_instructor_student_class_count():
     try:
-        #Retrieve user
-        user = user_provider.get_authenticated_user()
+        # Retrieve user
+        if 'username' in request.args:
+            username = request.args.get('username')
+        else:
+            username = None
+
+        # print("Username in get_user_sessions: ", username)
+        # input("Press Enter to continue...")
+
+        user = user_provider.get_authenticated_user(username=username)
+        if user is None:
+            error = {"message": "User not found."}
+            response = Response(json.dumps(error), 404,
+                                mimetype="application/json")
+            return response
+
+        # user = user_provider.get_authenticated_user()
         is_instructor = user_provider.has_role(user, 'Instructor')
         if is_instructor:
-            instructor_id =user.id
+            instructor_id = user.id
             if instructor_id:
-                count = provider.get_instructor_student_classes_count(instructor_id)
-                response = Response(json.dumps(count), 200, mimetype="application/json")
+                count = provider.get_instructor_student_classes_count(
+                    instructor_id)
+                response = Response(json.dumps(count), 200,
+                                    mimetype="application/json")
             else:
                 error = {"message": "No Id found for the user."}
-                response = Response(json.dumps(error), 404, mimetype="application/json")
+                response = Response(json.dumps(error), 404,
+                                    mimetype="application/json")
         else:
             error = {"message": "Access Denied"}
-            response = Response(json.dumps(error), 403, mimetype="application/json")
+            response = Response(json.dumps(error), 403,
+                                mimetype="application/json")
 
         return response
     except Exception as e:
-        error = { "exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
 
     return response
 
 
 @language2test_bp.route("/test_taker/student_classes", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def get_test_taker_student_classes():
     try:
         limit = request.args.get('limit')
@@ -633,90 +770,139 @@ def get_test_taker_student_classes():
         else:
             order = 'asc'
 
-        #Retrieve user
-        user = user_provider.get_authenticated_user()
+        # Retrieve user
+        if 'username' in request.args:
+            username = request.args.get('username')
+        else:
+            username = None
+
+        # print("Username in get_user_sessions: ", username)
+        # input("Press Enter to continue...")
+
+        user = user_provider.get_authenticated_user(username=username)
+        if user is None:
+            error = {"message": "User not found."}
+            response = Response(json.dumps(error), 404,
+                                mimetype="application/json")
+            return response
+
+        # Retrieve user
+        # user = user_provider.get_authenticated_user()
         if user:
             is_test_taker = user_provider.has_role(user, 'Test Taker')
             if is_test_taker:
-                test_taker_id =user.id
+                test_taker_id = user.id
                 if test_taker_id:
-                    properties = provider.get_test_taker_student_classes(test_taker_id,offset,limit,column,order)
+                    properties = provider.get_test_taker_student_classes(
+                        test_taker_id, offset, limit, column, order)
                     result = student_class_schema_many.dump(properties)
                     return jsonify(result)
                 else:
                     error = {"message": "No Id found for the user."}
-                    response = Response(json.dumps(error), 404, mimetype="application/json")
+                    response = Response(json.dumps(
+                        error), 404, mimetype="application/json")
             else:
                 error = {"message": "Access Denied"}
-                response = Response(json.dumps(error), 403, mimetype="application/json")
+                response = Response(json.dumps(error), 403,
+                                    mimetype="application/json")
         else:
             error = {"message": "User not found."}
-            response = Response(json.dumps(error), 404, mimetype="application/json")
+            response = Response(json.dumps(error), 404,
+                                mimetype="application/json")
     except Exception as e:
-        error = { "exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
 
     return response
 
 
 @language2test_bp.route("/test_taker/student_classes/count", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def get_test_taker_student_classes_count():
     try:
         # Retrieve user
-        user = user_provider.get_authenticated_user()
+        if 'username' in request.args:
+            username = request.args.get('username')
+        else:
+            username = None
+
+        # print("Username in get_user_sessions: ", username)
+        # input("Press Enter to continue...")
+
+        user = user_provider.get_authenticated_user(username=username)
+
+        # user = user_provider.get_authenticated_user()
         is_test_taker = user_provider.has_role(user, 'Test Taker')
         if is_test_taker:
             test_taker_id = user.id
             if test_taker_id:
-                count = provider.get_test_taker_student_classes_count(test_taker_id)
-                response = Response(json.dumps(count), 200, mimetype="application/json")
+                count = provider.get_test_taker_student_classes_count(
+                    test_taker_id)
+                response = Response(json.dumps(count), 200,
+                                    mimetype="application/json")
             else:
                 error = {"message": "No Id found for the user."}
-                response = Response(json.dumps(error), 404, mimetype="application/json")
+                response = Response(json.dumps(error), 404,
+                                    mimetype="application/json")
         else:
             error = {"message": "The user is not a test taker."}
-            response = Response(json.dumps(error), 403, mimetype="application/json")
+            response = Response(json.dumps(error), 403,
+                                mimetype="application/json")
 
         return response
     except Exception as e:
-        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
 
     return response
 
 
 @language2test_bp.route("/instructor/student_classes/upload", methods=['POST'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def instructor_student_class_upload():
-    raw_data = request.get_data()
-    data = pd.read_excel(raw_data, engine="openpyxl")
+
+    # Retrieve user
+    if 'username' in request.args:
+        username = request.args.get('username')
+    else:
+        username = None
+
     try:
-        current_user = user_provider.get_authenticated_user()
+        current_user = user_provider.get_authenticated_user(username=username)
         is_instructor = user_provider.has_role(current_user, 'Instructor')
         if is_instructor:
+            raw_data = request.get_data()
+            data = pd.read_excel(raw_data, engine="openpyxl")
+
             instructor_id = current_user.id
             token_kc = []
             scs = {}
             for _, row in data.iterrows():
                 d = dict(row)
                 if type(d['Class Name']) == str:
-                    exist_sc = StudentClass.query.filter_by(name=d["Class Name"]).first()
+                    exist_sc = StudentClass.query.filter_by(
+                        name=d["Class Name"]).first()
                     sc = scs.get(d["Class Name"])
                     if sc is None and exist_sc is None:
                         sc_data = {}
                         sc_data["name"] = d["Class Name"]
                         sc_data["display"] = d["Class Name"]
-                        sc_data["id"] = provider.generate_id(field=StudentClass.id)
+                        sc_data["id"] = provider.generate_id(
+                            field=StudentClass.id)
                         if "Term" in d:
                             sc_data["term"] = d["Term"]
                         if "Level" in d:
                             sc_data["level"] = d["Level"]
                         if "Program" in d:
                             sc_data["program"] = d["Program"]
-                        instructor = user_provider.get_authenticated_user()
+                        instructor = user_provider.get_authenticated_user(
+                            username=username)
                         sc = StudentClass(sc_data)
                         if "Administrator" in map(lambda e: e.name, instructor.roles) or "Instructor" in map(
                                 lambda e: e.name, instructor.roles) \
@@ -726,32 +912,40 @@ def instructor_student_class_upload():
                         scs[d["Class Name"]] = sc
                     else:
                         if exist_sc.instructor_id == instructor_id:
-                            user = User.query.filter_by(name=d["User Name"]).first()
+                            user = User.query.filter_by(
+                                name=d["User Name"]).first()
                             if user is None:
                                 user = __import_user_in_db(d)
                                 if user:
-                                    token_kc = __import_user_in_keycloak(d, token_kc)
+                                    token_kc = __import_user_in_keycloak(
+                                        d, token_kc)
                             else:
                                 marked = {}
                                 for field in user.fields:
                                     if field.name == "student_id" and "Student ID" in d:
                                         marked["student_id"] = True
-                                        field.value = str(d["Student ID"]).replace(".0", "") if not math.isnan(d["Student ID"]) else None
+                                        field.value = str(d["Student ID"]).replace(
+                                            ".0", "") if not math.isnan(d["Student ID"]) else None
                                     elif field.name == "first_language" and "First Language" in d:
                                         marked["first_language"] = True
-                                        field.value = d["First Language"] if type(d["First Language"]) != float else None
+                                        field.value = d["First Language"] if type(
+                                            d["First Language"]) != float else None
                                     elif field.name == "email" and "Email" in d:
                                         marked["email"] = True
-                                        field.value = d["Email"] if type(d["Email"]) != float else None
+                                        field.value = d["Email"] if type(
+                                            d["Email"]) != float else None
                                     elif field.name == "education" and "Education" in d:
                                         marked["education"] = True
-                                        field.value = d["Education"] if type(d["Education"]) != float else None
+                                        field.value = d["Education"] if type(
+                                            d["Education"]) != float else None
                                     elif field.name == "phone" and "Phone" in d:
                                         marked["phone"] = True
-                                        field.value = str(d["Phone"]).replace(".0", "") if not math.isnan(d["Phone"]) else None
+                                        field.value = str(d["Phone"]).replace(
+                                            ".0", "") if not math.isnan(d["Phone"]) else None
                                     elif field.name == "address" and "Address" in d:
                                         marked["address"] = True
-                                        field.value = d["Address"] if type(d["Address"]) != float else None
+                                        field.value = d["Address"] if type(
+                                            d["Address"]) != float else None
                                 if not marked.get("student_id", False) and "Student ID" in d:
                                     user.fields.append(UserField(
                                         {"name": "student_id", "type": "text", "value": str(d["Student ID"]).replace(".0", "") if not math.isnan(d["Student ID"]) else None, "user_id": user.id}))
@@ -776,24 +970,32 @@ def instructor_student_class_upload():
                                                                                                            user.roles):
                                 if exist_sc is not None:
                                     if user not in exist_sc.student_student_class:
-                                        exist_sc.student_student_class.append(user)
+                                        exist_sc.student_student_class.append(
+                                            user)
                                 else:
                                     if user not in scs[d["Class Name"]].student_student_class:
-                                        scs[d["Class Name"]].student_student_class.append(user)
-                                response = Response(json.dumps({"success": True}), 200, mimetype="application/json")
+                                        scs[d["Class Name"]].student_student_class.append(
+                                            user)
+                                response = Response(json.dumps(
+                                    {"success": True}), 200, mimetype="application/json")
                         else:
-                            error = {"message": "The class doesn't associated with the instructor"}
-                            response = Response(json.dumps(error), 404, mimetype="application/json")
+                            error = {
+                                "message": "The class doesn't associated with the instructor"}
+                            response = Response(json.dumps(
+                                error), 404, mimetype="application/json")
                 db.session.add_all(scs.values())
                 db.session.commit()
 
         else:
             error = {"message": "The user is not an instructor."}
-            response = Response(json.dumps(error), 403, mimetype="application/json")
+            response = Response(json.dumps(error), 403,
+                                mimetype="application/json")
 
         return response
     except Exception as e:
-        error = { "exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
 
     return response

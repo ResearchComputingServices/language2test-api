@@ -25,7 +25,8 @@ class UserProvider(BaseProvider):
         db.session.add(user)
         for field in data.get('fields'):
             user_field_type = 'text'
-            user_field_category = UserFieldCategory.query.filter_by(name=field.get('name')).first()
+            user_field_category = UserFieldCategory.query.filter_by(
+                name=field.get('name')).first()
             if user_field_category:
                 user_field_type = user_field_category.user_field_type.name
             field['type'] = user_field_type
@@ -47,16 +48,18 @@ class UserProvider(BaseProvider):
                     user.roles.append(role)
 
         for field in user.fields:
-            db.session.query(UserField).filter(UserField.id == field.id).delete()
+            db.session.query(UserField).filter(
+                UserField.id == field.id).delete()
 
         for field in data.get('fields'):
             user_field_type = 'text'
-            user_field_category = UserFieldCategory.query.filter_by(name=field.get('name')).first()
+            user_field_category = UserFieldCategory.query.filter_by(
+                name=field.get('name')).first()
             if user_field_category:
                 user_field_type = user_field_category.user_field_type.name
             field['type'] = user_field_type
             user_field = UserField(field)
-            user_field.user_id= user.id
+            user_field.user_id = user.id
             user.fields.append(user_field)
 
         return user
@@ -67,18 +70,24 @@ class UserProvider(BaseProvider):
             user = User.query.filter_by(name=data.get('name')).first()
         if user:
             for field in user.fields:
-                db.session.query(UserField).filter(UserField.id == field.id).delete()
+                db.session.query(UserField).filter(
+                    UserField.id == field.id).delete()
         return user
 
-    def get_authenticated_user(self):
-        auth = request.headers.get('Authorization')
-        auth_fragments = auth.split(' ')
-        token = auth_fragments[1]
-        user_info = oidc.user_getinfo(['preferred_username', 'given_name', 'family_name'], token)
-        username = user_info['preferred_username']
+    def get_authenticated_user(self, username=None):
+        # auth = request.headers.get('Authorization')
+        # auth_fragments = auth.split(' ')
+        # token = auth_fragments[1]
+        # user_info = oidc.user_getinfo(['preferred_username', 'given_name', 'family_name'], token)
+        # username = user_info['preferred_username']
 
-        # 2 Retrieve user information
-        user = User.query.filter_by(name=username).first()
+        try:
+
+            # 2 Retrieve user information
+            user = User.query.filter_by(name=username).first()
+        except Exception as e:
+            print(e)
+            user = None
 
         return user
 
@@ -89,21 +98,20 @@ class UserProvider(BaseProvider):
 
         return False
 
-
-
     def hide_roles(self, users):
         for user in users:
             user.roles = []
 
-
     def get_demographic_fields(self, user_id, start_datetime_rq, end_datetime_rq):
 
-        demographic_fields =[]
+        demographic_fields = []
         names = []
-        user_tests =[]
+        user_tests = []
 
-        query_start_datetime = datetime.strptime(start_datetime_rq, '%Y-%m-%dT%H:%M:%S.%fZ')
-        query_end_datetime = datetime.strptime(end_datetime_rq, '%Y-%m-%dT%H:%M:%S.%fZ')
+        query_start_datetime = datetime.strptime(
+            start_datetime_rq, '%Y-%m-%dT%H:%M:%S.%fZ')
+        query_end_datetime = datetime.strptime(
+            end_datetime_rq, '%Y-%m-%dT%H:%M:%S.%fZ')
 
         # Retrieve all student classes of the user_id
         user_student_classes = db.session.execute('SELECT * FROM student_student_class WHERE student_id = :val',
@@ -115,33 +123,31 @@ class UserProvider(BaseProvider):
             student_class_test_assignations = db.session.execute(
                 'SELECT * FROM test_assignation_student_class WHERE student_class_id = :val', {'val': student_class_id})
 
-            #Retrieve all tests
+            # Retrieve all tests
             for item_ta in student_class_test_assignations:
                 test_assignation_id = item_ta['test_assignation_id']
-                test_assignation = TestAssignation.query.filter_by(id=test_assignation_id).first()
+                test_assignation = TestAssignation.query.filter_by(
+                    id=test_assignation_id).first()
 
                 if not ((test_assignation.end_datetime <= query_start_datetime) or (
                         test_assignation.start_datetime >= query_end_datetime)):
 
-                   test_id = test_assignation.test_id
-                   if test_id not in user_tests:
+                    test_id = test_assignation.test_id
+                    if test_id not in user_tests:
                         user_tests.append(test_id)
                         test = Test.query.filter_by(id=test_id).first()
 
-
                         for user_field_category in test.test_user_field_category:
-                            #Since a user field can be repeated in a multiple test, we avoid querying.
+                            # Since a user field can be repeated in a multiple test, we avoid querying.
                             if user_field_category.name not in names:
                                 names.append(user_field_category.name)
                                 demographic_fields.append(user_field_category)
 
-                                #Check if the user_field has been already answered
-                                #user_field_with_answer = UserField.query.filter_by(name=user_field_category.name, user_id=user_id).first()
-                                #if user_field_with_answer:
+                                # Check if the user_field has been already answered
+                                # user_field_with_answer = UserField.query.filter_by(name=user_field_category.name, user_id=user_id).first()
+                                # if user_field_with_answer:
                                 #    demographic_fields.append(user_field_with_answer)
-                                #else:
+                                # else:
                                 #    demographic_fields.append(user_field_category)
 
         return demographic_fields
-
-

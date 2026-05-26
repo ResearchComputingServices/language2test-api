@@ -24,9 +24,10 @@ test_schema_many = TestSchema(many=True)
 provider = TestProvider()
 user_provider = UserProvider()
 
+
 @language2test_bp.route("/test/count", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def get_test_count():
     return provider.get_count(Test)
 
@@ -38,7 +39,7 @@ def __remove_correct_and_shuffle_options(tests):
         for type in test_types:
             if type in test:
                 for test_type in test[type]:
-                    if 'questions' in test_type: #Shuffle questions in each test
+                    if 'questions' in test_type:  # Shuffle questions in each test
                         for question in test_type['questions']:
                             question['correct'] = 0
                             random.shuffle(question['options'])
@@ -47,7 +48,7 @@ def __remove_correct_and_shuffle_options(tests):
                             test_type['correct'] = 0
                             random.shuffle(test_type['options'])
 
-    #Remove questions-word from cloze
+    # Remove questions-word from cloze
     for test in tests:
         if test['test_cloze']:
             cloze_tests = test['test_cloze']
@@ -58,6 +59,7 @@ def __remove_correct_and_shuffle_options(tests):
                 print(cloze_text)
 
     return tests
+
 
 def __shuffle_test_order(tests):
     test_types = ['test_rc', 'test_cloze', 'test_vocabulary']
@@ -72,7 +74,7 @@ def __shuffle_test_order(tests):
 
 @language2test_bp.route("/test/wizard", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def get_test_wizard():
     id = request.args.get('id')
     if id:
@@ -94,9 +96,10 @@ def get_test_wizard():
 
     return tests
 
+
 @language2test_bp.route("/test", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def get_test():
     id = request.args.get('id')
     if id:
@@ -117,7 +120,7 @@ def get_test():
 
 @language2test_bp.route("/test", methods=['POST'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def add_test():
     try:
         data = request.get_json()
@@ -126,14 +129,17 @@ def add_test():
         result = test_schema.dump(test)
         response = jsonify(result)
     except Exception as e:
-        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
 
     return response
 
+
 @language2test_bp.route("/test", methods=['PUT'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def update_test():
     try:
         data = request.get_json()
@@ -149,18 +155,23 @@ def update_test():
                 result = test_schema.dump(test)
                 response = jsonify(result)
             else:
-                response = Response(json.dumps(data), 403, mimetype="application/json")
+                response = Response(json.dumps(data), 403,
+                                    mimetype="application/json")
         else:
-            response = Response(json.dumps(data), 404, mimetype="application/json")
+            response = Response(json.dumps(data), 404,
+                                mimetype="application/json")
     except Exception as e:
-        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
 
     return response
 
+
 @language2test_bp.route("/test", methods=['DELETE'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def delete_test():
     try:
         data = request.get_json()
@@ -172,20 +183,26 @@ def delete_test():
                 provider.update_unremovable_flag(test, False)
                 db.session.delete(test)
                 db.session.commit()
-                response = Response(json.dumps(data), 200, mimetype="application/json")
+                response = Response(json.dumps(data), 200,
+                                    mimetype="application/json")
             else:
-                response = Response(json.dumps(data), 403, mimetype="application/json")
+                response = Response(json.dumps(data), 403,
+                                    mimetype="application/json")
         else:
-            response = Response(json.dumps(data), 404, mimetype="application/json")
+            response = Response(json.dumps(data), 404,
+                                mimetype="application/json")
     except Exception as e:
-        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
 
     return response
 
+
 @language2test_bp.route("/test/export", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def export_test():
     specific_id = request.args.get('id')
     if specific_id is None:
@@ -200,7 +217,8 @@ def export_test():
             output = BytesIO()
             with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
                 pd.DataFrame(records).to_excel(writer,
-                                               sheet_name="{} summary".format("test"),
+                                               sheet_name="{} summary".format(
+                                                   "test"),
                                                index=False)
                 workbook = writer.book
                 worksheet = writer.sheets["{} summary".format("test")]
@@ -217,8 +235,10 @@ def export_test():
                              mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                              as_attachment=True, cache_timeout=-1)
         except Exception as e:
-            error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-            response = Response(json.dumps(error), 404, mimetype="application/json")
+            error = {"exception": str(
+                e), "message": "Exception has occurred. Check the format of the request."}
+            response = Response(json.dumps(error), 404,
+                                mimetype="application/json")
             return response
     if specific_id is not None:
         try:
@@ -229,24 +249,38 @@ def export_test():
                 name = tests.name
             if name is not None:
                 return send_file(TestExportProvider.write_results_into_file(test_id),
-                                 attachment_filename=name+ ' test information' + '.xlsx',
+                                 attachment_filename=name + ' test information' + '.xlsx',
                                  mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                                  as_attachment=True, cache_timeout=-1)
 
         except Exception as e:
-            error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-            response = Response(json.dumps(error), 404, mimetype="application/json")
+            error = {"exception": str(
+                e), "message": "Exception has occurred. Check the format of the request."}
+            response = Response(json.dumps(error), 404,
+                                mimetype="application/json")
             return response
-
 
 
 @language2test_bp.route("/test_developer/test_with_sessions", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def get_tests_with_sessions():
     try:
         # Retrieve user
-        user = user_provider.get_authenticated_user()
+        if 'username' in request.args:
+            username = request.args.get('username')
+        else:
+            username = None
+            # print("Username in get_user_sessions: ", username)
+            # input("Press Enter to continue...")
+
+        user = user_provider.get_authenticated_user(username=username)
+        if user is None:
+            error = {"message": "User not found."}
+            response = Response(json.dumps(error), 404,
+                                mimetype="application/json")
+            return response
+
         is_test_developer = user_provider.has_role(user, 'Test Developer')
 
         if is_test_developer:
@@ -263,50 +297,84 @@ def get_tests_with_sessions():
             else:
                 order = 'desc'
 
-            properties = provider.query_test_with_sessions(limit,offset,column,order)
+            properties = provider.query_test_with_sessions(
+                limit, offset, column, order)
             result = test_schema_many.dump(properties)
             return jsonify(result)
         else:
             error = {"message": "Access Denied"}
-            response = Response(json.dumps(error), 403, mimetype="application/json")
+            response = Response(json.dumps(error), 403,
+                                mimetype="application/json")
 
     except Exception as e:
-        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 404, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 404,
+                            mimetype="application/json")
 
     return response
 
 
 @language2test_bp.route("/test_developer/test_with_sessions/count", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def get_tests_with_sessions_count():
     try:
         # Retrieve user
-        user = user_provider.get_authenticated_user()
+        if 'username' in request.args:
+            username = request.args.get('username')
+        else:
+            username = None
+            # print("Username in get_user_sessions: ", username)
+            # input("Press Enter to continue...")
+
+        user = user_provider.get_authenticated_user(username=username)
+        if user is None:
+            error = {"message": "User not found."}
+            response = Response(json.dumps(error), 404,
+                                mimetype="application/json")
+            return response
+
         is_test_developer = user_provider.has_role(user, 'Test Developer')
 
         if is_test_developer:
             count = provider.query_test_with_sessions_count()
-            response = Response(json.dumps(count), 200, mimetype="application/json")
+            response = Response(json.dumps(count), 200,
+                                mimetype="application/json")
         else:
             error = {"message": "Access Denied"}
-            response = Response(json.dumps(error), 403, mimetype="application/json")
+            response = Response(json.dumps(error), 403,
+                                mimetype="application/json")
         return response
     except Exception as e:
-        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
 
     return response
 
 
 @language2test_bp.route("/test_developer/upcoming_tests", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def get_upcoming_tests():
     try:
         # Retrieve user
-        user = user_provider.get_authenticated_user()
+        if 'username' in request.args:
+            username = request.args.get('username')
+        else:
+            username = None
+            # print("Username in get_user_sessions: ", username)
+            # input("Press Enter to continue...")
+
+        user = user_provider.get_authenticated_user(username=username)
+        if user is None:
+            error = {"message": "User not found."}
+            response = Response(json.dumps(error), 404,
+                                mimetype="application/json")
+            return response
+
         is_test_developer = user_provider.has_role(user, 'Test Developer')
 
         if is_test_developer:
@@ -316,7 +384,6 @@ def get_upcoming_tests():
 
             limit = request.args.get('limit')
             offset = request.args.get('offset')
-
 
             if 'column' in request.args:
                 column = request.args.get('column')
@@ -328,90 +395,134 @@ def get_upcoming_tests():
             else:
                 order = 'asc'
 
-            properties = provider.query_upcoming_tests(start_datetime,limit,offset,column,order)
+            properties = provider.query_upcoming_tests(
+                start_datetime, limit, offset, column, order)
             result = test_schema_many.dump(properties)
             return jsonify(result)
         else:
             error = {"message": "Access Denied"}
-            response = Response(json.dumps(error), 403, mimetype="application/json")
+            response = Response(json.dumps(error), 403,
+                                mimetype="application/json")
 
     except Exception as e:
-        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 404, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 404,
+                            mimetype="application/json")
 
     return response
 
 
-
-
 @language2test_bp.route("/test_developer/upcoming_tests/count", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def get_upcoming_tests_with_count():
     try:
         # Retrieve user
-        user = user_provider.get_authenticated_user()
+        if 'username' in request.args:
+            username = request.args.get('username')
+        else:
+            username = None
+            # print("Username in get_user_sessions: ", username)
+            # input("Press Enter to continue...")
+
+        user = user_provider.get_authenticated_user(username=username)
+        if user is None:
+            error = {"message": "User not found."}
+            response = Response(json.dumps(error), 404,
+                                mimetype="application/json")
+            return response
+
         is_test_developer = user_provider.has_role(user, 'Test Developer')
 
         if is_test_developer:
             start_datetime = request.args.get('start_datetime')
             if not start_datetime:
                 start_datetime = datetime.datetime.utcnow()
-            
+
             count = provider.query_upcoming_tests_count(start_datetime)
-            response = Response(json.dumps(count), 200, mimetype="application/json")
+            response = Response(json.dumps(count), 200,
+                                mimetype="application/json")
         else:
             error = {"message": "Access Denied"}
-            response = Response(json.dumps(error), 403, mimetype="application/json")
+            response = Response(json.dumps(error), 403,
+                                mimetype="application/json")
         return response
     except Exception as e:
-        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
 
     return response
 
 
-
-
-
-
 @language2test_bp.route("/test_developer/test_not_in_use/count", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def get_tests_not_in_use_count():
     try:
         # Retrieve user
-        user = user_provider.get_authenticated_user()
+        if 'username' in request.args:
+            username = request.args.get('username')
+        else:
+            username = None
+            # print("Username in get_user_sessions: ", username)
+            # input("Press Enter to continue...")
+
+        user = user_provider.get_authenticated_user(username=username)
+        if user is None:
+            error = {"message": "User not found."}
+            response = Response(json.dumps(error), 404,
+                                mimetype="application/json")
+            return response
+
         is_test_developer = user_provider.has_role(user, 'Test Developer')
 
         if is_test_developer:
             count = provider.query_tests_not_in_use_count()
-            response = Response(json.dumps(count), 200, mimetype="application/json")
+            response = Response(json.dumps(count), 200,
+                                mimetype="application/json")
         else:
             error = {"message": "Access Denied"}
-            response = Response(json.dumps(error), 403, mimetype="application/json")
+            response = Response(json.dumps(error), 403,
+                                mimetype="application/json")
         return response
     except Exception as e:
-        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
 
     return response
 
 
 @language2test_bp.route("/test_developer/test_not_in_use", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def get_tests_not_in_use():
     try:
         # Retrieve user
-        user = user_provider.get_authenticated_user()
+        if 'username' in request.args:
+            username = request.args.get('username')
+        else:
+            username = None
+            # print("Username in get_user_sessions: ", username)
+            # input("Press Enter to continue...")
+
+        user = user_provider.get_authenticated_user(username=username)
+        if user is None:
+            error = {"message": "User not found."}
+            response = Response(json.dumps(error), 404,
+                                mimetype="application/json")
+            return response
+
         is_test_developer = user_provider.has_role(user, 'Test Developer')
 
         if is_test_developer:
 
             limit = request.args.get('limit')
             offset = request.args.get('offset')
-
 
             if 'column' in request.args:
                 column = request.args.get('column')
@@ -423,33 +534,48 @@ def get_tests_not_in_use():
             else:
                 order = 'asc'
 
-            properties = provider.query_tests_not_in_use(limit,offset,column,order)
+            properties = provider.query_tests_not_in_use(
+                limit, offset, column, order)
             result = test_schema_many.dump(properties)
             return jsonify(result)
         else:
             error = {"message": "Access Denied"}
-            response = Response(json.dumps(error), 403, mimetype="application/json")
+            response = Response(json.dumps(error), 403,
+                                mimetype="application/json")
 
     except Exception as e:
-        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 404, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 404,
+                            mimetype="application/json")
 
     return response
 
 
 @language2test_bp.route("/test_developer/cloned_tests", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def get_cloned_tests():
     try:
         # Retrieve user
-        user = user_provider.get_authenticated_user()
+        if 'username' in request.args:
+            username = request.args.get('username')
+        else:
+            username = None
+            # print("Username in get_user_sessions: ", username)
+            # input("Press Enter to continue...")
+
+        user = user_provider.get_authenticated_user(username=username)
+        if user is None:
+            error = {"message": "User not found."}
+            response = Response(json.dumps(error), 404,
+                                mimetype="application/json")
+            return response
         is_test_developer = user_provider.has_role(user, 'Test Developer')
 
         if is_test_developer:
             limit = request.args.get('limit')
             offset = request.args.get('offset')
-
 
             if 'column' in request.args:
                 column = request.args.get('column')
@@ -461,46 +587,84 @@ def get_cloned_tests():
             else:
                 order = 'asc'
 
-            properties = provider.query_cloned_tests(limit,offset,column,order)
+            properties = provider.query_cloned_tests(
+                limit, offset, column, order)
             result = test_schema_many.dump(properties)
             return jsonify(result)
         else:
             error = {"message": "Access Denied"}
-            response = Response(json.dumps(error), 403, mimetype="application/json")
+            response = Response(json.dumps(error), 403,
+                                mimetype="application/json")
 
     except Exception as e:
-        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 404, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 404,
+                            mimetype="application/json")
 
     return response
 
+
 @language2test_bp.route("/test_developer/cloned_tests/count", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def get_cloned_tests_count():
     try:
         # Retrieve user
-        user = user_provider.get_authenticated_user()
+        if 'username' in request.args:
+            username = request.args.get('username')
+        else:
+            username = None
+            # print("Username in get_user_sessions: ", username)
+            # input("Press Enter to continue...")
+
+        user = user_provider.get_authenticated_user(username=username)
+        if user is None:
+            error = {"message": "User not found."}
+            response = Response(json.dumps(error), 404,
+                                mimetype="application/json")
+            return response
+
         is_test_developer = user_provider.has_role(user, 'Test Developer')
 
         if is_test_developer:
             count = provider.query_cloned_tests_count()
-            response = Response(json.dumps(count), 200, mimetype="application/json")
+            response = Response(json.dumps(count), 200,
+                                mimetype="application/json")
         else:
             error = {"message": "Access Denied"}
-            response = Response(json.dumps(error), 403, mimetype="application/json")
+            response = Response(json.dumps(error), 403,
+                                mimetype="application/json")
         return response
     except Exception as e:
-        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
 
     return response
 
+
 @language2test_bp.route("/test_developer/test/export", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def test_developer_export_test():
-    user = user_provider.get_authenticated_user()
+
+    # Retrieve user
+    if 'username' in request.args:
+        username = request.args.get('username')
+    else:
+        username = None
+        # print("Username in get_user_sessions: ", username)
+        # input("Press Enter to continue...")
+
+    user = user_provider.get_authenticated_user(username=username)
+    if user is None:
+        error = {"message": "User not found."}
+        response = Response(json.dumps(error), 404,
+                            mimetype="application/json")
+        return response
+
     is_test_developer = user_provider.has_role(user, 'Test Developer')
     if is_test_developer:
         specific_id = request.args.get('id')
@@ -516,7 +680,8 @@ def test_developer_export_test():
                 output = BytesIO()
                 with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
                     pd.DataFrame(records).to_excel(writer,
-                                                   sheet_name="{} summary".format("test"),
+                                                   sheet_name="{} summary".format(
+                                                       "test"),
                                                    index=False)
                     workbook = writer.book
                     worksheet = writer.sheets["{} summary".format("test")]
@@ -533,8 +698,10 @@ def test_developer_export_test():
                                  mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                                  as_attachment=True, cache_timeout=-1)
             except Exception as e:
-                error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-                response = Response(json.dumps(error), 404, mimetype="application/json")
+                error = {"exception": str(
+                    e), "message": "Exception has occurred. Check the format of the request."}
+                response = Response(json.dumps(error), 404,
+                                    mimetype="application/json")
                 return response
         if specific_id is not None:
             try:
@@ -545,27 +712,45 @@ def test_developer_export_test():
                     name = tests.name
                 if name is not None:
                     return send_file(TestExportProvider.write_results_into_file(test_id),
-                                     attachment_filename=name+ ' test information' + '.xlsx',
+                                     attachment_filename=name + ' test information' + '.xlsx',
                                      mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                                      as_attachment=True, cache_timeout=-1)
 
             except Exception as e:
-                error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-                response = Response(json.dumps(error), 404, mimetype="application/json")
+                error = {"exception": str(
+                    e), "message": "Exception has occurred. Check the format of the request."}
+                response = Response(json.dumps(error), 404,
+                                    mimetype="application/json")
                 return response
 
     else:
         error = {"message": "Access Denied"}
-        response = Response(json.dumps(error), 403, mimetype="application/json")
+        response = Response(json.dumps(error), 403,
+                            mimetype="application/json")
 
     return response
 
 
 @language2test_bp.route("/test_developer/upcoming_tests/export", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def upcoming_tests_developer_export_test():
-    user = user_provider.get_authenticated_user()
+
+    # Retrieve user
+    if 'username' in request.args:
+        username = request.args.get('username')
+    else:
+        username = None
+        # print("Username in get_user_sessions: ", username)
+        # input("Press Enter to continue...")
+
+    user = user_provider.get_authenticated_user(username=username)
+    if user is None:
+        error = {"message": "User not found."}
+        response = Response(json.dumps(error), 404,
+                            mimetype="application/json")
+        return response
+
     is_test_developer = user_provider.has_role(user, 'Test Developer')
     if is_test_developer:
         specific_id = request.args.get('id')
@@ -574,8 +759,7 @@ def upcoming_tests_developer_export_test():
             try:
                 records = []
                 tests = db.session.query(Test).join(TestAssignation).filter(Test.id == TestAssignation.test_id,
-                                                                        start_datetime <= TestAssignation.end_datetime).all()
-
+                                                                            start_datetime <= TestAssignation.end_datetime).all()
 
                 for test in tests:
                     records.append({
@@ -585,7 +769,8 @@ def upcoming_tests_developer_export_test():
                 output = BytesIO()
                 with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
                     pd.DataFrame(records).to_excel(writer,
-                                                   sheet_name="{} summary".format("test"),
+                                                   sheet_name="{} summary".format(
+                                                       "test"),
                                                    index=False)
                     workbook = writer.book
                     worksheet = writer.sheets["{} summary".format("test")]
@@ -602,8 +787,10 @@ def upcoming_tests_developer_export_test():
                                  mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                                  as_attachment=True, cache_timeout=-1)
             except Exception as e:
-                error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-                response = Response(json.dumps(error), 404, mimetype="application/json")
+                error = {"exception": str(
+                    e), "message": "Exception has occurred. Check the format of the request."}
+                response = Response(json.dumps(error), 404,
+                                    mimetype="application/json")
                 return response
         if specific_id is not None:
             try:
@@ -613,34 +800,53 @@ def upcoming_tests_developer_export_test():
                     if test.id == int(specific_id):
                         name = test.name
                         return send_file(TestExportProvider.write_results_into_file(test.id),
-                                             attachment_filename=name+ ' test information' + '.xlsx',
-                                             mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                                             as_attachment=True, cache_timeout=-1)
+                                         attachment_filename=name + ' test information' + '.xlsx',
+                                         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                         as_attachment=True, cache_timeout=-1)
 
             except Exception as e:
-                error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-                response = Response(json.dumps(error), 404, mimetype="application/json")
+                error = {"exception": str(
+                    e), "message": "Exception has occurred. Check the format of the request."}
+                response = Response(json.dumps(error), 404,
+                                    mimetype="application/json")
                 return response
 
     else:
         error = {"message": "Access Denied"}
-        response = Response(json.dumps(error), 403, mimetype="application/json")
+        response = Response(json.dumps(error), 403,
+                            mimetype="application/json")
 
     return response
 
 
 @language2test_bp.route("/test_developer/test_with_sessions/export", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def test_with_sessions_developer_export_test():
-    user = user_provider.get_authenticated_user()
+
+    # Retrieve user
+    if 'username' in request.args:
+        username = request.args.get('username')
+    else:
+        username = None
+        # print("Username in get_user_sessions: ", username)
+        # input("Press Enter to continue...")
+
+    user = user_provider.get_authenticated_user(username=username)
+
+    if user is None:
+        error = {"message": "User not found."}
+        response = Response(json.dumps(error), 404,
+                            mimetype="application/json")
+        return response
     is_test_developer = user_provider.has_role(user, 'Test Developer')
     if is_test_developer:
         specific_id = request.args.get('id')
         if specific_id is None:
             try:
                 records = []
-                tests = db.session.query(Test).join(TestSession).filter(Test.id == TestSession.test_id).all()
+                tests = db.session.query(Test).join(TestSession).filter(
+                    Test.id == TestSession.test_id).all()
                 for test in tests:
                     records.append({
                         "id": test.id,
@@ -649,7 +855,8 @@ def test_with_sessions_developer_export_test():
                 output = BytesIO()
                 with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
                     pd.DataFrame(records).to_excel(writer,
-                                                   sheet_name="{} summary".format("test"),
+                                                   sheet_name="{} summary".format(
+                                                       "test"),
                                                    index=False)
                     workbook = writer.book
                     worksheet = writer.sheets["{} summary".format("test")]
@@ -666,36 +873,56 @@ def test_with_sessions_developer_export_test():
                                  mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                                  as_attachment=True, cache_timeout=-1)
             except Exception as e:
-                error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-                response = Response(json.dumps(error), 404, mimetype="application/json")
+                error = {"exception": str(
+                    e), "message": "Exception has occurred. Check the format of the request."}
+                response = Response(json.dumps(error), 404,
+                                    mimetype="application/json")
                 return response
         if specific_id is not None:
             try:
-                tests = db.session.query(Test).join(TestSession).filter(Test.id == TestSession.test_id).all()
+                tests = db.session.query(Test).join(TestSession).filter(
+                    Test.id == TestSession.test_id).all()
                 for test in tests:
                     if test.id == int(specific_id):
                         name = test.name
                         return send_file(TestExportProvider.write_results_into_file(test.id),
-                                             attachment_filename=name+ ' test information' + '.xlsx',
-                                             mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                                             as_attachment=True, cache_timeout=-1)
+                                         attachment_filename=name + ' test information' + '.xlsx',
+                                         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                         as_attachment=True, cache_timeout=-1)
 
             except Exception as e:
-                error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-                response = Response(json.dumps(error), 404, mimetype="application/json")
+                error = {"exception": str(
+                    e), "message": "Exception has occurred. Check the format of the request."}
+                response = Response(json.dumps(error), 404,
+                                    mimetype="application/json")
                 return response
 
     else:
         error = {"message": "Access Denied"}
-        response = Response(json.dumps(error), 403, mimetype="application/json")
+        response = Response(json.dumps(error), 403,
+                            mimetype="application/json")
 
     return response
 
+
 @language2test_bp.route("/test_developer/test_not_in_use/export", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def test_not_in_use_developer_export_test():
-    user = user_provider.get_authenticated_user()
+    # Retrieve user
+    if 'username' in request.args:
+        username = request.args.get('username')
+    else:
+        username = None
+        # print("Username in get_user_sessions: ", username)
+        # input("Press Enter to continue...")
+
+    user = user_provider.get_authenticated_user(username=username)
+    if user is None:
+        error = {"message": "User not found."}
+        response = Response(json.dumps(error), 404,
+                            mimetype="application/json")
+        return response
     is_test_developer = user_provider.has_role(user, 'Test Developer')
     if is_test_developer:
         specific_id = request.args.get('id')
@@ -711,7 +938,8 @@ def test_not_in_use_developer_export_test():
         if specific_id is None:
             try:
                 records = []
-                tests = db.session.query(Test).filter(~Test.id.in_(tests_in_use)).all()
+                tests = db.session.query(Test).filter(
+                    ~Test.id.in_(tests_in_use)).all()
                 for test in tests:
                     records.append({
                         "id": test.id,
@@ -720,7 +948,8 @@ def test_not_in_use_developer_export_test():
                 output = BytesIO()
                 with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
                     pd.DataFrame(records).to_excel(writer,
-                                                   sheet_name="{} summary".format("test"),
+                                                   sheet_name="{} summary".format(
+                                                       "test"),
                                                    index=False)
                     workbook = writer.book
                     worksheet = writer.sheets["{} summary".format("test")]
@@ -737,43 +966,64 @@ def test_not_in_use_developer_export_test():
                                  mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                                  as_attachment=True, cache_timeout=-1)
             except Exception as e:
-                error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-                response = Response(json.dumps(error), 404, mimetype="application/json")
+                error = {"exception": str(
+                    e), "message": "Exception has occurred. Check the format of the request."}
+                response = Response(json.dumps(error), 404,
+                                    mimetype="application/json")
                 return response
         if specific_id is not None:
             try:
-                tests = db.session.query(Test).filter(~Test.id.in_(tests_in_use)).all()
+                tests = db.session.query(Test).filter(
+                    ~Test.id.in_(tests_in_use)).all()
                 for test in tests:
                     if test.id == int(specific_id):
                         name = test.name
                         return send_file(TestExportProvider.write_results_into_file(test.id),
-                                             attachment_filename=name+ ' test information' + '.xlsx',
-                                             mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                                             as_attachment=True, cache_timeout=-1)
+                                         attachment_filename=name + ' test information' + '.xlsx',
+                                         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                         as_attachment=True, cache_timeout=-1)
 
             except Exception as e:
-                error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-                response = Response(json.dumps(error), 404, mimetype="application/json")
+                error = {"exception": str(
+                    e), "message": "Exception has occurred. Check the format of the request."}
+                response = Response(json.dumps(error), 404,
+                                    mimetype="application/json")
                 return response
 
     else:
         error = {"message": "Access Denied"}
-        response = Response(json.dumps(error), 403, mimetype="application/json")
+        response = Response(json.dumps(error), 403,
+                            mimetype="application/json")
 
     return response
 
+
 @language2test_bp.route("/test_developer/cloned_tests/export", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def cloned_tests_developer_export_test():
-    user = user_provider.get_authenticated_user()
+    # Retrieve user
+    if 'username' in request.args:
+        username = request.args.get('username')
+    else:
+        username = None
+        # print("Username in get_user_sessions: ", username)
+        # input("Press Enter to continue...")
+
+    user = user_provider.get_authenticated_user(username=username)
+    if user is None:
+        error = {"message": "User not found."}
+        response = Response(json.dumps(error), 404,
+                            mimetype="application/json")
+        return response
     is_test_developer = user_provider.has_role(user, 'Test Developer')
     if is_test_developer:
         specific_id = request.args.get('id')
         if specific_id is None:
             try:
                 records = []
-                tests = db.session.query(Test).filter(Test.cloned_from_id != None).all()
+                tests = db.session.query(Test).filter(
+                    Test.cloned_from_id != None).all()
                 for test in tests:
                     records.append({
                         "id": test.id,
@@ -782,7 +1032,8 @@ def cloned_tests_developer_export_test():
                 output = BytesIO()
                 with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
                     pd.DataFrame(records).to_excel(writer,
-                                                   sheet_name="{} summary".format("test"),
+                                                   sheet_name="{} summary".format(
+                                                       "test"),
                                                    index=False)
                     workbook = writer.book
                     worksheet = writer.sheets["{} summary".format("test")]
@@ -799,27 +1050,33 @@ def cloned_tests_developer_export_test():
                                  mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                                  as_attachment=True, cache_timeout=-1)
             except Exception as e:
-                error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-                response = Response(json.dumps(error), 404, mimetype="application/json")
+                error = {"exception": str(
+                    e), "message": "Exception has occurred. Check the format of the request."}
+                response = Response(json.dumps(error), 404,
+                                    mimetype="application/json")
                 return response
         if specific_id is not None:
             try:
-                tests = db.session.query(Test).filter(Test.cloned_from_id != None).all()
+                tests = db.session.query(Test).filter(
+                    Test.cloned_from_id != None).all()
                 for test in tests:
                     if test.id == int(specific_id):
                         name = test.name
                         return send_file(TestExportProvider.write_results_into_file(test.id),
-                                             attachment_filename=name+ ' test information' + '.xlsx',
-                                             mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                                             as_attachment=True, cache_timeout=-1)
+                                         attachment_filename=name + ' test information' + '.xlsx',
+                                         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                         as_attachment=True, cache_timeout=-1)
 
             except Exception as e:
-                error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-                response = Response(json.dumps(error), 404, mimetype="application/json")
+                error = {"exception": str(
+                    e), "message": "Exception has occurred. Check the format of the request."}
+                response = Response(json.dumps(error), 404,
+                                    mimetype="application/json")
                 return response
 
     else:
         error = {"message": "Access Denied"}
-        response = Response(json.dumps(error), 403, mimetype="application/json")
+        response = Response(json.dumps(error), 403,
+                            mimetype="application/json")
 
     return response

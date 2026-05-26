@@ -12,15 +12,17 @@ test_type_schema_many = TestTypeSchema(many=True)
 
 provider = BaseProvider()
 
+
 @language2test_bp.route("/test_types/count", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def get_test_types_count():
     return provider.get_count(TestType)
 
+
 @language2test_bp.route("/test_types", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def get_test_type():
     id = request.args.get('id')
     if id:
@@ -38,9 +40,10 @@ def get_test_type():
     result = test_type_schema_many.dump(properties)
     return jsonify(result)
 
+
 @language2test_bp.route("/test_types", methods=['POST'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def add_test_type():
     try:
         data = request.get_json()
@@ -50,14 +53,17 @@ def add_test_type():
         result = test_type_schema.dump(test_type)
         response = jsonify(result)
     except Exception as e:
-        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
 
     return response
 
+
 @language2test_bp.route("/test_types", methods=['PUT'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def update_test_type():
     try:
         data = request.get_json()
@@ -66,18 +72,23 @@ def update_test_type():
             test_type = TestType.query.filter_by(name=data.get('name')).first()
         if test_type:
             db.session.commit()
-            response = Response(json.dumps(data), 200, mimetype="application/json")
+            response = Response(json.dumps(data), 200,
+                                mimetype="application/json")
         else:
-            response = Response(json.dumps(data), 404, mimetype="application/json")
+            response = Response(json.dumps(data), 404,
+                                mimetype="application/json")
     except Exception as e:
-        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
 
     return response
 
+
 @language2test_bp.route("/test_types", methods=['DELETE'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def delete_test_type():
     try:
         data = request.get_json()
@@ -87,10 +98,14 @@ def delete_test_type():
         if test_type:
             db.session.delete(test_type)
             db.session.commit()
-            response = Response(json.dumps(data), 200, mimetype="application/json")
+            response = Response(json.dumps(data), 200,
+                                mimetype="application/json")
         else:
-            response = Response(json.dumps(data), 404, mimetype="application/json")
+            response = Response(json.dumps(data), 404,
+                                mimetype="application/json")
     except Exception as e:
-        error = {"exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
     return response

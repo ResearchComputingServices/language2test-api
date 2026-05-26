@@ -29,7 +29,6 @@ import language2test_api.web.test_schedule_view
 
 @language2test_bp.route("/", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def hello():
     return "Hello Language2Test!"
-

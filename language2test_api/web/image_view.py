@@ -8,9 +8,10 @@ from language2test_api.providers.image_provider import ImageProvider
 
 provider = ImageProvider()
 
+
 @language2test_bp.route("/images", methods=['POST'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def add_image():
     if request.method == 'POST':
         file = request.files.get('file')
@@ -25,13 +26,13 @@ def add_image():
             return Response(json.dumps([]), 201, mimetype="application/json")
     return Response(json.dumps([]), 404, mimetype="application/json")
 
+
 @language2test_bp.route("/images", methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def get_image():
     filename = request.args.get('name')
     fullpath = "images/" + filename
     if filename:
         return provider.download_file(fullpath, filename)
     return Response(json.dumps([]), 404, mimetype="application/json")
-

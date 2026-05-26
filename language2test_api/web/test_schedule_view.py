@@ -16,56 +16,85 @@ provider = TestScheduleProvider()
 user_provider = UserProvider()
 test_assignation_schema_many = TestAssignationSchema(many=True)
 
+
 @language2test_bp.route('/test_schedule/test_taker', methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def test_schedule_test_taker():
-    auth = request.headers.get('Authorization')
-    auth_fragments = auth.split(' ')
-    token = auth_fragments[1]
+    # auth = request.headers.get('Authorization')
+    # auth_fragments = auth.split(' ')
+    # token = auth_fragments[1]
     try:
-        user_info = oidc.user_getinfo(['preferred_username', 'given_name', 'family_name'], token)
-        name = user_info['preferred_username']
-        user = User.query.filter_by(name=name).first()
+        # user_info = oidc.user_getinfo(['preferred_username', 'given_name', 'family_name'], token)
+        # name = user_info['preferred_username']
+        # user = User.query.filter_by(name=name).first()
+
+        username = "myuser"
+        user = User.query.filter_by(name=username).first()
         start_datetime_rq = request.args.get('start_datetime')
         end_datetime_rq = request.args.get('end_datetime')
         if user:
-            result = provider.get_test_taker_schedule(user.id, start_datetime_rq, end_datetime_rq)
+            result = provider.get_test_taker_schedule(
+                user.id, start_datetime_rq, end_datetime_rq)
             response = jsonify(result)
         else:
-            message = {"message": "User does not exist. Check the format of the request."}
-            response = Response(json.dumps(message), 404, mimetype="application/json")
+            message = {
+                "message": "User does not exist. Check the format of the request."}
+            response = Response(json.dumps(message), 404,
+                                mimetype="application/json")
     except Exception as e:
         error = {"exception": str(e), "message": "Exception has occurred."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
     return response
-
 
 
 @language2test_bp.route('/test_schedule/instructor', methods=['GET'])
 @crossdomain(origin='*')
-@authentication
+# @authentication
 def test_schedule_instructor():
     try:
         # Retrieve user
         start_datetime_rq = request.args.get('start_datetime')
         end_datetime_rq = request.args.get('end_datetime')
-        user = user_provider.get_authenticated_user()
+        # Retrieve user
+        if 'username' in request.args:
+            username = request.args.get('username')
+        else:
+            username = None
+
+        # print("Username in get_user_sessions: ", username)
+        # input("Press Enter to continue...")
+
+        user = user_provider.get_authenticated_user(username=username)
+        if user is None:
+            error = {"message": "User not found."}
+            response = Response(json.dumps(error), 404,
+                                mimetype="application/json")
+            return response
+
+        # user = user_provider.get_authenticated_user()
+
         is_instructor = user_provider.has_role(user, 'Instructor')
         if is_instructor:
             instructor_id = user.id
             if instructor_id:
-                test_assignations = provider.get_instructor_test_schedule(user.id, start_datetime_rq, end_datetime_rq)
+                test_assignations = provider.get_instructor_test_schedule(
+                    user.id, start_datetime_rq, end_datetime_rq)
                 result = test_assignation_schema_many.dump(test_assignations)
                 return jsonify(result)
             else:
                 error = {"message": "No Id found for the user."}
-                response = Response(json.dumps(error), 404, mimetype="application/json")
+                response = Response(json.dumps(error), 404,
+                                    mimetype="application/json")
         else:
             error = {"message": "The user is not an instructor."}
-            response = Response(json.dumps(error), 403, mimetype="application/json")
+            response = Response(json.dumps(error), 403,
+                                mimetype="application/json")
     except Exception as e:
-        error = { "exception": str(e), "message": "Exception has occurred. Check the format of the request."}
-        response = Response(json.dumps(error), 500, mimetype="application/json")
+        error = {"exception": str(
+            e), "message": "Exception has occurred. Check the format of the request."}
+        response = Response(json.dumps(error), 500,
+                            mimetype="application/json")
 
     return response

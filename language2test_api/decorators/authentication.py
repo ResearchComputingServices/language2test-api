@@ -2,7 +2,8 @@ from flask import request, Response, json
 from functools import wraps
 from language2test_api.extensions import oidc
 
-def authentication(original_func):
+
+def authentication_original(original_func):
     @wraps(original_func)
     def decorator(*args, **kwargs):
         auth = request.headers.get('Authorization')
@@ -24,5 +25,14 @@ def authentication(original_func):
                 "error": "Authentication token is not valid"
             }
             return Response(json.dumps(error), 401, mimetype="application/json")
+        return original_func(*args, **kwargs)
+    return decorator
+
+
+# We are removing the OIDC authorization.
+def authentication(original_func):
+    @wraps(original_func)
+    def decorator(*args, **kwargs):
+        print("Bypassing authentication for testing purposes")
         return original_func(*args, **kwargs)
     return decorator

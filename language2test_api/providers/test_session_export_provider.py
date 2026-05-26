@@ -21,7 +21,8 @@ class TestSessionExportProvider(RawSqlProvider):
             for session_id in [session.id for session in sessions]:
                 t_s = TestSession.query.filter_by(id=session_id).first()
                 results = test_schema.dump(t_s)
-                test_time = testhelper.calculate_time_consumption(results['end_datetime'], results['start_datetime'])
+                test_time = testhelper.calculate_time_consumption(
+                    results['end_datetime'], results['start_datetime'])
 
                 basic_info = {
                     "User ID": results['user_id'],
@@ -37,13 +38,16 @@ class TestSessionExportProvider(RawSqlProvider):
                 if ('results_vocabulary' in results) and ((len(results['results_vocabulary'])) > 0):
                     voc_score = testhelper.calculate_correctly_answered_questions(
                         results['results_vocabulary'][0]['answers'])
-                    voc_total = len(results['results_vocabulary'][0]['answers'])
-                    voc_grade = testhelper.grade_calculator(voc_score, voc_total)
+                    voc_total = len(
+                        results['results_vocabulary'][0]['answers'])
+                    voc_grade = testhelper.grade_calculator(
+                        voc_score, voc_total)
                     if voc_total > 0:
                         basic_info["Vocabulary Grade"] = voc_grade
 
                 if 'results_rc' in results and ((len(results['results_rc'])) > 0):
-                    rc_score = testhelper.calculate_correctly_answered_questions(results['results_rc'][0]['answers'])
+                    rc_score = testhelper.calculate_correctly_answered_questions(
+                        results['results_rc'][0]['answers'])
                     rc_total = len(results['results_rc'][0]['answers'])
                     rc_grade = testhelper.grade_calculator(rc_score, rc_total)
                     if rc_total > 0:
@@ -53,7 +57,8 @@ class TestSessionExportProvider(RawSqlProvider):
                     cloze_score = testhelper.calculate_correctly_answered_questions(
                         results['results_cloze'][0]['answers'])
                     cloze_total = len(results['results_cloze'][0]['answers'])
-                    cloze_grade = testhelper.grade_calculator(cloze_score, cloze_total)
+                    cloze_grade = testhelper.grade_calculator(
+                        cloze_score, cloze_total)
                     if cloze_total > 0:
                         basic_info["Cloze Grade"] = cloze_grade
 
@@ -61,7 +66,8 @@ class TestSessionExportProvider(RawSqlProvider):
                     writing_score = testhelper.calculate_correctly_answered_questions_writings(
                         results['results_writing'])
                     writing_total = len(results['results_writing'])
-                    writing_grade = testhelper.grade_calculator(writing_score, writing_total)
+                    writing_grade = testhelper.grade_calculator(
+                        writing_score, writing_total)
                     if writing_total > 0:
                         basic_info["Writing Grade"] = writing_grade
                 else:
@@ -139,7 +145,7 @@ class TestSessionExportProvider(RawSqlProvider):
                             if answer is None:
                                 test_result = "Empty Answer"
                             elif answer == cloze_questions[j]['options'][int(cloze_questions[j]['correct']) - 1][
-                                'text']:
+                                    'text']:
                                 test_result = "Correct"
                             else:
                                 test_result = "Incorrect"
@@ -189,7 +195,8 @@ class TestSessionExportProvider(RawSqlProvider):
                         format = workbook.add_format()
                         format.set_align('center')
                         format.set_align('vcenter')
-                        worksheet = writer.sheets["Vocabulary Test Info #" + str(session_id)]
+                        worksheet = writer.sheets["Vocabulary Test Info #" +
+                                                  str(session_id)]
                         worksheet.set_column('A:A', 13, format)
                         worksheet.set_column('B:B', 16, format)
                         worksheet.set_column('C:C', 18, format)
@@ -211,7 +218,8 @@ class TestSessionExportProvider(RawSqlProvider):
                         format = workbook.add_format()
                         format.set_align('center')
                         format.set_align('vcenter')
-                        worksheet = writer.sheets["RC Test Info # " + str(session_id)]
+                        worksheet = writer.sheets["RC Test Info # " +
+                                                  str(session_id)]
                         worksheet.set_column('A:A', 15, format)
                         worksheet.set_column('B:H', 60, format)
                         worksheet.set_column('I:I', 25, format)
@@ -226,7 +234,8 @@ class TestSessionExportProvider(RawSqlProvider):
                                                                                   session_id),
                                                                               header=False)
                         workbook = writer.book
-                        worksheet = writer.sheets["Cloze Test Info # " + str(session_id)]
+                        worksheet = writer.sheets["Cloze Test Info # " +
+                                                  str(session_id)]
                         format = workbook.add_format()
                         format.set_align('center')
                         format.set_align('vcenter')
@@ -243,7 +252,8 @@ class TestSessionExportProvider(RawSqlProvider):
                                                                                     session_id),
                                                                                 header=False)
                         workbook = writer.book
-                        worksheet = writer.sheets["Writing Test Info #" + str(session_id)]
+                        worksheet = writer.sheets["Writing Test Info #" +
+                                                  str(session_id)]
                         format = workbook.add_format()
                         format.set_align('center')
                         format.set_align('vcenter')
@@ -268,19 +278,22 @@ class TestSessionExportProvider(RawSqlProvider):
                         docx = BytesIO()
                         if results['results_writing'][i]['answer']['text'] is None:
                             results['results_writing'][i]['answer']['text'] = " "
-                        txt.write((results['results_writing'][i]['answer']['text']).encode("utf8"))
+                        txt.write(
+                            (results['results_writing'][i]['answer']['text']).encode("utf8"))
                         document = Document()
-                        document.add_paragraph(results['results_writing'][i]['answer']['text'])
+                        document.add_paragraph(
+                            results['results_writing'][i]['answer']['text'])
                         document.save(docx)
-                        file_name = "Test #" + str(session_id) + writing_results[i]['name']
+                        file_name = "Test #" + \
+                            str(session_id) + writing_results[i]['name']
                         zip_file.writestr(file_name + ".txt", txt.getvalue())
                         zip_file.writestr(file_name + ".docx", docx.getvalue())
                 zip_file.writestr("Test Details user.xlsx", xlsx.getvalue())
             else:
                 zip_file.writestr("Test Details user.xlsx", xlsx.getvalue())
             xlsx = BytesIO
-            zip_file.writestr("User Test Summary.xlsx",
-                              xlsx.getvalue(TestSessionExportProvider().test_session_summary(sessions)))
+            # zip_file.writestr("User Test Summary.xlsx",
+            #                  xlsx.getvalue(TestSessionExportProvider().test_session_summary(sessions)))
             zip_file.writestr("Specific Test Summary.xlsx",
                               xlsx.getvalue(TestSessionExportProvider().test_session_summary_for_instructor(sessions)))
 
@@ -309,22 +322,24 @@ class TestSessionExportProvider(RawSqlProvider):
 
                     if answer is None:
                         test_result = "Unattempted!" if results['results_vocabulary'][0]['answers'][i][
-                                                            'seen'] is True else "Unseen!"
+                            'seen'] is True else "Unseen!"
                     elif answer == voc_results[i]['options'][int(voc_results[i]['correct']) - 1]['text']:
                         test_result = 1
                     else:
                         test_result = 0
 
-                    test_infos["voc # " + str(i + 1) + ": " + str(voc_questions_test[i])] = test_result
+                    test_infos["voc # " + str(i + 1) + ": " +
+                               str(voc_questions_test[i])] = test_result
 
                     if len(results['results_vocabulary'][0]['answers']) < max_voc_test:
-                        missing_num_voc = max_voc_test - len(results['results_vocabulary'][0]['answers'])
+                        missing_num_voc = max_voc_test - \
+                            len(results['results_vocabulary'][0]['answers'])
                         for j in range(missing_num_voc):
                             test_infos["voc #" + str(i + j + 1)] = 0
 
             else:
                 for k in range(max_voc_test):
-                    test_infos["voc #" + str(k + 1)]: ""
+                    test_infos["voc #" + str(k + 1)] = " "
 
         if max_rc_test > 0:
             rc_results = test_results["test_rc"]
@@ -339,21 +354,23 @@ class TestSessionExportProvider(RawSqlProvider):
                             answer = ""
                         if answer == "":
                             test_result = "Unattempted!" if results['results_rc'][i]['answers'][j][
-                                                                'seen'] is True else "Unseen!"
+                                'seen'] is True else "Unseen!"
                         elif answer == rc_questions[j]['options'][int(rc_questions[j]['correct']) - 1]['text']:
                             test_result = 1
                         else:
                             test_result = 0
-                        test_infos["rc #" + str(j + 1) + ": " + str(rc_questions_test[j])] = test_result
+                        test_infos["rc #" + str(j + 1) + ": " +
+                                   str(rc_questions_test[j])] = test_result
 
                         if len(test_results["test_rc"][i]['questions']) < max_rc_test:
-                            missing_num_rc = max_rc_test - len(test_results["test_rc"][i]['questions'])
+                            missing_num_rc = max_rc_test - \
+                                len(test_results["test_rc"][i]['questions'])
                             for k in range(missing_num_rc):
-                                test_infos["rc #" + str(j + k + 1)]: " "
+                                test_infos["rc #" + str(j + k + 1)] = " "
 
             else:
                 for h in range(max_rc_test):
-                    test_infos["rc #" + str(h + 1)]: ""
+                    test_infos["rc #" + str(h + 1)] = ""
 
         if max_cloze_test > 0:
             if 'test_cloze' in test_results and (len(test_results['test_cloze']) > 0):
@@ -365,20 +382,22 @@ class TestSessionExportProvider(RawSqlProvider):
                         answer = results['results_cloze'][i]['answers'][j]['text']
                         if answer is None:
                             test_result = "Unattempted!" if results['results_cloze'][i]['answers'][j][
-                                                                'seen'] is True else "Unseen!"
+                                'seen'] is True else "Unseen!"
                         elif answer == cloze_questions[j]['options'][int(cloze_questions[j]['correct']) - 1]['text']:
                             test_result = 1
                         else:
                             test_result = 0
-                        test_infos["cloze #" + str(j + 1) + ": " + str(cloze_questions_test[j])] = test_result
+                        test_infos["cloze #" + str(j + 1) + ": " +
+                                   str(cloze_questions_test[j])] = test_result
 
                         if len(cloze_questions) < max_cloze_test:
-                            missing_num_cloze = max_cloze_test - len(cloze_questions)
+                            missing_num_cloze = max_cloze_test - \
+                                len(cloze_questions)
                             for k in range(missing_num_cloze):
-                                test_infos["cloze #" + str(j + k + 1)]: " "
+                                test_infos["cloze #" + str(j + k + 1)] = " "
             else:
                 for h in range(max_cloze_test):
-                    test_infos["cloze #" + str(h + 1)]: ""
+                    test_infos["cloze #" + str(h + 1)] = ""
 
         if max_writing_test > 0:
             if 'test_writing' in test_results and (len(test_results['test_writing']) > 0):
@@ -387,7 +406,8 @@ class TestSessionExportProvider(RawSqlProvider):
                     test_infos["writing # " + str(i + 1)] = 0
 
                     if len(writing_results) < max_writing_test:
-                        missing_num_writing = max_writing_test - len(writing_results)
+                        missing_num_writing = max_writing_test - \
+                            len(writing_results)
                         for j in range(missing_num_writing):
                             test_infos["writing # " + str(j + 1)] = " "
             else:
@@ -398,7 +418,8 @@ class TestSessionExportProvider(RawSqlProvider):
 
     def vocabulary_test_grade(self, results):
         if ('results_vocabulary' in results) and ((len(results['results_vocabulary'])) > 0):
-            voc_score = testhelper.calculate_correctly_answered_questions(results['results_vocabulary'][0]['answers'])
+            voc_score = testhelper.calculate_correctly_answered_questions(
+                results['results_vocabulary'][0]['answers'])
             voc_total = len(results['results_vocabulary'][0]['answers'])
             voc_grade = testhelper.grade_calculator(voc_score, voc_total)
             if voc_total > 0:
@@ -408,7 +429,8 @@ class TestSessionExportProvider(RawSqlProvider):
 
     def rc_test_grade(self, results):
         if 'results_rc' in results and ((len(results['results_rc'])) > 0):
-            rc_score = testhelper.calculate_correctly_answered_questions(results['results_rc'][0]['answers'])
+            rc_score = testhelper.calculate_correctly_answered_questions(
+                results['results_rc'][0]['answers'])
             rc_total = len(results['results_rc'][0]['answers'])
             rc_grade = testhelper.grade_calculator(rc_score, rc_total)
             if rc_total > 0:
@@ -418,7 +440,8 @@ class TestSessionExportProvider(RawSqlProvider):
 
     def cloze_test_grade(self, results):
         if 'results_cloze' in results and ((len(results['results_cloze'])) > 0):
-            cloze_score = testhelper.calculate_correctly_answered_questions(results['results_cloze'][0]['answers'])
+            cloze_score = testhelper.calculate_correctly_answered_questions(
+                results['results_cloze'][0]['answers'])
             cloze_total = len(results['results_cloze'][0]['answers'])
             cloze_grade = testhelper.grade_calculator(cloze_score, cloze_total)
             if cloze_total > 0:
@@ -428,9 +451,11 @@ class TestSessionExportProvider(RawSqlProvider):
 
     def writing_test_grade(self, results):
         if 'results_writing' in results and ((len(results['results_writing'])) > 0):
-            writing_score = testhelper.calculate_correctly_answered_questions_writings(results['results_writing'])
+            writing_score = testhelper.calculate_correctly_answered_questions_writings(
+                results['results_writing'])
             writing_total = len(results['results_writing'])
-            writing_grade = testhelper.grade_calculator(writing_score, writing_total)
+            writing_grade = testhelper.grade_calculator(
+                writing_score, writing_total)
             if writing_total > 0:
                 return writing_grade
         else:
@@ -454,12 +479,17 @@ class TestSessionExportProvider(RawSqlProvider):
                 "Created Time": s.created_datetime.strftime("%A, %B %d, %Y %I %P")}
             t_s = TestSession.query.filter_by(id=s.id).first()
             results = test_schema.dump(t_s)
-            test_time = testhelper.calculate_time_consumption(results['end_datetime'], results['start_datetime'])
+            test_time = testhelper.calculate_time_consumption(
+                results['end_datetime'], results['start_datetime'])
             records["Time Consumption"] = test_time
-            records['Vocabulary Grade'] = TestSessionExportProvider().vocabulary_test_grade(results)
-            records["Reading Comprehension Grade"] = TestSessionExportProvider().rc_test_grade(results)
-            records["Cloze Grade"] = TestSessionExportProvider().cloze_test_grade(results)
-            records["Writing Grade"] = "N/A" if TestSessionExportProvider().writing_test_grade(results) is None else TestSessionExportProvider().writing_test_grade(results)
+            records['Vocabulary Grade'] = TestSessionExportProvider(
+            ).vocabulary_test_grade(results)
+            records["Reading Comprehension Grade"] = TestSessionExportProvider(
+            ).rc_test_grade(results)
+            records["Cloze Grade"] = TestSessionExportProvider(
+            ).cloze_test_grade(results)
+            records["Writing Grade"] = "N/A" if TestSessionExportProvider().writing_test_grade(
+                results) is None else TestSessionExportProvider().writing_test_grade(results)
             records_list.append(records)
 
         output = BytesIO()
@@ -536,11 +566,11 @@ class TestSessionExportProvider(RawSqlProvider):
                 result = test_schema.dump(t_s)
 
                 test_info_with_zero_one_result.append(TestSessionExportProvider().test_session_grade_summary(result, questions, max_voc_test,
-                                                                                        max_rc_test, max_cloze_test,
-                                                                                        max_writing_test))
+                                                                                                             max_rc_test, max_cloze_test,
+                                                                                                             max_writing_test))
             pd.DataFrame(test_info_with_zero_one_result).to_excel(writer,
-                                             sheet_name="Test Results",
-                                             index=False)
+                                                                  sheet_name="Test Results",
+                                                                  index=False)
             workbook = writer.book
             format = workbook.add_format()
             format.set_align('center')
@@ -562,8 +592,8 @@ class TestSessionExportProvider(RawSqlProvider):
                                                                                  max_cloze_test,
                                                                                  max_writing_test))
             pd.DataFrame(test_info_with_user_answer).to_excel(writer,
-                                             sheet_name="Student Answer",
-                                             index=False)
+                                                              sheet_name="Student Answer",
+                                                              index=False)
             workbook = writer.book
             format = workbook.add_format()
             format.set_align('center')
@@ -580,12 +610,12 @@ class TestSessionExportProvider(RawSqlProvider):
 
                 test_info_with_correct_answer.append(
                     TestSessionExportProvider().test_session_correct_answer_summary(result, questions, max_voc_test,
-                                                                                 max_rc_test,
-                                                                                 max_cloze_test,
-                                                                                 max_writing_test))
+                                                                                    max_rc_test,
+                                                                                    max_cloze_test,
+                                                                                    max_writing_test))
             pd.DataFrame(test_info_with_correct_answer).to_excel(writer,
-                                                              sheet_name="Correct Answer",
-                                                              index=False)
+                                                                 sheet_name="Correct Answer",
+                                                                 index=False)
             workbook = writer.book
             format = workbook.add_format()
             format.set_align('center')
@@ -606,7 +636,6 @@ class TestSessionExportProvider(RawSqlProvider):
         cloze_questions_test = questions['cloze_questions']
         test_results = results['test']
 
-
         test_infos = {
             "User ID": results['user_id'],
             "Test Info": results['name'],
@@ -623,20 +652,22 @@ class TestSessionExportProvider(RawSqlProvider):
 
                     if answer is None:
                         test_result = "Unattempted!" if results['results_vocabulary'][0]['answers'][i][
-                                                            'seen'] is True else "Unseen!"
+                            'seen'] is True else "Unseen!"
                     else:
                         test_result = answer
 
-                    test_infos["voc # " + str(i + 1) + ": " + str(voc_questions_test[i])] = test_result
+                    test_infos["voc # " + str(i + 1) + ": " +
+                               str(voc_questions_test[i])] = test_result
 
                     if len(results['results_vocabulary'][0]['answers']) < max_voc_test:
-                        missing_num_voc = max_voc_test - len(results['results_vocabulary'][0]['answers'])
+                        missing_num_voc = max_voc_test - \
+                            len(results['results_vocabulary'][0]['answers'])
                         for j in range(missing_num_voc):
                             test_infos["voc #" + str(i + j + 1)] = ""
 
             else:
                 for k in range(max_voc_test):
-                    test_infos["voc #" + str(k + 1)]: ""
+                    test_infos["voc #" + str(k + 1)] = ""
 
         if max_rc_test > 0:
             rc_results = test_results["test_rc"]
@@ -649,19 +680,21 @@ class TestSessionExportProvider(RawSqlProvider):
                         answer = results['results_rc'][i]['answers'][j]['text']
                         if answer is None:
                             test_result = "Unattempted!" if results['results_rc'][i]['answers'][j][
-                                                                'seen'] is True else "Unseen!"
+                                'seen'] is True else "Unseen!"
                         else:
                             test_result = answer
-                        test_infos["rc #" + str(j + 1) + ": " + str(rc_questions_test[j])] = test_result
+                        test_infos["rc #" + str(j + 1) + ": " +
+                                   str(rc_questions_test[j])] = test_result
 
                         if len(test_results["test_rc"][i]['questions']) < max_rc_test:
-                            missing_num_rc = max_rc_test - len(test_results["test_rc"][i]['questions'])
+                            missing_num_rc = max_rc_test - \
+                                len(test_results["test_rc"][i]['questions'])
                             for k in range(missing_num_rc):
-                                test_infos["rc #" + str(j + k + 1)]: " "
+                                test_infos["rc #" + str(j + k + 1)] = " "
 
             else:
                 for h in range(max_rc_test):
-                    test_infos["rc #" + str(h + 1)]: ""
+                    test_infos["rc #" + str(h + 1)] = ""
 
         if max_cloze_test > 0:
             if 'test_cloze' in test_results and (len(test_results['test_cloze']) > 0):
@@ -673,18 +706,20 @@ class TestSessionExportProvider(RawSqlProvider):
                         answer = results['results_cloze'][i]['answers'][j]['text']
                         if answer is None:
                             test_result = "Unattempted!" if results['results_cloze'][i]['answers'][j][
-                                                                'seen'] is True else "Unseen!"
+                                'seen'] is True else "Unseen!"
                         else:
                             test_result = answer
-                        test_infos["cloze #" + str(j + 1) + ": " + str(cloze_questions_test[j])] = test_result
+                        test_infos["cloze #" + str(j + 1) + ": " +
+                                   str(cloze_questions_test[j])] = test_result
 
                         if len(cloze_questions) < max_cloze_test:
-                            missing_num_cloze = max_cloze_test - len(cloze_questions)
+                            missing_num_cloze = max_cloze_test - \
+                                len(cloze_questions)
                             for k in range(missing_num_cloze):
-                                test_infos["cloze #" + str(j + k + 1)]: " "
+                                test_infos["cloze #" + str(j + k + 1)] = " "
             else:
                 for h in range(max_cloze_test):
-                    test_infos["cloze #" + str(h + 1)]: ""
+                    test_infos["cloze #" + str(h + 1)] = ""
 
         if max_writing_test > 0:
             if 'test_writing' in test_results and (len(test_results['test_writing']) > 0):
@@ -693,7 +728,8 @@ class TestSessionExportProvider(RawSqlProvider):
                     test_infos["writing # " + str(i + 1)] = " "
 
                     if len(writing_results) < max_writing_test:
-                        missing_num_writing = max_writing_test - len(writing_results)
+                        missing_num_writing = max_writing_test - \
+                            len(writing_results)
                         for j in range(missing_num_writing):
                             test_infos["writing # " + str(j + 1)] = " "
             else:
@@ -721,12 +757,17 @@ class TestSessionExportProvider(RawSqlProvider):
             t_s = TestSession.query.filter_by(id=s.id).first()
             results = test_schema.dump(t_s)
 
-            test_time = testhelper.calculate_time_consumption(results['end_datetime'], results['start_datetime'])
+            test_time = testhelper.calculate_time_consumption(
+                results['end_datetime'], results['start_datetime'])
             records["Time Consumption"] = test_time
-            records['Vocabulary Grade'] = TestSessionExportProvider().vocabulary_test_grade(results)
-            records["Reading Comprehension Grade"] = TestSessionExportProvider().rc_test_grade(results)
-            records["Cloze Grade"] = TestSessionExportProvider().cloze_test_grade(results)
-            records["Writing Grade"] = "N/A" if TestSessionExportProvider().writing_test_grade(results) is None else TestSessionExportProvider().writing_test_grade(results)
+            records['Vocabulary Grade'] = TestSessionExportProvider(
+            ).vocabulary_test_grade(results)
+            records["Reading Comprehension Grade"] = TestSessionExportProvider(
+            ).rc_test_grade(results)
+            records["Cloze Grade"] = TestSessionExportProvider(
+            ).cloze_test_grade(results)
+            records["Writing Grade"] = "N/A" if TestSessionExportProvider().writing_test_grade(
+                results) is None else TestSessionExportProvider().writing_test_grade(results)
             records_list.append(records)
 
         output = BytesIO()
@@ -829,7 +870,8 @@ class TestSessionExportProvider(RawSqlProvider):
             for session_id in [session.id for session in sessions]:
                 t_s = TestSession.query.filter_by(id=session_id).first()
                 results = test_schema.dump(t_s)
-                test_time = testhelper.calculate_time_consumption(results['end_datetime'], results['start_datetime'])
+                test_time = testhelper.calculate_time_consumption(
+                    results['end_datetime'], results['start_datetime'])
 
                 basic_info = {
                     "User ID": results['user_id'],
@@ -845,13 +887,16 @@ class TestSessionExportProvider(RawSqlProvider):
                 if ('results_vocabulary' in results) and ((len(results['results_vocabulary'])) > 0):
                     voc_score = testhelper.calculate_correctly_answered_questions(
                         results['results_vocabulary'][0]['answers'])
-                    voc_total = len(results['results_vocabulary'][0]['answers'])
-                    voc_grade = testhelper.grade_calculator(voc_score, voc_total)
+                    voc_total = len(
+                        results['results_vocabulary'][0]['answers'])
+                    voc_grade = testhelper.grade_calculator(
+                        voc_score, voc_total)
                     if voc_total > 0:
                         basic_info["Vocabulary Grade"] = voc_grade
 
                 if 'results_rc' in results and ((len(results['results_rc'])) > 0):
-                    rc_score = testhelper.calculate_correctly_answered_questions(results['results_rc'][0]['answers'])
+                    rc_score = testhelper.calculate_correctly_answered_questions(
+                        results['results_rc'][0]['answers'])
                     rc_total = len(results['results_rc'][0]['answers'])
                     rc_grade = testhelper.grade_calculator(rc_score, rc_total)
                     if rc_total > 0:
@@ -861,7 +906,8 @@ class TestSessionExportProvider(RawSqlProvider):
                     cloze_score = testhelper.calculate_correctly_answered_questions(
                         results['results_cloze'][0]['answers'])
                     cloze_total = len(results['results_cloze'][0]['answers'])
-                    cloze_grade = testhelper.grade_calculator(cloze_score, cloze_total)
+                    cloze_grade = testhelper.grade_calculator(
+                        cloze_score, cloze_total)
                     if cloze_total > 0:
                         basic_info["Cloze Grade"] = cloze_grade
 
@@ -869,7 +915,8 @@ class TestSessionExportProvider(RawSqlProvider):
                     writing_score = testhelper.calculate_correctly_answered_questions_writings(
                         results['results_writing'])
                     writing_total = len(results['results_writing'])
-                    writing_grade = testhelper.grade_calculator(writing_score, writing_total)
+                    writing_grade = testhelper.grade_calculator(
+                        writing_score, writing_total)
                     if writing_total > 0:
                         basic_info["Writing Grade"] = writing_grade
                 else:
@@ -947,7 +994,7 @@ class TestSessionExportProvider(RawSqlProvider):
                             if answer is None:
                                 test_result = "Empty Answer"
                             elif answer == cloze_questions[j]['options'][int(cloze_questions[j]['correct']) - 1][
-                                'text']:
+                                    'text']:
                                 test_result = "Correct"
                             else:
                                 test_result = "Incorrect"
@@ -997,7 +1044,8 @@ class TestSessionExportProvider(RawSqlProvider):
                         format = workbook.add_format()
                         format.set_align('center')
                         format.set_align('vcenter')
-                        worksheet = writer.sheets["Vocabulary Test Info #" + str(session_id)]
+                        worksheet = writer.sheets["Vocabulary Test Info #" +
+                                                  str(session_id)]
                         worksheet.set_column('A:A', 13, format)
                         worksheet.set_column('B:B', 16, format)
                         worksheet.set_column('C:C', 18, format)
@@ -1019,7 +1067,8 @@ class TestSessionExportProvider(RawSqlProvider):
                         format = workbook.add_format()
                         format.set_align('center')
                         format.set_align('vcenter')
-                        worksheet = writer.sheets["RC Test Info # " + str(session_id)]
+                        worksheet = writer.sheets["RC Test Info # " +
+                                                  str(session_id)]
                         worksheet.set_column('A:A', 15, format)
                         worksheet.set_column('B:H', 60, format)
                         worksheet.set_column('I:I', 25, format)
@@ -1034,7 +1083,8 @@ class TestSessionExportProvider(RawSqlProvider):
                                                                                   session_id),
                                                                               header=False)
                         workbook = writer.book
-                        worksheet = writer.sheets["Cloze Test Info # " + str(session_id)]
+                        worksheet = writer.sheets["Cloze Test Info # " +
+                                                  str(session_id)]
                         format = workbook.add_format()
                         format.set_align('center')
                         format.set_align('vcenter')
@@ -1051,7 +1101,8 @@ class TestSessionExportProvider(RawSqlProvider):
                                                                                     session_id),
                                                                                 header=False)
                         workbook = writer.book
-                        worksheet = writer.sheets["Writing Test Info #" + str(session_id)]
+                        worksheet = writer.sheets["Writing Test Info #" +
+                                                  str(session_id)]
                         format = workbook.add_format()
                         format.set_align('center')
                         format.set_align('vcenter')
@@ -1076,19 +1127,21 @@ class TestSessionExportProvider(RawSqlProvider):
                         docx = BytesIO()
                         if results['results_writing'][i]['answer']['text'] is None:
                             results['results_writing'][i]['answer']['text'] = " "
-                        txt.write((results['results_writing'][i]['answer']['text']).encode("utf8"))
+                        txt.write(
+                            (results['results_writing'][i]['answer']['text']).encode("utf8"))
                         document = Document()
-                        document.add_paragraph(results['results_writing'][i]['answer']['text'])
+                        document.add_paragraph(
+                            results['results_writing'][i]['answer']['text'])
                         document.save(docx)
-                        file_name = "Test #" + str(session_id) + writing_results[i]['name']
+                        file_name = "Test #" + \
+                            str(session_id) + writing_results[i]['name']
                         zip_file.writestr(file_name + ".txt", txt.getvalue())
                         zip_file.writestr(file_name + ".docx", docx.getvalue())
-                #zip_file.writestr("Test Details test.xlsx", xlsx.getvalue())
-
+                # zip_file.writestr("Test Details test.xlsx", xlsx.getvalue())
 
             else:
                 pass
-                #zip_file.writestr("Test Details test.xlsx", xlsx.getvalue())
+                # zip_file.writestr("Test Details test.xlsx", xlsx.getvalue())
             xlsx = BytesIO
             zip_file.writestr("Test results for researcher.xlsx",
                               xlsx.getvalue(TestSessionExportProvider().test_session_summary_for_researcher(sessions)))
@@ -1137,18 +1190,21 @@ class TestSessionExportProvider(RawSqlProvider):
             if ('test_vocabulary' in test_results) and (len(test_results['test_vocabulary']) > 0):
                 voc_results = test_results["test_vocabulary"]
                 for i in range(len(results['results_vocabulary'][0]['answers'])):
-                    correct_option_voc = int(results['test']['test_vocabulary'][i]['correct'])
+                    correct_option_voc = int(
+                        results['test']['test_vocabulary'][i]['correct'])
                     answer = results['test']['test_vocabulary'][i]['options'][correct_option_voc-1]['text']
-                    test_infos["voc # " + str(i + 1) + ": " + str(voc_questions_test[i])] = answer
+                    test_infos["voc # " + str(i + 1) + ": " +
+                               str(voc_questions_test[i])] = answer
 
                     if len(results['results_vocabulary'][0]['answers']) < max_voc_test:
-                        missing_num_voc = max_voc_test - len(results['results_vocabulary'][0]['answers'])
+                        missing_num_voc = max_voc_test - \
+                            len(results['results_vocabulary'][0]['answers'])
                         for j in range(missing_num_voc):
                             test_infos["voc #" + str(i + j + 1)] = ""
 
             else:
                 for k in range(max_voc_test):
-                    test_infos["voc #" + str(k + 1)]: ""
+                    test_infos["voc #" + str(k + 1)] = " "
         if max_rc_test > 0:
             rc_results = test_results["test_rc"]
 
@@ -1157,19 +1213,22 @@ class TestSessionExportProvider(RawSqlProvider):
                 for i in range(len(rc_results)):
                     rc_questions = test_results["test_rc"][i]['questions']
                     for j in range(len(rc_questions)):
-                        correct_option = int(results['test']['test_rc'][i]['questions'][j]['correct'])
+                        correct_option = int(
+                            results['test']['test_rc'][i]['questions'][j]['correct'])
                         answer = results['test']['test_rc'][i]['questions'][j]['options'][correct_option-1]['text']
 
-                        test_infos["rc #" + str(j + 1) + ": " + str(rc_questions_test[j])] = answer
+                        test_infos["rc #" + str(j + 1) + ": " +
+                                   str(rc_questions_test[j])] = answer
 
                         if len(test_results["test_rc"][i]['questions']) < max_rc_test:
-                            missing_num_rc = max_rc_test - len(test_results["test_rc"][i]['questions'])
+                            missing_num_rc = max_rc_test - \
+                                len(test_results["test_rc"][i]['questions'])
                             for k in range(missing_num_rc):
-                                test_infos["rc #" + str(j + k + 1)]: " "
+                                test_infos["rc #" + str(j + k + 1)] = " "
 
             else:
                 for h in range(max_rc_test):
-                    test_infos["rc #" + str(h + 1)]: ""
+                    test_infos["rc #" + str(h + 1)] = ""
 
         if max_cloze_test > 0:
             if 'test_cloze' in test_results and (len(test_results['test_cloze']) > 0):
@@ -1180,15 +1239,17 @@ class TestSessionExportProvider(RawSqlProvider):
                     for j in range(len(cloze_questions)):
                         answer = results['test']['test_cloze'][i]['questions'][j]['text']
 
-                        test_infos["cloze #" + str(j + 1) + ": " + str(cloze_questions_test[j])] = answer
+                        test_infos["cloze #" + str(j + 1) + ": " +
+                                   str(cloze_questions_test[j])] = answer
 
                         if len(cloze_questions) < max_cloze_test:
-                            missing_num_cloze = max_cloze_test - len(cloze_questions)
+                            missing_num_cloze = max_cloze_test - \
+                                len(cloze_questions)
                             for k in range(missing_num_cloze):
-                                test_infos["cloze #" + str(j + k + 1)]: " "
+                                test_infos["cloze #" + str(j + k + 1)] = " "
             else:
                 for h in range(max_cloze_test):
-                    test_infos["cloze #" + str(h + 1)]: ""
+                    test_infos["cloze #" + str(h + 1)] = ""
 
         if max_writing_test > 0:
             if 'test_writing' in test_results and (len(test_results['test_writing']) > 0):
@@ -1197,7 +1258,8 @@ class TestSessionExportProvider(RawSqlProvider):
                     test_infos["writing # " + str(i + 1)] = " "
 
                     if len(writing_results) < max_writing_test:
-                        missing_num_writing = max_writing_test - len(writing_results)
+                        missing_num_writing = max_writing_test - \
+                            len(writing_results)
                         for j in range(missing_num_writing):
                             test_infos["writing # " + str(j + 1)] = " "
             else:
@@ -1205,4 +1267,3 @@ class TestSessionExportProvider(RawSqlProvider):
                     test_infos["writing # " + str(h + 1)] = " "
 
         return test_infos
-
